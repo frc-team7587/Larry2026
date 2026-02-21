@@ -32,6 +32,9 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSpark;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSpark;
+
 import java.util.Set;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -46,6 +49,7 @@ public class RobotContainer {
   // private final Vision vision;
   private final Drive drive;
   private final Intake intake = new Intake(new IntakeIOSpark());
+  private final Shooter shooter = new Shooter(new ShooterIOSpark());
 
   // Input devices
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -150,6 +154,11 @@ public class RobotContainer {
     controller.rightTrigger().whileTrue(intake.outtakeFuel());
     controller.leftBumper().whileTrue(intake.turntoDown());
     controller.rightBumper().whileTrue(intake.turntoUp());
+
+    controller.povUp().whileTrue(shooter.shootFuel());
+    controller.povDown().whileTrue(shooter.reverseShootFuel());
+    controller.povRight().whileTrue(shooter.feedFuel());
+    controller.povLeft().whileTrue(shooter.reverseFeedFuel());
 
     // // Lock to 0° when A button is held
     // controller
