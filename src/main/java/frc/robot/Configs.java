@@ -5,6 +5,7 @@ import com.revrobotics.spark.config.SoftLimitConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.subsystems.intake.IntakeConstants;
+import frc.robot.subsystems.shooter.ShooterConstants;
 
 public class Configs {
   public static final class IntakeConfig {
@@ -32,6 +33,38 @@ public class Configs {
           .voltageCompensation(12.0)
           .smartCurrentLimit(60)
           .inverted(false);
+    }
+  }
+
+  public static final class ShooterConfig {
+    public static final SparkMaxConfig topMotorConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig bottomMotorConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig feederMotorConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig pivotMotorConfig = new SparkMaxConfig();
+    public static final SoftLimitConfig shooterSoftLimit = new SoftLimitConfig();
+
+    static {
+      topMotorConfig
+          .idleMode(IdleMode.kBrake)
+          .voltageCompensation(12.0)
+          .smartCurrentLimit(60)
+          .inverted(false);
+      bottomMotorConfig.apply(topMotorConfig).follow(ShooterConstants.Top.kTopMotorID, true);
+      feederMotorConfig
+          .idleMode(IdleMode.kBrake)
+          .voltageCompensation(12.0)
+          .smartCurrentLimit(60)
+          .inverted(false);
+      pivotMotorConfig
+          .idleMode(IdleMode.kBrake)
+          .voltageCompensation(12.0)
+          .smartCurrentLimit(60)
+          .inverted(false);
+      pivotMotorConfig
+          .closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          .pid(ShooterConstants.Pivot.kP, ShooterConstants.Pivot.kI, ShooterConstants.Pivot.kD)
+          .outputRange(ShooterConstants.Pivot.kMinOutput, ShooterConstants.Pivot.kMaxOutput);
     }
   }
 }
