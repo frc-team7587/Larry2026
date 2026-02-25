@@ -67,4 +67,16 @@ public class Configs {
           .outputRange(ShooterConstants.Pivot.kMinOutput, ShooterConstants.Pivot.kMaxOutput);
     }
   }
+
+  public static final class ConveyorConfig {
+    public static final SparkMaxConfig conveyorMotorConfig = new SparkMaxConfig();
+
+    static {
+      conveyorMotorConfig
+          .idleMode(IdleMode.kBrake)
+          .voltageCompensation(12.0)
+          .smartCurrentLimit(60)
+          .inverted(false);
+    }
+  }
 }

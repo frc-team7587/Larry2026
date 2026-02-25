@@ -24,6 +24,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.conveyor.Conveyor;
+import frc.robot.subsystems.conveyor.ConveyorIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIONavX;
@@ -34,7 +36,6 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSpark;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSpark;
-
 import java.util.Set;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -50,6 +51,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake = new Intake(new IntakeIOSpark());
   private final Shooter shooter = new Shooter(new ShooterIOSpark());
+  private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
 
   // Input devices
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -156,9 +158,12 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(intake.turntoUp());
 
     controller.povUp().whileTrue(shooter.shootFuel());
-    controller.povDown().whileTrue(shooter.reverseShootFuel());
+    controller.povDown().whileTrue(shooter.shootFuelReverse());
     controller.povRight().whileTrue(shooter.feedFuel());
-    controller.povLeft().whileTrue(shooter.reverseFeedFuel());
+    controller.povLeft().whileTrue(shooter.feedFuelReverse());
+
+    controller.a().whileTrue(conveyor.transportBalls());
+    controller.b().whileTrue(conveyor.transportBallsReverse());
 
     // // Lock to 0° when A button is held
     // controller
