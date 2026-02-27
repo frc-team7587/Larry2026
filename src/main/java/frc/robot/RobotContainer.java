@@ -162,8 +162,8 @@ public class RobotContainer {
     controller.povRight().whileTrue(shooter.feedFuel());
     controller.povLeft().whileTrue(shooter.feedFuelReverse());
 
-    controller.a().whileTrue(conveyor.transportBalls());
-    controller.b().whileTrue(conveyor.transportBallsReverse());
+    controller.a().toggleOnTrue(conveyor.transportBalls());
+    controller.b().toggleOnTrue(conveyor.transportBallsReverse());
 
     // // Lock to 0° when A button is held
     // controller
