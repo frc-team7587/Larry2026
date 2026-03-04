@@ -51,13 +51,28 @@ public class ShooterIOSpark implements ShooterIO {
   }
 
   @Override
+  public void setShooterVoltage(double volts) {
+    topMotor.setVoltage(volts);
+  }
+
+  @Override
   public void setFeederSpeed(double speed) {
     feederMotor.set(speed);
   }
 
   @Override
+  public void setFeederVoltage(double volts) {
+    feederMotor.setVoltage(volts);
+  }
+
+  @Override
   public void setPivotSpeed(double speed) {
     pivotMotor.set(speed);
+  }
+
+  @Override
+  public void setPivotVoltage(double volts) {
+    pivotMotor.setVoltage(volts);
   }
 
   @Override

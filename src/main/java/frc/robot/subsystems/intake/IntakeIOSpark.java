@@ -46,8 +46,18 @@ public class IntakeIOSpark implements IntakeIO {
   }
 
   @Override
+  public void setIntakeVoltage(double volts) {
+    intakeMotor.setVoltage(volts);
+  }
+
+  @Override
   public void setPivotSpeed(double speed) {
     pivotLeaderMotor.set(speed);
+  }
+
+  @Override
+  public void setPivotVoltage(double volts) {
+    pivotLeaderMotor.setVoltage(volts);
   }
 
   @Override

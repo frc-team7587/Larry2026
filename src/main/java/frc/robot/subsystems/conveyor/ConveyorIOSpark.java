@@ -23,4 +23,9 @@ public class ConveyorIOSpark implements ConveyorIO {
   public void setConveyorSpeed(double speed) {
     conveyorMotor.set(speed);
   }
+
+  @Override
+  public void setConveyorVoltage(double volts) {
+    conveyorMotor.setVoltage(volts);
+  }
 }

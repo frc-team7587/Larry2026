@@ -8,6 +8,9 @@ public interface ShooterIO {
    */
   public void setShooterSpeed(double speed);
 
+  /** Sets shooter motors with direct voltage for characterization. */
+  public void setShooterVoltage(double volts);
+
   /**
    * Sets the speed of the feeder motor.
    *
@@ -15,12 +18,18 @@ public interface ShooterIO {
    */
   public void setFeederSpeed(double speed);
 
+  /** Sets feeder motor with direct voltage for characterization. */
+  public void setFeederVoltage(double volts);
+
   /**
    * Sets the speed of the pivot motor.
    *
    * @param speed The speed to set the intake motor to.
    */
   public void setPivotSpeed(double speed);
+
+  /** Sets pivot motor with direct voltage for characterization. */
+  public void setPivotVoltage(double volts);
 
   /**
    * Sets the position of the pivot motor.

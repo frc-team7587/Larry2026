@@ -132,6 +132,76 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Shooter Wheel SysId (Quasistatic Forward)",
+        shooter.wheelSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Shooter Wheel SysId (Quasistatic Reverse)",
+        shooter.wheelSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Shooter Wheel SysId (Dynamic Forward)",
+        shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Shooter Wheel SysId (Dynamic Reverse)",
+        shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Shooter Feeder SysId (Quasistatic Forward)",
+        shooter.feederSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Shooter Feeder SysId (Quasistatic Reverse)",
+        shooter.feederSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Shooter Feeder SysId (Dynamic Forward)",
+        shooter.feederSysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Shooter Feeder SysId (Dynamic Reverse)",
+        shooter.feederSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Shooter Pivot SysId (Quasistatic Forward)",
+        shooter.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Shooter Pivot SysId (Quasistatic Reverse)",
+        shooter.pivotSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Shooter Pivot SysId (Dynamic Forward)",
+        shooter.pivotSysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Shooter Pivot SysId (Dynamic Reverse)",
+        shooter.pivotSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Intake Roller SysId (Quasistatic Forward)",
+        intake.rollerSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Intake Roller SysId (Quasistatic Reverse)",
+        intake.rollerSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Intake Roller SysId (Dynamic Forward)",
+        intake.rollerSysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Intake Roller SysId (Dynamic Reverse)",
+        intake.rollerSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Intake Pivot SysId (Quasistatic Forward)",
+        intake.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Intake Pivot SysId (Quasistatic Reverse)",
+        intake.pivotSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Intake Pivot SysId (Dynamic Forward)",
+        intake.pivotSysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Intake Pivot SysId (Dynamic Reverse)",
+        intake.pivotSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Conveyor SysId (Quasistatic Forward)",
+        conveyor.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Conveyor SysId (Quasistatic Reverse)",
+        conveyor.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Conveyor SysId (Dynamic Forward)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Conveyor SysId (Dynamic Reverse)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();

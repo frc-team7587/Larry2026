@@ -8,12 +8,18 @@ public interface IntakeIO {
    */
   public void setIntakeSpeed(double speed);
 
+  /** Sets intake motor with direct voltage for characterization. */
+  public void setIntakeVoltage(double volts);
+
   /**
    * Sets the speed of the pivot motors.
    *
    * @param speed The speed to set the pivot motors to.
    */
   public void setPivotSpeed(double speed);
+
+  /** Sets pivot motor with direct voltage for characterization. */
+  public void setPivotVoltage(double volts);
 
   /**
    * Sets the position of the pivot motors.
