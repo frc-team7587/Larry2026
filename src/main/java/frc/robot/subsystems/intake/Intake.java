@@ -49,13 +49,13 @@ public class Intake extends SubsystemBase {
   public Command turntoUp() {
     return startEnd(
         () -> intake.setPivotSpeed(IntakeConstants.Pivot.kPivotSpeedUp),
-        () -> intake.setPivotSpeed(0));
+        () -> intake.setPivotPosition(intake.getPivotPosition()));
   }
 
   public Command turntoDown() {
     return startEnd(
         () -> intake.setPivotSpeed(IntakeConstants.Pivot.kPivotSpeedDown),
-        () -> intake.setPivotSpeed(0));
+        () -> intake.setPivotPosition(intake.getPivotPosition()));
   }
 
   public Command rollerSysIdQuasistatic(SysIdRoutine.Direction direction) {
