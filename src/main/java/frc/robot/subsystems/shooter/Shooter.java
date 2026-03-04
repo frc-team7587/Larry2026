@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
@@ -11,26 +12,38 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command shootFuel() {
-    return startEnd(
+    return Commands.startEnd(
         () -> shooter.setShooterSpeed(ShooterConstants.Top.kOutSpeed),
         () -> shooter.setShooterSpeed(0));
   }
 
   public Command feedFuel() {
-    return startEnd(
+    return Commands.startEnd(
         () -> shooter.setFeederSpeed(ShooterConstants.Feeder.kOutSpeed),
         () -> shooter.setFeederSpeed(0));
   }
 
   public Command shootFuelReverse() {
-    return startEnd(
+    return Commands.startEnd(
         () -> shooter.setShooterSpeed(ShooterConstants.Top.kInSpeed),
         () -> shooter.setShooterSpeed(0));
   }
 
   public Command feedFuelReverse() {
-    return startEnd(
+    return Commands.startEnd(
         () -> shooter.setFeederSpeed(ShooterConstants.Feeder.kInSpeed),
         () -> shooter.setFeederSpeed(0));
+  }
+
+  public Command pivotShooterUp() {
+    return startEnd(
+        () -> shooter.setPivotSpeed(ShooterConstants.Pivot.kPivotSpeedUp),
+        () -> shooter.setPivotSpeed(0));
+  }
+
+  public Command pivotShooterDown() {
+    return startEnd(
+        () -> shooter.setPivotSpeed(ShooterConstants.Pivot.kPivotSpeedDown),
+        () -> shooter.setPivotSpeed(0));
   }
 }

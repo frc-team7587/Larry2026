@@ -152,23 +152,24 @@ public class RobotContainer {
             () -> controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    controller.leftTrigger().whileTrue(intake.intakeFuel());
-    controller.rightTrigger().whileTrue(intake.outtakeFuel());
+    controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
+    controller.rightTrigger().toggleOnTrue(intake.outtakeFuel());
     controller.leftBumper().whileTrue(intake.turntoDown());
     controller.rightBumper().whileTrue(intake.turntoUp());
 
     controller.povUp().whileTrue(shooter.shootFuel());
     controller.povDown().whileTrue(shooter.shootFuelReverse());
-    controller.povRight().whileTrue(shooter.feedFuel());
-    controller.povLeft().whileTrue(shooter.feedFuelReverse());
-
+    controller.povLeft().whileTrue(shooter.pivotShooterUp());
+    controller.povRight().whileTrue(shooter.pivotShooterDown());
+    controller.x().whileTrue(shooter.feedFuel());
+    controller.y().whileTrue(shooter.feedFuelReverse());
     controller.a().toggleOnTrue(conveyor.transportBalls());
     controller.b().toggleOnTrue(conveyor.transportBallsReverse());
 
     // // Lock to 0° when A button is held
     // controller
     //     .a()
-    //     .whileTrue(
+    //     .whileTrue(d
     //         DriveCommands.joystickDriveAtAngle(
     //             drive,
     //             () -> -controller.getLeftY(),
@@ -182,7 +183,7 @@ public class RobotContainer {
     // controller
     //     .start()
     //     .onTrue(
-    //         Commands.runOnce(
+    // Commands.runOnce(
     //                 () ->
     //                     drive.setPose(
     //                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),

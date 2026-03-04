@@ -2,7 +2,7 @@ package frc.robot.subsystems.shooter;
 
 public class ShooterConstants {
   public class Pivot {
-    public static final int kPivotMotorID = 12;
+    public static final int kPivotMotorID = 13;
 
     public static final double kPivotSpeedUp = 0.1;
     public static final double kPivotSpeedDown = -0.1;
@@ -17,7 +17,7 @@ public class ShooterConstants {
   }
 
   public class Top {
-    public static final int kTopMotorID = 13;
+    public static final int kTopMotorID = 16;
 
     public static final double kOutSpeed = 0.8;
     public static final double kInSpeed = -0.8;

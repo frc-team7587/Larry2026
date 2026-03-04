@@ -488,7 +488,7 @@ public class FieldConstants {
                       Units.inchesToMeters(21.75),
                       new Rotation3d(0, 0, Math.toRadians(0)))),
               new AprilTag(
-                  32,
+                  100,
                   new Pose3d(
                       Units.inchesToMeters(0.32),
                       Units.inchesToMeters(164.47),
