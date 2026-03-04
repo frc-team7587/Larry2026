@@ -23,6 +23,18 @@ public class Shooter extends SubsystemBase {
         () -> shooter.setFeederSpeed(0));
   }
 
+  public Command shootAndFeedFuel() {
+    return Commands.startEnd(
+        () -> {
+          shooter.setShooterSpeed(ShooterConstants.Top.kOutSpeed);
+          shooter.setFeederSpeed(ShooterConstants.Feeder.kOutSpeed);
+        },
+        () -> {
+          shooter.setShooterSpeed(0);
+          shooter.setFeederSpeed(0);
+        });
+  }
+
   public Command shootFuelReverse() {
     return Commands.startEnd(
         () -> shooter.setShooterSpeed(ShooterConstants.Top.kInSpeed),
