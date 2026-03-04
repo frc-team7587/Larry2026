@@ -63,7 +63,11 @@ public class Configs {
       pivotMotorConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-          .pid(ShooterConstants.Pivot.kP, ShooterConstants.Pivot.kI, ShooterConstants.Pivot.kD)
+          .pidf(
+              ShooterConstants.Pivot.kP,
+              ShooterConstants.Pivot.kI,
+              ShooterConstants.Pivot.kD,
+              ShooterConstants.Pivot.kFF)
           .outputRange(ShooterConstants.Pivot.kMinOutput, ShooterConstants.Pivot.kMaxOutput);
     }
   }

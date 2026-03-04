@@ -62,12 +62,12 @@ public class Shooter extends SubsystemBase {
   public Command pivotShooterUp() {
     return startEnd(
         () -> shooter.setPivotSpeed(ShooterConstants.Pivot.kPivotSpeedUp),
-        () -> shooter.setPivotSpeed(0));
+        () -> shooter.setPivotPosition(shooter.getPivotPosition()));
   }
 
   public Command pivotShooterDown() {
     return startEnd(
         () -> shooter.setPivotSpeed(ShooterConstants.Pivot.kPivotSpeedDown),
-        () -> shooter.setPivotSpeed(0));
+        () -> shooter.setPivotPosition(shooter.getPivotPosition()));
   }
 }
