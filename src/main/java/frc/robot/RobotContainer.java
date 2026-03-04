@@ -158,7 +158,7 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(intake.turntoUp());
 
     controller.povUp().whileTrue(shooter.shootAndFeedFuel());
-    controller.povDown().whileTrue(shooter.shootFuelReverse());
+    controller.povDown().whileTrue(shooter.shootAndFeedFuelReverse());
     controller.povLeft().whileTrue(shooter.pivotShooterUp());
     controller.povRight().whileTrue(shooter.pivotShooterDown());
     controller.x().whileTrue(shooter.feedFuel());
