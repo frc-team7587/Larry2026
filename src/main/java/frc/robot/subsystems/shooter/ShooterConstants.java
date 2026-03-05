@@ -36,13 +36,4 @@ public class ShooterConstants {
     public static final double kMaxOutput = 1.0;
   }
 
-  public class Feeder {
-    public static final int kFeederMotorID = 15;
-
-    public static final double kOutSpeed = 0.8;
-    public static final double kInSpeed = -0.8;
-
-    public static final double kMinOutput = -1.0;
-    public static final double kMaxOutput = 1.0;
-  }
 }

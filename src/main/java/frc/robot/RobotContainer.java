@@ -32,6 +32,8 @@ import frc.robot.subsystems.drive.GyroIONavX;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.feeder.FeederIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSpark;
 import frc.robot.subsystems.shooter.Shooter;
@@ -51,6 +53,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake = new Intake(new IntakeIOSpark());
   private final Shooter shooter = new Shooter(new ShooterIOSpark());
+  private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
 
   // Input devices
@@ -145,17 +148,13 @@ public class RobotContainer {
         "Shooter Wheel SysId (Dynamic Reverse)",
         shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-        "Shooter Feeder SysId (Quasistatic Forward)",
-        shooter.feederSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        "Feeder SysId (Quasistatic Forward)", feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-        "Shooter Feeder SysId (Quasistatic Reverse)",
-        shooter.feederSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        "Feeder SysId (Quasistatic Reverse)", feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-        "Shooter Feeder SysId (Dynamic Forward)",
-        shooter.feederSysIdDynamic(SysIdRoutine.Direction.kForward));
+        "Feeder SysId (Dynamic Forward)", feeder.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-        "Shooter Feeder SysId (Dynamic Reverse)",
-        shooter.feederSysIdDynamic(SysIdRoutine.Direction.kReverse));
+        "Feeder SysId (Dynamic Reverse)", feeder.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
         "Shooter Pivot SysId (Quasistatic Forward)",
         shooter.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -227,12 +226,12 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(intake.turntoDown());
     controller.rightBumper().whileTrue(intake.turntoUp());
 
-    controller.povUp().whileTrue(shooter.shootAndFeedFuel());
-    controller.povDown().whileTrue(shooter.shootAndFeedFuelReverse());
+    controller.povUp().whileTrue(Commands.parallel(shooter.shootFuel(), feeder.feedFuel()));
+    controller.povDown().whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
     controller.povLeft().whileTrue(shooter.pivotShooterUp());
     controller.povRight().whileTrue(shooter.pivotShooterDown());
-    controller.x().whileTrue(shooter.feedFuel());
-    controller.y().whileTrue(shooter.feedFuelReverse());
+    controller.x().whileTrue(feeder.feedFuel());
+    controller.y().whileTrue(feeder.feedFuelReverse());
     controller.a().toggleOnTrue(conveyor.transportBalls());
     controller.b().toggleOnTrue(conveyor.transportBallsReverse());
 

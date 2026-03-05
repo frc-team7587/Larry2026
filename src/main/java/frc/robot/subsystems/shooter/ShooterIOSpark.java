@@ -12,7 +12,6 @@ import frc.robot.Configs.ShooterConfig;
 public class ShooterIOSpark implements ShooterIO {
   private final SparkMax topMotor;
   private final SparkMax bottomMotor;
-  private final SparkMax feederMotor;
   private final SparkMax pivotMotor;
 
   private final RelativeEncoder pivotEncoder;
@@ -21,7 +20,6 @@ public class ShooterIOSpark implements ShooterIO {
   public ShooterIOSpark() {
     topMotor = new SparkMax(ShooterConstants.Top.kTopMotorID, MotorType.kBrushless);
     bottomMotor = new SparkMax(ShooterConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
-    feederMotor = new SparkMax(ShooterConstants.Feeder.kFeederMotorID, MotorType.kBrushless);
     pivotMotor = new SparkMax(ShooterConstants.Pivot.kPivotMotorID, MotorType.kBrushless);
 
     pivotEncoder = pivotMotor.getEncoder();
@@ -33,10 +31,6 @@ public class ShooterIOSpark implements ShooterIO {
         PersistMode.kPersistParameters);
     bottomMotor.configure(
         ShooterConfig.bottomMotorConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
-    feederMotor.configure(
-        ShooterConfig.feederMotorConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
     pivotMotor.configure(
@@ -53,16 +47,6 @@ public class ShooterIOSpark implements ShooterIO {
   @Override
   public void setShooterVoltage(double volts) {
     topMotor.setVoltage(volts);
-  }
-
-  @Override
-  public void setFeederSpeed(double speed) {
-    feederMotor.set(speed);
-  }
-
-  @Override
-  public void setFeederVoltage(double volts) {
-    feederMotor.setVoltage(volts);
   }
 
   @Override

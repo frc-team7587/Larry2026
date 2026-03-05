@@ -43,7 +43,6 @@ public class Configs {
   public static final class ShooterConfig {
     public static final SparkMaxConfig topMotorConfig = new SparkMaxConfig();
     public static final SparkMaxConfig bottomMotorConfig = new SparkMaxConfig();
-    public static final SparkMaxConfig feederMotorConfig = new SparkMaxConfig();
     public static final SparkMaxConfig pivotMotorConfig = new SparkMaxConfig();
     public static final SoftLimitConfig shooterSoftLimit = new SoftLimitConfig();
 
@@ -54,11 +53,6 @@ public class Configs {
           .smartCurrentLimit(60)
           .inverted(false);
       bottomMotorConfig.apply(topMotorConfig).follow(ShooterConstants.Top.kTopMotorID, true);
-      feederMotorConfig
-          .idleMode(IdleMode.kBrake)
-          .voltageCompensation(12.0)
-          .smartCurrentLimit(60)
-          .inverted(false);
       pivotMotorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
@@ -73,6 +67,18 @@ public class Configs {
               ShooterConstants.Pivot.kD,
               ShooterConstants.Pivot.kFF)
           .outputRange(ShooterConstants.Pivot.kMinOutput, ShooterConstants.Pivot.kMaxOutput);
+    }
+  }
+
+  public static final class FeederConfig {
+    public static final SparkMaxConfig motorConfig = new SparkMaxConfig();
+
+    static {
+      motorConfig
+          .idleMode(IdleMode.kBrake)
+          .voltageCompensation(12.0)
+          .smartCurrentLimit(60)
+          .inverted(false);
     }
   }
 
