@@ -5,12 +5,15 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO shooter;
   private final SysIdRoutine wheelSysId;
   private final SysIdRoutine pivotSysId;
+  private double targetShooterVelocityRpm = ShooterConstants.Control.kNoTargetRpm;
+  private double speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
 
   public Shooter(ShooterIO shooter) {
     this.shooter = shooter;
@@ -28,14 +31,54 @@ public class Shooter extends SubsystemBase {
 
   public Command shootFuel() {
     return startEnd(
-        () -> shooter.setShooterSpeed(ShooterConstants.Top.kOutSpeed),
-        () -> shooter.setShooterSpeed(0));
+        () -> {
+          targetShooterVelocityRpm = ShooterConstants.Top.kOutTargetRpm;
+          speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
+          shooter.setShooterSpeed(ShooterConstants.Top.kOutSpeed);
+        },
+        this::stopShooter);
   }
 
   public Command shootFuelReverse() {
     return startEnd(
-        () -> shooter.setShooterSpeed(ShooterConstants.Top.kInSpeed),
-        () -> shooter.setShooterSpeed(0));
+        () -> {
+          targetShooterVelocityRpm = ShooterConstants.Top.kInTargetRpm;
+          speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
+          shooter.setShooterSpeed(ShooterConstants.Top.kInSpeed);
+        },
+        this::stopShooter);
+  }
+
+  public boolean atSpeed() {
+    if (Math.abs(targetShooterVelocityRpm) <= ShooterConstants.Control.kTargetEpsilonRpm
+        || speedWithinToleranceStartTime < ShooterConstants.Control.kNoStableTimestamp) {
+      return false;
+    }
+    return Timer.getFPGATimestamp() - speedWithinToleranceStartTime
+        >= ShooterConstants.Top.kSpeedStableTimeSec;
+  }
+
+  public double getShooterVelocityRpm() {
+    return shooter.getShooterVelocityRpm();
+  }
+
+  @Override
+  public void periodic() {
+    double velocityRpm = shooter.getShooterVelocityRpm();
+    boolean speedWithinTolerance =
+        Math.abs(targetShooterVelocityRpm - velocityRpm) <= ShooterConstants.Top.kSpeedToleranceRpm;
+    if (Math.abs(targetShooterVelocityRpm) > ShooterConstants.Control.kTargetEpsilonRpm
+        && speedWithinTolerance) {
+      if (speedWithinToleranceStartTime < ShooterConstants.Control.kNoStableTimestamp) {
+        speedWithinToleranceStartTime = Timer.getFPGATimestamp();
+      }
+    } else {
+      speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
+    }
+
+    Logger.recordOutput("Shooter/VelocityRpm", velocityRpm);
+    Logger.recordOutput("Shooter/TargetVelocityRpm", targetShooterVelocityRpm);
+    Logger.recordOutput("Shooter/AtSpeed", atSpeed());
   }
 
   public Command pivotShooterUp() {
@@ -64,5 +107,11 @@ public class Shooter extends SubsystemBase {
 
   public Command pivotSysIdDynamic(SysIdRoutine.Direction direction) {
     return pivotSysId.dynamic(direction);
+  }
+
+  private void stopShooter() {
+    shooter.setShooterSpeed(ShooterConstants.Control.kStoppedSpeed);
+    targetShooterVelocityRpm = ShooterConstants.Control.kNoTargetRpm;
+    speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
   }
 }

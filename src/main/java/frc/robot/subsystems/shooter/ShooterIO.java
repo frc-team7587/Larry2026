@@ -12,6 +12,13 @@ public interface ShooterIO {
   public void setShooterVoltage(double volts);
 
   /**
+   * Gets the shooter wheel velocity in rpm.
+   *
+   * @return The shooter wheel velocity in rpm.
+   */
+  public double getShooterVelocityRpm();
+
+  /**
    * Sets the speed of the pivot motor.
    *
    * @param speed The speed to set the intake motor to.
