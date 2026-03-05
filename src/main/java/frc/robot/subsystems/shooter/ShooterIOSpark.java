@@ -14,6 +14,7 @@ public class ShooterIOSpark implements ShooterIO {
   private final SparkMax bottomMotor;
   private final SparkMax pivotMotor;
 
+  private final RelativeEncoder topEncoder;
   private final RelativeEncoder pivotEncoder;
   private final SparkClosedLoopController pivotController;
 
@@ -22,6 +23,7 @@ public class ShooterIOSpark implements ShooterIO {
     bottomMotor = new SparkMax(ShooterConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
     pivotMotor = new SparkMax(ShooterConstants.Pivot.kPivotMotorID, MotorType.kBrushless);
 
+    topEncoder = topMotor.getEncoder();
     pivotEncoder = pivotMotor.getEncoder();
     pivotController = pivotMotor.getClosedLoopController();
 
@@ -47,6 +49,11 @@ public class ShooterIOSpark implements ShooterIO {
   @Override
   public void setShooterVoltage(double volts) {
     topMotor.setVoltage(volts);
+  }
+
+  @Override
+  public double getShooterVelocityRpm() {
+    return topEncoder.getVelocity();
   }
 
   @Override
