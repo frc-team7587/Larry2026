@@ -4,7 +4,7 @@ It's Larry! This is [Metuchen Momentum's](https://metuchenmomentum.org/) (a 501(
 
 ## Robot overview
 
-Larry is built with Java as a WPILib project. We use AdvantageKit logging and PathPlanner for our autos.  
+Larry is built with Java as a WPILib project. We use AdvantageKit logging and PathPlanner for our autos.
 Larry can be set to `REAL`, `SIM`, and replay modes! Infinitely simulated Larries. Also fully supports SysID!
 
 ## Subsystems

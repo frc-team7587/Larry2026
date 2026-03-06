@@ -2,10 +2,10 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -20,13 +20,21 @@ public class Shooter extends SubsystemBase {
     wheelSysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null, null, null, (state) -> Logger.recordOutput("Shooter/WheelSysIdState", state.toString())),
-            new SysIdRoutine.Mechanism((voltage) -> shooter.setShooterVoltage(voltage.in(Volts)), null, this));
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Shooter/WheelSysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> shooter.setShooterVoltage(voltage.in(Volts)), null, this));
     pivotSysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null, null, null, (state) -> Logger.recordOutput("Shooter/PivotSysIdState", state.toString())),
-            new SysIdRoutine.Mechanism((voltage) -> shooter.setPivotVoltage(voltage.in(Volts)), null, this));
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Shooter/PivotSysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> shooter.setPivotVoltage(voltage.in(Volts)), null, this));
   }
 
   public Command shootFuel() {

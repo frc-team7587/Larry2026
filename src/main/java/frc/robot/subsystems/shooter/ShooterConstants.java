@@ -46,5 +46,4 @@ public class ShooterConstants {
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;
   }
-
 }
