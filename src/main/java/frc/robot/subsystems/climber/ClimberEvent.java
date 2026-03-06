@@ -27,4 +27,8 @@ public enum ClimberEvent {
    */
   FULLY_RETRACTED,
 
+  /**
+   * The climber has been in motion for far too long.
+   */
+  WATCHDOG_EXPIRED,
 }

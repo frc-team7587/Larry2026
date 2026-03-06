@@ -26,6 +26,12 @@ public enum State {
    * Stopped, neither fully extended nor parked.
    */
   PAUSED,
+
+  /**
+   * Halted due to watchdog timeout. This is
+   * an irrecoverable error.
+   */
+  TIMED_OUT,
   /**
    * Causes the state machine to ignore
    * the incoming event. The machine <em>NEVER</em> enters

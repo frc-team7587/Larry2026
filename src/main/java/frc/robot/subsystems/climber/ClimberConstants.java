@@ -9,30 +9,33 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 public class ClimberConstants {
     /**
      * State transition table for the following DFA:
-     * 
+     *
      * <code>
      *   <pre>
-     *                                     o
-     *                                     | 
-     *                                     v
-     *                   +-------------->PARKED-->-----------+
-     *                   |                                   |
-     *                   |                                   |
-     *  FULLY_RETRACTED  |         HOLD          HOLD        |
-     *                   |      +--------+    +---------+    |  UNWIND
-     *                   |      |        |    |         |    |
-     *                   ^      ^        |    |         ^    |
-     *                   |     /         v    v         \    v
-     *              RETRACTING           PAUSED          EXTENDING
-     *                   ^     \        /      \        /    |
-     *                   |     ^       v        v       ^    v
-     *                   |     |       |        |      |     |  
-     *                   |     +---<---+        +-->---+     |  
-     *           WIND    |       WIND            UNWIND      |  FULLY_EXTENDED
-     *                   |                                   |  
-     *                   |                                   |
-     *                   +--------------<-RAISED-------------+
-     * 
+     *                                       o
+     *                                       |
+     *                                       v
+     *                     +-------------->PARKED-->-----------+
+     *                     |                                   |
+     *                     |                                   |
+     *    FULLY_RETRACTED  |         HOLD          HOLD        |
+     *                     |   +->---------+    +--------<-+   |  UNWIND
+     *                     |   |           |    |          |   |
+     *                     ^   ^           |    |          ^   |
+     *   WATCHDOG_EXPIRED  |   |           v    v          |   v      WATCHDOG_EXPIRED
+     *  +-----------<-RETRACTING           PAUSED          EXTENDING->-----------------+
+     *  |                  ^   ^           |    |          |   |                       |
+     *  v                  |   |           v    v          ^   v                       v
+     *  |                  |   |           |    |          |   |                       |
+     *  |                  |   +---------<-+    +->--------+   |                       |
+     *  |          WIND    |       WIND            UNWIND      |  FULLY_EXTENDED       |
+     *  |                  |                                   |                       |
+     *  |                  |                                   |                       |
+     *  |                  +--------------<-RAISED-------------+                       |
+     *  v                                                                              v
+     *  |                                                                              |
+     *  +->------------------------------>TIMED_OUT<-----------------------------------+
+     *
      *   </pre>
      * </code?
      */
@@ -42,9 +45,11 @@ public class ClimberConstants {
             .add(State.PARKED, ClimberEvent.UNWIND, State.EXTENDING)
             .add(State.EXTENDING, ClimberEvent.FULLY_EXTENDED, State.RAISED)
             .add(State.EXTENDING, ClimberEvent.HOLD, State.PAUSED)
+            .add(State.EXTENDING, ClimberEvent.WATCHDOG_EXPIRED, State.TIMED_OUT)
             .add(State.RAISED, ClimberEvent.WIND, State.RETRACTING)
             .add(State.RETRACTING, ClimberEvent.FULLY_RETRACTED, State.PARKED)
             .add(State.RETRACTING, ClimberEvent.HOLD, State.PAUSED)
+            .add(State.RETRACTING, ClimberEvent.WATCHDOG_EXPIRED, State.TIMED_OUT)
             .add(State.PAUSED, ClimberEvent.WIND, State.RETRACTING)
             .add(State.PAUSED, ClimberEvent.UNWIND, State.EXTENDING)
             .build();
@@ -68,6 +73,15 @@ public class ClimberConstants {
     static final double kD = 0.0;
     static final double kFF = new ElevatorFeedforward(0.1,1.44,0.6,0.05).calculate(0);
     static final double kMinOutput = -1.0;
-    static final double kMaxOutput = 1.0; 
+    static final double kMaxOutput = 1.0;
     // END Cribbed code END
+
+    /**
+     * The watchdog timeout in ticks, the robot's default
+     * interval between {@code IteratedRobotBase.robotPeriodic()}
+     * invocations. The default value is 20 ms, 50
+     * invocations/second. The timeout is arbitrarily
+     * set to 20 seconds.
+     */
+    static long kWatchdogTimeout = 50 * 20;
 }

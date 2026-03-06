@@ -35,6 +35,7 @@ public class ClimberModule implements ClimberIO {
     
     private State state;
     private Consumer<ClimberModule> periodicAction;
+    private long timeInMotion;
 
     /**
      * Log an error message when the climber enters an unexpected
@@ -59,17 +60,26 @@ public class ClimberModule implements ClimberIO {
             .pidf(ClimberConstants.kP, ClimberConstants.kI, ClimberConstants.kD, 0)
             .outputRange(ClimberConstants.kMinOutput, ClimberConstants.kMaxOutput);
         motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        timeInMotion = 0;
 
         reset();
     }
 
+    private void enforceTimeut() {
+        if (ClimberConstants.kWatchdogTimeout < ++timeInMotion) {
+            receive(ClimberEvent.WATCHDOG_EXPIRED);
+        }
+    }
+
     private void stopWhenFullyExtended() {
+        enforceTimeut();
         if (getPosition() >= ClimberConstants.kExtendedHeight) {
             receive(ClimberEvent.FULLY_EXTENDED);
         }
     }
 
     private void stopWhenFullyRetracted() {
+        enforceTimeut();
         if (ClimberConstants.kRetractedHeight >= getPosition()) {
             receive(ClimberEvent.FULLY_RETRACTED);
         }
@@ -111,9 +121,10 @@ public class ClimberModule implements ClimberIO {
     }
 
     @Override
-    public void receive(ClimberEvent command) {
-        State maybeNewState =  ClimberConstants.STATE_TRANSITION_TABLE.onReceipt(state, command);
+    public void receive(ClimberEvent event) {
+        State maybeNewState =  ClimberConstants.STATE_TRANSITION_TABLE.onReceipt(state, event);
         if (State.IGNORE != maybeNewState) {
+            timeInMotion = 0;
             periodicAction = DO_NOTHING;
             switch (state = maybeNewState) {
                 case EXTENDING:
@@ -136,6 +147,9 @@ public class ClimberModule implements ClimberIO {
                     periodicAction = STOP_WHEN_PARKED;
                     motor.set(ClimberConstants.kWindSpeed);
                     break;
+                case TIMED_OUT:
+                motor.set(0);
+                break;
                 default:
                     logInvalidState();
                     break;
