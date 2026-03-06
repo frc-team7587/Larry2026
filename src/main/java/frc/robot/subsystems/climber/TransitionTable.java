@@ -108,7 +108,7 @@ public class TransitionTable<S extends Enum<S>, E extends Enum<E>> {
      * @return a newly created {@link TransitionTable} as described above.
      */
     public TransitionTable<S, E> build() {
-      return new TransitionTable<>(new EnumMap<>(table)); // TODO
+      return new TransitionTable<>(new EnumMap<>(table));
     }
   }
 }
