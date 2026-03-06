@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.conveyor.ConveyorIOSpark;
 import frc.robot.subsystems.drive.Drive;
@@ -56,6 +58,7 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter(new ShooterIOSpark());
   private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
+  private final Climber climber = new Climber(new ClimberIOSpark());
 
   // Input devices
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -204,6 +207,16 @@ public class RobotContainer {
         "Conveyor SysId (Dynamic Forward)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Conveyor SysId (Dynamic Reverse)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Climber SysId (Quasistatic Forward)",
+        climber.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Climber SysId (Quasistatic Reverse)",
+        climber.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Climber SysId (Dynamic Forward)", climber.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Climber SysId (Dynamic Reverse)", climber.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -245,6 +258,9 @@ public class RobotContainer {
     controller.a().toggleOnTrue(conveyor.transportBalls());
     controller.b().toggleOnTrue(conveyor.transportBallsReverse());
     controller.back().whileTrue(new AutoAimShooter(drive, shooter, intake));
+    controller.rightStick().whileTrue(climber.climbUp());
+    controller.leftStick().whileTrue(climber.climbDown());
+    controller.start().onTrue(climber.holdPosition());
 
     // // Lock to 0° when A button is held
     // controller
