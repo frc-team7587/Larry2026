@@ -74,7 +74,6 @@ public interface ClimberIO {
      * Winds the climber cord on its spool, lowering the climber hook.
      */ */
     void wind();
-    }
 
     /**
      * Unwinds the climber cord  from the spool, raising the climber hook.
