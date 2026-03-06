@@ -1,7 +1,8 @@
 package frc.robot.subsystems.climber;
 
 public class ClimberConstants {
-  public static final int kMotorId = 16;
+  
+  public static final int kMotorId = 17;
 
   public static final double kGearRatio = 180.0;
   public static final double kNeoFreeSpeedRpm = 5676.0;
