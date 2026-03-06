@@ -16,8 +16,12 @@ public class Feeder extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null, null, null, (state) -> Logger.recordOutput("Feeder/SysIdState", state.toString())),
-            new SysIdRoutine.Mechanism((voltage) -> feeder.setFeederVoltage(voltage.in(Volts)), null, this));
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Feeder/SysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> feeder.setFeederVoltage(voltage.in(Volts)), null, this));
   }
 
   public Command feedFuel() {

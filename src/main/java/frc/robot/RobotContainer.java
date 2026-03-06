@@ -148,9 +148,11 @@ public class RobotContainer {
         "Shooter Wheel SysId (Dynamic Reverse)",
         shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-        "Feeder SysId (Quasistatic Forward)", feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        "Feeder SysId (Quasistatic Forward)",
+        feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-        "Feeder SysId (Quasistatic Reverse)", feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        "Feeder SysId (Quasistatic Reverse)",
+        feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
         "Feeder SysId (Dynamic Forward)", feeder.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
@@ -230,8 +232,11 @@ public class RobotContainer {
         .povUp()
         .whileTrue(
             Commands.parallel(
-                shooter.shootFuel(), Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
-    controller.povDown().whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
+                shooter.shootFuel(),
+                Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
+    controller
+        .povDown()
+        .whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
     controller.povLeft().whileTrue(shooter.pivotShooterUp());
     controller.povRight().whileTrue(shooter.pivotShooterDown());
     controller.x().whileTrue(feeder.feedFuel());
