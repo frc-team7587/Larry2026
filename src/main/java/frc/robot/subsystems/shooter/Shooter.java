@@ -2,10 +2,10 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -20,21 +20,48 @@ public class Shooter extends SubsystemBase {
     wheelSysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null, null, null, (state) -> Logger.recordOutput("Shooter/WheelSysIdState", state.toString())),
-            new SysIdRoutine.Mechanism((voltage) -> shooter.setShooterVoltage(voltage.in(Volts)), null, this));
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Shooter/WheelSysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> shooter.setShooterVoltage(voltage.in(Volts)), null, this));
     pivotSysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null, null, null, (state) -> Logger.recordOutput("Shooter/PivotSysIdState", state.toString())),
-            new SysIdRoutine.Mechanism((voltage) -> shooter.setPivotVoltage(voltage.in(Volts)), null, this));
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Shooter/PivotSysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> shooter.setPivotVoltage(voltage.in(Volts)), null, this));
+  }
+
+  public void setShooterSpeedWithTargetRpm(double speed, double targetRpm) {
+    targetShooterVelocityRpm = targetRpm;
+    speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
+    shooter.setShooterSpeed(speed);
+  }
+
+  public void setPivotPosition(double position) {
+    shooter.setPivotPosition(position);
+  }
+
+  public void holdPivotPosition() {
+    shooter.setPivotPosition(shooter.getPivotPosition());
+  }
+
+  public void stopShooter() {
+    shooter.setShooterSpeed(ShooterConstants.Control.kStoppedSpeed);
+    targetShooterVelocityRpm = ShooterConstants.Control.kNoTargetRpm;
+    speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
   }
 
   public Command shootFuel() {
     return startEnd(
         () -> {
-          targetShooterVelocityRpm = ShooterConstants.Top.kOutTargetRpm;
-          speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
-          shooter.setShooterSpeed(ShooterConstants.Top.kOutSpeed);
+          setShooterSpeedWithTargetRpm(
+              ShooterConstants.Top.kOutSpeed, ShooterConstants.Top.kOutTargetRpm);
         },
         this::stopShooter);
   }
@@ -42,9 +69,8 @@ public class Shooter extends SubsystemBase {
   public Command shootFuelReverse() {
     return startEnd(
         () -> {
-          targetShooterVelocityRpm = ShooterConstants.Top.kInTargetRpm;
-          speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
-          shooter.setShooterSpeed(ShooterConstants.Top.kInSpeed);
+          setShooterSpeedWithTargetRpm(
+              ShooterConstants.Top.kInSpeed, ShooterConstants.Top.kInTargetRpm);
         },
         this::stopShooter);
   }
@@ -107,11 +133,5 @@ public class Shooter extends SubsystemBase {
 
   public Command pivotSysIdDynamic(SysIdRoutine.Direction direction) {
     return pivotSysId.dynamic(direction);
-  }
-
-  private void stopShooter() {
-    shooter.setShooterSpeed(ShooterConstants.Control.kStoppedSpeed);
-    targetShooterVelocityRpm = ShooterConstants.Control.kNoTargetRpm;
-    speedWithinToleranceStartTime = ShooterConstants.Control.kNoStableTimestamp;
   }
 }

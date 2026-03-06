@@ -16,8 +16,12 @@ public class Conveyor extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null, null, null, (state) -> Logger.recordOutput("Conveyor/SysIdState", state.toString())),
-            new SysIdRoutine.Mechanism((voltage) -> conveyor.setConveyorVoltage(voltage.in(Volts)), null, this));
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Conveyor/SysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> conveyor.setConveyorVoltage(voltage.in(Volts)), null, this));
   }
 
   public Command transportBalls() {

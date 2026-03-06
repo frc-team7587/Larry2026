@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.conveyor.ConveyorIOSpark;
@@ -148,9 +149,11 @@ public class RobotContainer {
         "Shooter Wheel SysId (Dynamic Reverse)",
         shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-        "Feeder SysId (Quasistatic Forward)", feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        "Feeder SysId (Quasistatic Forward)",
+        feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-        "Feeder SysId (Quasistatic Reverse)", feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        "Feeder SysId (Quasistatic Reverse)",
+        feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
         "Feeder SysId (Dynamic Forward)", feeder.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
@@ -230,14 +233,18 @@ public class RobotContainer {
         .povUp()
         .whileTrue(
             Commands.parallel(
-                shooter.shootFuel(), Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
-    controller.povDown().whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
+                shooter.shootFuel(),
+                Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
+    controller
+        .povDown()
+        .whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
     controller.povLeft().whileTrue(shooter.pivotShooterUp());
     controller.povRight().whileTrue(shooter.pivotShooterDown());
     controller.x().whileTrue(feeder.feedFuel());
     controller.y().whileTrue(feeder.feedFuelReverse());
     controller.a().toggleOnTrue(conveyor.transportBalls());
     controller.b().toggleOnTrue(conveyor.transportBallsReverse());
+    controller.back().whileTrue(new AutoAimShooter(drive, shooter, intake));
 
     // // Lock to 0° when A button is held
     // controller

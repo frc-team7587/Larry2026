@@ -17,13 +17,25 @@ public class Intake extends SubsystemBase {
     intakeSysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null, null, null, (state) -> Logger.recordOutput("Intake/RollerSysIdState", state.toString())),
-            new SysIdRoutine.Mechanism((voltage) -> intake.setIntakeVoltage(voltage.in(Volts)), null, this));
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Intake/RollerSysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> intake.setIntakeVoltage(voltage.in(Volts)), null, this));
     pivotSysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null, null, null, (state) -> Logger.recordOutput("Intake/PivotSysIdState", state.toString())),
-            new SysIdRoutine.Mechanism((voltage) -> intake.setPivotVoltage(voltage.in(Volts)), null, this));
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Intake/PivotSysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> intake.setPivotVoltage(voltage.in(Volts)), null, this));
+  }
+
+  public void setIntakeSpeed(double speed) {
+    intake.setIntakeSpeed(speed);
   }
 
   public Command intakeFuel() {
