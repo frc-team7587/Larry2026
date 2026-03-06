@@ -4,7 +4,8 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 
 /**
  * Climber configuration, including motion parameters and
- * the climber life cycle.
+ * the climber life cycle. Note that the climber is
+ * powered by a Neo with a 180:1 gear ratio.
  */
 public class ClimberConstants {
     /**
@@ -65,10 +66,10 @@ public class ClimberConstants {
     static final double kParkedPosition = 0.0;
     // TODO: kExtendedPosition
 
-    static final int kSmatCurrentLimit = 40;
+    static final int kSmartCurrentLimit = 40;
 
     // TODO: configuration cribbed from the 2025 elevator. Set correct values
-    static final double kP = 0.07;
+    static final double kP = 0.07;  // TODO: probably low by a factor of 10.
     static final double kI = 0.0;
     static final double kD = 0.0;
     static final double kFF = new ElevatorFeedforward(0.1,1.44,0.6,0.05).calculate(0);

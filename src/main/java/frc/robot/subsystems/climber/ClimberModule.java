@@ -16,7 +16,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 /**
  * Climber API implementation -- the heart of the matter.
- * 
+ *
  * TODO: must this be public?
  */
 public class ClimberModule implements ClimberIO {
@@ -32,14 +32,14 @@ public class ClimberModule implements ClimberIO {
 
     private final SparkMax motor;
     private final RelativeEncoder encoder;
-    
+
     private State state;
     private Consumer<ClimberModule> periodicAction;
     private long timeInMotion;
 
     /**
      * Log an error message when the climber enters an unexpected
-     * or unrecognized state. 
+     * or unrecognized state.
      */
     private void logInvalidState() {
         Logger.recordOutput("Climber/InvalidState", state.toString());
@@ -52,7 +52,7 @@ public class ClimberModule implements ClimberIO {
         periodicAction = DO_NOTHING;
 
         var config = new SparkMaxConfig()
-            .smartCurrentLimit(ClimberConstants.kSmatCurrentLimit)
+            .smartCurrentLimit(ClimberConstants.kSmartCurrentLimit)
             .idleMode(IdleMode.kBrake);
         config.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
