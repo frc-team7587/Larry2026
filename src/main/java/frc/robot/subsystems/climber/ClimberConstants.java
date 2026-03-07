@@ -1,6 +1,19 @@
+// Copyright 2026, Metuchen Momentum, FRC 7857
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
 package frc.robot.subsystems.climber;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.system.plant.DCMotor;
 
 /**
  * Climber configuration, including motion parameters and
@@ -32,7 +45,7 @@ public class ClimberConstants {
      *  |          WIND    |       WIND            UNWIND      |  FULLY_EXTENDED       |
      *  |                  |                                   |                       |
      *  |                  |                                   |                       |
-     *  |                  +--------------<-RAISED-------------+                       |
+     *  |                  +--------------<-RAISED-<-----------+                       |
      *  v                                                                              v
      *  |                                                                              |
      *  +->------------------------------>TIMED_OUT<-----------------------------------+
@@ -55,16 +68,26 @@ public class ClimberConstants {
             .add(State.PAUSED, ClimberEvent.UNWIND, State.EXTENDING)
             .build();
 
-    static final int kMotorId = 15;  // TODO: correct value
+    static final int kMotorId = 18;
 
     static final double kUnwindSpeed = 0.4;
     static final double kWindSpeed = -0.4;
 
-    static final double kRetractedHeight = 0.0;
-    static final double kExtendedHeight = 1.0; // TODO: correct value + units
-
+    // Heights relative to parked position ib motor revolutions
     static final double kParkedPosition = 0.0;
-    // TODO: kExtendedPosition
+    static final double kExtendedHeight = 1.0;  // TODO: correct value!
+
+    /**
+     * The top of the hook is 20 1/16" +/=, above the
+     * ground, when fully retracted, approximately 51 cm.
+     */
+    static final double kRetractedElevation = .051;
+    /**
+     * The top of the hook is 29" +/- above the
+     * ground when fully extended, approximately
+     * 83.66 cm.
+     */
+    static final double kExtendedElevation = .07366;
 
     static final int kSmartCurrentLimit = 40;
 
@@ -77,6 +100,25 @@ public class ClimberConstants {
     static final double kMaxOutput = 1.0;
     // END Cribbed code END
 
+
+    static final DCMotor kDrivebox = DCMotor.getNeoVortex(1);
+
+    static final double kDriveMotorReduction = 180;
+    static final double kdrumRadiusInches = 0.39;
+    static final double kDrumRadiusMeters = kdrumRadiusInches * 0.00254;
+    static final double kDrumWidthInches = .562;
+    static final double kDrumWidthMeters = kDrumWidthInches + 0.00254;
+    static final double kDrumVolumeCubitMeters =
+        Math.PI * kDrumRadiusMeters * kDrumRadiusMeters * kDrumWidthMeters;
+    static final double kParacordDiameterInches = .125;
+    static final double kParacordRadiusMeters = (kParacordDiameterInches / 2) + .00254;
+    static final double kParacordLengthInches = 24;
+    static final double kParacordLengthMeters = kParacordDiameterInches * .00254;
+    static final double kCarrigeMassKg = .75;  // TODO: estimate --
+
+    static final long kTickTimeMillis = 20;
+    static final double kTickTimeSeconds = ((double) kTickTimeMillis) / 1000.0;
+
     /**
      * The watchdog timeout in ticks, the robot's default
      * interval between {@code IteratedRobotBase.robotPeriodic()}
@@ -84,5 +126,19 @@ public class ClimberConstants {
      * invocations/second. The timeout is arbitrarily
      * set to 20 seconds.
      */
-    static long kWatchdogTimeout = 50 * 20;
+    static final long kWatchdogTimeout = 50 * kTickTimeMillis;
+
+    // Climber simulator configuration
+
+    /**
+     * Estimated max motor speed. According to the
+     * <a href=''https://www.revrobotics.com/content/docs/REV-21-1650-DS.pdf>
+     * NEO Brushless Motor Data Sheet</a>, the maximum speed is just shy of
+     * 6000 RPM, but this produces 0 torque. Sticking a finger in the air, we
+     * note that the torque peaks at 3000 ROM (+/->, so we use that
+     * for now.)
+     */
+    static final long kSimulatedMaxRPM = 3000;
+    static final long kSimulatedMaxRevolutionsPerTick =
+        (kSimulatedMaxRPM * 1000) / kTickTimeMillis;
 }

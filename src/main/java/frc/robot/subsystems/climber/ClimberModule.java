@@ -1,57 +1,44 @@
+// Copyright 2026, Metuchen Momentum, FRC 7857
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
 package frc.robot.subsystems.climber;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-import java.util.function.Consumer;
-
-import org.littletonrobotics.junction.Logger;
-
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 /**
- * Climber API implementation -- the heart of the matter.
+ * A concrete climber module that drives a physical climber.
+ * Note that the climber motor <em>MUST</em> be controlled by
+ * a SparkMax motor controller.
  *
- * TODO: must this be public?
+ * @see  SimulatedClimberModule
  */
-public class ClimberModule implements ClimberIO {
+public class ClimberModule extends BaseClimberModule {
 
-    private static final Consumer<ClimberModule> DO_NOTHING =
-        (m) -> {};
-    private static final Consumer<ClimberModule> STOP_WHEN_RAISED =
-            (m) -> {m.stopWhenFullyExtended();
-        };
-    private static final Consumer<ClimberModule> STOP_WHEN_PARKED =
-            (m) -> {m.stopWhenFullyRetracted();
-        };
 
     private final SparkMax motor;
     private final RelativeEncoder encoder;
 
-    private State state;
-    private Consumer<ClimberModule> periodicAction;
-    private long timeInMotion;
-
-    /**
-     * Log an error message when the climber enters an unexpected
-     * or unrecognized state.
-     */
-    private void logInvalidState() {
-        Logger.recordOutput("Climber/InvalidState", state.toString());
-    }
-
     public ClimberModule() {
+        super();
         motor = new SparkMax(ClimberConstants.kMotorId, MotorType.kBrushless);
         encoder = motor.getEncoder();
-        state = State.PARKED;
-        periodicAction = DO_NOTHING;
-
-        var config = new SparkMaxConfig()
+            var config = new SparkMaxConfig()
             .smartCurrentLimit(ClimberConstants.kSmartCurrentLimit)
             .idleMode(IdleMode.kBrake);
         config.closedLoop
@@ -60,121 +47,80 @@ public class ClimberModule implements ClimberIO {
             .pidf(ClimberConstants.kP, ClimberConstants.kI, ClimberConstants.kD, 0)
             .outputRange(ClimberConstants.kMinOutput, ClimberConstants.kMaxOutput);
         motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        timeInMotion = 0;
+}
 
-        reset();
-    }
-
-    private void enforceTimeut() {
-        if (ClimberConstants.kWatchdogTimeout < ++timeInMotion) {
-            receive(ClimberEvent.WATCHDOG_EXPIRED);
-        }
-    }
-
-    private void stopWhenFullyExtended() {
-        enforceTimeut();
-        if (getPosition() >= ClimberConstants.kExtendedHeight) {
-            receive(ClimberEvent.FULLY_EXTENDED);
-        }
-    }
-
-    private void stopWhenFullyRetracted() {
-        enforceTimeut();
-        if (ClimberConstants.kRetractedHeight >= getPosition()) {
-            receive(ClimberEvent.FULLY_RETRACTED);
-        }
-    }
-
+    /**
+     * Gets the current that is running throw a motor
+     * controlled by a real SparkMax
+     *
+     * @return the current through the motor in amps
+     */
     @Override
-    public double getCurrent() {
+    protected double doGetCurrent() {
         return motor.getOutputCurrent();
     }
 
-    @Override
-    public double getOutput() {
-        return motor.getAppliedOutput();
-    }
-
-    @Override
-    public double getPosition() {
+    /**
+     * Gest the position of a motor controlled by a
+     * real SparkMax
+     *
+     * @return the motor position in net rotations since power-on
+     */
+     @Override
+    protected double doGetMotorPosition() {
         return encoder.getPosition();
     }
 
+    /**
+     * Gets the output of a motor controlled by a
+     * real SparkMax
+     *
+     * @return the motor output in TODO: units
+     */
     @Override
-    public double getTemp() {
+    protected double doGetOutput() {
+        return motor.getAppliedOutput();
+    }
+
+    /**
+     * Gets the temperature of a motor controoled by a
+     * real SparkMax
+     *
+     * @return the motor temperature in degrees Celsius
+     */
+    @Override
+    protected double doGetTemp() {
         return motor.getMotorTemperature();
     }
 
+    /**
+     * Gets the velocity of a motor controlled bhy a
+     * real sparkmax
+     *
+     * @return the algular velocity in revolutions/minute
+     */
     @Override
-    public double getVelocity() {
+    protected double doGetVelocity() {
         return encoder.getVelocity();
     }
 
-    @Override
-    public double getVoltage() {
+    /**
+     * Gets the voltage across a moter controlled by a real
+     * SparkMax.
+     *
+     * @return the voltage in volts
+     */@Override
+    protected double doGetVoltage() {
         return motor.getBusVoltage();
     }
 
     @Override
-    public void periodic() {
-        periodicAction.accept(this);
-    }
-
-    @Override
-    public void receive(ClimberEvent event) {
-        State maybeNewState =  ClimberConstants.STATE_TRANSITION_TABLE.onReceipt(state, event);
-        if (State.IGNORE != maybeNewState) {
-            timeInMotion = 0;
-            periodicAction = DO_NOTHING;
-            switch (state = maybeNewState) {
-                case EXTENDING:
-                periodicAction = STOP_WHEN_RAISED;
-                    motor.set(ClimberConstants.kUnwindSpeed);
-                    break;
-                case IGNORE:
-                   logInvalidState();
-                    break;
-                case PARKED:
-                motor.set(0);
-                    break;
-                case PAUSED:
-                    motor.set(0);
-                    break;
-                case RAISED:
-                motor.set(0);
-                    break;
-                case RETRACTING:
-                    periodicAction = STOP_WHEN_PARKED;
-                    motor.set(ClimberConstants.kWindSpeed);
-                    break;
-                case TIMED_OUT:
-                    motor.set(0);
-                    Logger.recordOutput("Climber/Failure", "Timeout");
-                    break;
-                default:
-                    logInvalidState();
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void reset() {
+    protected void doReset() {
         encoder.setPosition(ClimberConstants.kParkedPosition);
     }
 
     @Override
-    public void stop() {
-        receive(ClimberEvent.HOLD);
-    }
-
-    @Override
-    public void wind() {
-       receive(ClimberEvent.WIND);
-    }
-
-    @Override
-    public void unwind() {
-        receive(ClimberEvent.UNWIND);
+    protected void doSetMotorSpeed(double speed) {
+        motor.set(speed);
     }
 }
