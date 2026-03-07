@@ -148,8 +148,9 @@ public class ClimberModule implements ClimberIO {
                     motor.set(ClimberConstants.kWindSpeed);
                     break;
                 case TIMED_OUT:
-                motor.set(0);
-                break;
+                    motor.set(0);
+                    Logger.recordOutput("Climber/Failure", "Timeout");
+                    break;
                 default:
                     logInvalidState();
                     break;
