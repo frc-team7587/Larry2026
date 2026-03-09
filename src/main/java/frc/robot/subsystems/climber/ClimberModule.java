@@ -22,105 +22,100 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 /**
- * A concrete climber module that drives a physical climber.
- * Note that the climber motor <em>MUST</em> be controlled by
- * a SparkMax motor controller.
+ * A concrete climber module that drives a physical climber. Note that the climber motor
+ * <em>MUST</em> be controlled by a SparkMax motor controller.
  *
- * @see  SimulatedClimberModule
+ * @see SimulatedClimberModule
  */
 public class ClimberModule extends BaseClimberModule {
 
+  private final SparkMax motor;
+  private final RelativeEncoder encoder;
 
-    private final SparkMax motor;
-    private final RelativeEncoder encoder;
-
-    public ClimberModule() {
-        super();
-        motor = new SparkMax(ClimberConstants.kMotorId, MotorType.kBrushless);
-        encoder = motor.getEncoder();
-            var config = new SparkMaxConfig()
+  public ClimberModule() {
+    super();
+    motor = new SparkMax(ClimberConstants.kMotorId, MotorType.kBrushless);
+    encoder = motor.getEncoder();
+    var config =
+        new SparkMaxConfig()
             .smartCurrentLimit(ClimberConstants.kSmartCurrentLimit)
             .idleMode(IdleMode.kBrake);
-        config.closedLoop
-            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            // TODO: invoke supported counterpart instead.
-            .pidf(ClimberConstants.kP, ClimberConstants.kI, ClimberConstants.kD, 0)
-            .outputRange(ClimberConstants.kMinOutput, ClimberConstants.kMaxOutput);
-        motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-}
+    config
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        // TODO: invoke supported counterpart instead.
+        .pidf(ClimberConstants.kP, ClimberConstants.kI, ClimberConstants.kD, 0)
+        .outputRange(ClimberConstants.kMinOutput, ClimberConstants.kMaxOutput);
+    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
 
-    /**
-     * Gets the current that is running throw a motor
-     * controlled by a real SparkMax
-     *
-     * @return the current through the motor in amps
-     */
-    @Override
-    protected double doGetCurrent() {
-        return motor.getOutputCurrent();
-    }
+  /**
+   * Gets the current that is running throw a motor controlled by a real SparkMax
+   *
+   * @return the current through the motor in amps
+   */
+  @Override
+  protected double doGetCurrent() {
+    return motor.getOutputCurrent();
+  }
 
-    /**
-     * Gest the position of a motor controlled by a
-     * real SparkMax
-     *
-     * @return the motor position in net rotations since power-on
-     */
-     @Override
-    protected double doGetMotorPosition() {
-        return encoder.getPosition();
-    }
+  /**
+   * Gest the position of a motor controlled by a real SparkMax
+   *
+   * @return the motor position in net rotations since power-on
+   */
+  @Override
+  protected double doGetMotorPosition() {
+    return encoder.getPosition();
+  }
 
-    /**
-     * Gets the output of a motor controlled by a
-     * real SparkMax
-     *
-     * @return the motor output in TODO: units
-     */
-    @Override
-    protected double doGetOutput() {
-        return motor.getAppliedOutput();
-    }
+  /**
+   * Gets the output of a motor controlled by a real SparkMax
+   *
+   * @return the motor output in TODO: units
+   */
+  @Override
+  protected double doGetOutput() {
+    return motor.getAppliedOutput();
+  }
 
-    /**
-     * Gets the temperature of a motor controoled by a
-     * real SparkMax
-     *
-     * @return the motor temperature in degrees Celsius
-     */
-    @Override
-    protected double doGetTemp() {
-        return motor.getMotorTemperature();
-    }
+  /**
+   * Gets the temperature of a motor controoled by a real SparkMax
+   *
+   * @return the motor temperature in degrees Celsius
+   */
+  @Override
+  protected double doGetTemp() {
+    return motor.getMotorTemperature();
+  }
 
-    /**
-     * Gets the velocity of a motor controlled bhy a
-     * real sparkmax
-     *
-     * @return the algular velocity in revolutions/minute
-     */
-    @Override
-    protected double doGetVelocity() {
-        return encoder.getVelocity();
-    }
+  /**
+   * Gets the velocity of a motor controlled bhy a real sparkmax
+   *
+   * @return the algular velocity in revolutions/minute
+   */
+  @Override
+  protected double doGetVelocity() {
+    return encoder.getVelocity();
+  }
 
-    /**
-     * Gets the voltage across a moter controlled by a real
-     * SparkMax.
-     *
-     * @return the voltage in volts
-     */@Override
-    protected double doGetVoltage() {
-        return motor.getBusVoltage();
-    }
+  /**
+   * Gets the voltage across a moter controlled by a real SparkMax.
+   *
+   * @return the voltage in volts
+   */
+  @Override
+  protected double doGetVoltage() {
+    return motor.getBusVoltage();
+  }
 
-    @Override
-    protected void doReset() {
-        encoder.setPosition(ClimberConstants.kParkedPosition);
-    }
+  @Override
+  protected void doReset() {
+    encoder.setPosition(ClimberConstants.kParkedPosition);
+  }
 
-    @Override
-    protected void doSetMotorSpeed(double speed) {
-        motor.set(speed);
-    }
+  @Override
+  protected void doSetMotorSpeed(double speed) {
+    motor.set(speed);
+  }
 }

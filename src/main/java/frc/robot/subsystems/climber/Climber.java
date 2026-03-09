@@ -21,65 +21,55 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * the commands that control timer behavior.
  */
 public class Climber extends SubsystemBase {
-    private final ClimberIO climber;
+  private final ClimberIO climber;
 
-    /**
-     * Creats a module that controls the specified {@code climber}
-     *
-     * @param climber the climber to control
-     */
-    public Climber(ClimberIO climber) {
-        this.climber = climber;
-    }
+  /**
+   * Creats a module that controls the specified {@code climber}
+   *
+   * @param climber the climber to control
+   */
+  public Climber(ClimberIO climber) {
+    this.climber = climber;
+  }
 
-    /**
-     * Extends the climber. Ignored if the climber is already extended
-     *
-     * @return a {@link Command} that unqinds the climber cable, which
-     *         extends the climber.
-     */
-    public Command extend() {
-        return run(
-            () -> climber.unwind()
-        );
-    }
+  /**
+   * Extends the climber. Ignored if the climber is already extended
+   *
+   * @return a {@link Command} that unqinds the climber cable, which extends the climber.
+   */
+  public Command extend() {
+    return run(() -> climber.unwind());
+  }
 
-    /**
-     * Winds the climber cable, which retracts the climber
-     *
-     * @return a {@link Command} that retracts the climber.
-     */
-    public Command retract() {
-        return run(
-            () -> climber.wind()
-        );
-    }
-    /**
-     * Pauses (i.e.stops) the climber in its current position, wherever it may be.
-     *
-     * @return a {@link Command) that pauses the timer.}
-     */
-    public Command pause() {
-        return run(
-            () -> climber.stop()
-        );
-    }
+  /**
+   * Winds the climber cable, which retracts the climber
+   *
+   * @return a {@link Command} that retracts the climber.
+   */
+  public Command retract() {
+    return run(() -> climber.wind());
+  }
+  /**
+   * Pauses (i.e.stops) the climber in its current position, wherever it may be.
+   *
+   * @return a {@link Command) that pauses the timer.}
+   */
+  public Command pause() {
+    return run(() -> climber.stop());
+  }
 
-    /**
-     * Update climber-related smart dashboard fields and performs internal climber
-     * housekeeping.
-     */
-    @Override
-    public void periodic() {
-        SmartDashboard.putNumber("Climber Position", climber.getTemp());
-        SmartDashboard.putNumber("Climber Voltage", climber.getVoltage());
-        SmartDashboard.putNumber("Climber Output", climber.getOutput());
-        SmartDashboard.putNumber("Climber Temp", climber.getTemp());
-        climber.periodic();
-    }
+  /** Update climber-related smart dashboard fields and performs internal climber housekeeping. */
+  @Override
+  public void periodic() {
+    SmartDashboard.putNumber("Climber Position", climber.getTemp());
+    SmartDashboard.putNumber("Climber Voltage", climber.getVoltage());
+    SmartDashboard.putNumber("Climber Output", climber.getOutput());
+    SmartDashboard.putNumber("Climber Temp", climber.getTemp());
+    climber.periodic();
+  }
 
-    @Override
-    public void simulationPeriodic() {
-        climber.simulationPeriodic();
-    }
+  @Override
+  public void simulationPeriodic() {
+    climber.simulationPeriodic();
+  }
 }
