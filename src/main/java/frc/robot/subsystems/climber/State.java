@@ -17,8 +17,7 @@ package frc.robot.subsystems.climber;
  */
 public enum State {
   /**
-   * Elevator is fully retracted and not holding onto the ladder. Motor is stopped and braking is
-   * OFF.
+   * Elevator is fully retracted and not holding onto the ladder. Motor is stopped.
    */
   PARKED,
   /**
