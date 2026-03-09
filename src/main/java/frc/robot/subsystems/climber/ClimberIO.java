@@ -78,6 +78,12 @@ public interface ClimberIO {
     void reset();
 
     /**
+     * Invoked periodically during simulation. Should not be invoked
+     * when the robot is running.
+     */
+    void simulationPeriodic();
+
+    /**
      * Stops the motor
      */
     void stop();

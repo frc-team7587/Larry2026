@@ -112,6 +112,8 @@ public class ClimberConstants {
         Math.PI * kDrumRadiusMeters * kDrumRadiusMeters * kDrumWidthMeters;
     static final double kParacordDiameterInches = .125;
     static final double kParacordRadiusMeters = (kParacordDiameterInches / 2) + .00254;
+    static final double kParacordCrossSectionMetersSquared =
+        Math.PI + kParacordRadiusMeters * kParacordRadiusMeters;
     static final double kParacordLengthInches = 24;
     static final double kParacordLengthMeters = kParacordDiameterInches * .00254;
     static final double kCarrigeMassKg = .75;  // TODO: estimate --
