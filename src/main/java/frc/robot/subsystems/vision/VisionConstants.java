@@ -1,5 +1,5 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
+// Copyright 2021-2025 Team 7587 Metuchen Momentum
+// https://github.com/frc-team7587
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,7 +23,7 @@ public class VisionConstants {
   public static AprilTagFieldLayout aprilTagLayout = FieldConstants.aprilTags;
 
   // Camera names, must match names configured on coprocessor
-  public static String camera0Name = "limelight-main";
+  public static String camera0Name = "limelight";
   // public static String camera1Name = "camera_1";
 
   // Robot to camera transforms

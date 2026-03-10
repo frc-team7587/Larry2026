@@ -20,8 +20,8 @@ public class IntakeConstants {
   public class Intake {
     public static final int kIntakeMotorID = 12;
 
-    public static final double kIntakeOutSpeed = 0.35;
-    public static final double kIntakeInSpeed = -0.35;
+    public static final double kIntakeOutSpeed = 0.4;
+    public static final double kIntakeInSpeed = -0.4;
 
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;

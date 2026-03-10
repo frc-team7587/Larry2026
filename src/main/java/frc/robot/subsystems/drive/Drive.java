@@ -1,5 +1,5 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
+// Copyright 2021-2025 Team 7587 Metuchen Momentum
+// https://github.com/frc-team7587
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -25,11 +25,11 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -43,9 +43,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants;
-import frc.robot.Constants.Mode;
 import frc.robot.FieldConstants;
+import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
@@ -57,6 +56,7 @@ public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert =
@@ -181,41 +181,99 @@ public class Drive extends SubsystemBase {
       Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
       Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
+    updateOdometry();
 
-    // Update odometry
-    double[] sampleTimestamps =
-        modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = sampleTimestamps.length;
-    for (int i = 0; i < sampleCount; i++) {
-      // Read wheel positions and deltas from each module
-      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        moduleDeltas[moduleIndex] =
-            new SwerveModulePosition(
-                modulePositions[moduleIndex].distanceMeters
-                    - lastModulePositions[moduleIndex].distanceMeters,
-                modulePositions[moduleIndex].angle);
-        lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+    // // Update odometry
+    // double[] sampleTimestamps =
+    //     modules[0].getOdometryTimestamps(); // All signals are sampled together
+    // int sampleCount = sampleTimestamps.length;
+    // for (int i = 0; i < sampleCount; i++) {
+    //   // Read wheel positions and deltas from each module
+    //   SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+    //   SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+    //   for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+    //     modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
+    //     moduleDeltas[moduleIndex] =
+    //         new SwerveModulePosition(
+    //             modulePositions[moduleIndex].distanceMeters
+    //                 - lastModulePositions[moduleIndex].distanceMeters,
+    //             modulePositions[moduleIndex].angle);
+    //     lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+    //   }
+
+    //   // Update gyro angle
+    //   if (gyroInputs.connected) {
+    //     // Use the real gyro angle
+    //     rawGyroRotation = gyroInputs.odometryYawPositions[i];
+    //   } else {
+    //     // Use the angle delta from the kinematics and module deltas
+    //     Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+    //     rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+    //   }
+
+    //   // Apply update
+    //   poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+    // }
+
+    // // Update gyro alert
+    // gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+
+  }
+
+  /** Updates the field relative position of the robot. */
+  public void updateOdometry() {
+    poseEstimator.update(gyroInputs.yawPosition, getModulePositions());
+
+    boolean useMegaTag2 = true; // set to false to use MegaTag1
+    boolean doRejectUpdate = false;
+    if (useMegaTag2 == false) {
+      LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+
+      if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
+        if (mt1.rawFiducials[0].ambiguity > .7) {
+          doRejectUpdate = true;
+        }
+        if (mt1.rawFiducials[0].distToCamera > 3) {
+          doRejectUpdate = true;
+        }
+      }
+      if (mt1.tagCount == 0) {
+        doRejectUpdate = true;
       }
 
-      // Update gyro angle
-      if (gyroInputs.connected) {
-        // Use the real gyro angle
-        rawGyroRotation = gyroInputs.odometryYawPositions[i];
-      } else {
-        // Use the angle delta from the kinematics and module deltas
-        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+      if (!doRejectUpdate) {
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));
+        poseEstimator.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
       }
-
-      // Apply update
-      poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+    } else if (useMegaTag2 == true) {
+      LimelightHelpers.SetRobotOrientation(
+          "limelight",
+          poseEstimator.getEstimatedPosition().getRotation().getDegrees(),
+          0,
+          0,
+          0,
+          0,
+          0);
+      LimelightHelpers.PoseEstimate mt2 =
+          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+      if (Math.abs(getAngularSpeed())
+          > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision
+      // updates
+      {
+        doRejectUpdate = true;
+      }
+      if (mt2.tagCount == 0) {
+        doRejectUpdate = true;
+      }
+      if (!doRejectUpdate) {
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+        poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+      }
     }
-
-    // Update gyro alert
-    gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+  }
+  // rotational speed
+  public double getAngularSpeed() {
+    return getChassisSpeeds().omegaRadiansPerSecond;
   }
 
   /**
