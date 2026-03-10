@@ -15,6 +15,9 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -38,6 +41,7 @@ import frc.robot.subsystems.feeder.FeederIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSpark;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
@@ -210,6 +214,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Conveyor SysId (Dynamic Reverse)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    autoChooser.addOption("AutoAim Interpolation Sweep (Sim)", autoAimInterpolationSweep());
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -304,6 +309,25 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  private Command autoAimInterpolationSweep() {
+    Translation2d hubCenter = FieldConstants.Hub.blueCenter.getTranslation();
+    double hubY = hubCenter.getY();
+    double holdTimeSec = 0.75;
+    Command sweep = Commands.none();
+    for (double distanceMeters : ShooterConstants.AutoAim.kDistanceMeters) {
+      double sampleX = hubCenter.getX() + distanceMeters;
+      sweep =
+          sweep.andThen(
+              Commands.sequence(
+                  Commands.runOnce(
+                      () -> drive.setPose(new Pose2d(sampleX, hubY, new Rotation2d())), drive),
+                  Commands.deadline(
+                      Commands.waitSeconds(holdTimeSec),
+                      new AutoAimShooter(drive, shooter, intake))));
+    }
+    return sweep.withName("AutoAimInterpolationSweep");
   }
 
   public Command pathfindToClosestHub(boolean leftSide) {

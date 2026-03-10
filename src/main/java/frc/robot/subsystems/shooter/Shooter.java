@@ -104,6 +104,7 @@ public class Shooter extends SubsystemBase {
 
     Logger.recordOutput("Shooter/VelocityRpm", velocityRpm);
     Logger.recordOutput("Shooter/TargetVelocityRpm", targetShooterVelocityRpm);
+    Logger.recordOutput("Shooter/ShooterPivot", shooter.getPivotPosition());
     Logger.recordOutput("Shooter/AtSpeed", atSpeed());
   }
 
