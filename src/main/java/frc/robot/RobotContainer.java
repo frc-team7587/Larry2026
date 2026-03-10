@@ -250,7 +250,7 @@ public class RobotContainer {
     //     .whileTrue(
     //         Commands.parallel(
     //             shooter.shootFuel(),
-    //             Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
+    //             Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
     // controller
     //     .povDown()
     //     .whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
@@ -267,7 +267,7 @@ public class RobotContainer {
         .whileTrue(
             Commands.parallel(
                 shooter.shootFuel(),
-                Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
+                Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
 
     controller.leftTrigger().toggleOnTrue(intake.outtakeFuel());
     controller.rightBumper().whileTrue(shooter.pivotShooterUp());
@@ -280,6 +280,7 @@ public class RobotContainer {
     controller.povUp().whileTrue(intake.turntoUp());
     controller.povDown().whileTrue(intake.turntoDown());
     controller.povLeft().whileTrue(intake.outtakeFuel());
+    controller.povRight().whileTrue(feeder.feedFuel());
 
     // // Lock to 0° when A button is held
     // controller

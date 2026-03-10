@@ -29,8 +29,8 @@ public class ShooterConstants {
 
     public static final double kOutSpeed = 0.95;
     public static final double kInSpeed = -0.95;
-    public static final double kOutTargetRpm = 7000.0;
-    public static final double kInTargetRpm = -7000.0;
+    public static final double kOutTargetRpm = 5000.0;
+    public static final double kInTargetRpm = -5000.0;
     public static final double kSpeedToleranceRpm = 200.0;
     public static final double kSpeedStableTimeSec = 0.1;
 
