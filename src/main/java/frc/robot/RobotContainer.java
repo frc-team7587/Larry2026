@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.conveyor.ConveyorIOSpark;
 import frc.robot.subsystems.drive.Drive;
@@ -66,6 +68,7 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter(new ShooterIOSpark());
   private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
+  private final Climber climber = new Climber(new ClimberIOSpark());
 
   // Input devices
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -213,6 +216,16 @@ public class RobotContainer {
         "Conveyor SysId (Dynamic Forward)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Conveyor SysId (Dynamic Reverse)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Climber SysId (Quasistatic Forward)",
+        climber.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Climber SysId (Quasistatic Reverse)",
+        climber.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Climber SysId (Dynamic Forward)", climber.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Climber SysId (Dynamic Reverse)", climber.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     autoChooser.addOption("AutoAim Interpolation Sweep (Sim)", autoAimInterpolationSweep());
     // Configure the button bindings
@@ -284,8 +297,8 @@ public class RobotContainer {
 
     controller.povUp().whileTrue(intake.turntoUp());
     controller.povDown().whileTrue(intake.turntoDown());
-    controller.povLeft().whileTrue(intake.outtakeFuel());
-    controller.povRight().whileTrue(feeder.feedFuel());
+    controller.povRight().whileTrue(climber.climbUp());
+    controller.povLeft().whileTrue(climber.climbDown());
 
     // // Lock to 0° when A button is held
     // controller
