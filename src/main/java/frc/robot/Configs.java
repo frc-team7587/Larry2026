@@ -111,11 +111,7 @@ public class Configs {
       motorConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-          .pidf(
-              ClimberConstants.kP,
-              ClimberConstants.kI,
-              ClimberConstants.kD,
-              ClimberConstants.kFF)
+          .pidf(ClimberConstants.kP, ClimberConstants.kI, ClimberConstants.kD, ClimberConstants.kFF)
           .outputRange(ClimberConstants.kMinOutput, ClimberConstants.kMaxOutput);
     }
   }
