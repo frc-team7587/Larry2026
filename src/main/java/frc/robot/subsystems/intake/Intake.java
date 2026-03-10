@@ -34,6 +34,10 @@ public class Intake extends SubsystemBase {
                 (voltage) -> intake.setPivotVoltage(voltage.in(Volts)), null, this));
   }
 
+  public void setIntakeSpeed(double speed) {
+    intake.setIntakeSpeed(speed);
+  }
+
   public Command intakeFuel() {
     return startEnd(
         () -> intake.setIntakeSpeed(IntakeConstants.Intake.kIntakeInSpeed),

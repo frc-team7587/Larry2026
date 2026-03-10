@@ -1,5 +1,5 @@
-// Copyright (c) 2021-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
+// Copyright (c) 2021-2026 Team 7587 Metuchen Momentum
+// https://github.com/frc-team7587
 //
 // Use of this source code is governed by a BSD
 // license that can be found in the LICENSE file

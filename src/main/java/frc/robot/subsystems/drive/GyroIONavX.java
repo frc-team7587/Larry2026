@@ -1,5 +1,5 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
+// Copyright 2021-2025 Team 7587 Metuchen Momentum
+// https://github.com/frc-team7587
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -29,14 +29,14 @@ public class GyroIONavX implements GyroIO {
 
   public GyroIONavX() {
     yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
-    yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(navX::getAngle);
+    yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(navX::getYaw);
   }
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
     inputs.connected = navX.isConnected();
-    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getAngle());
-    inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
+    inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw());
+    inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRate());
 
     inputs.odometryYawTimestamps =
         yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();

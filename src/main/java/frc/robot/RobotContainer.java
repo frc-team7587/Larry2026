@@ -1,5 +1,5 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
+// Copyright 2021-2025 Team 7587 Metuchen Momentum
+// https://github.com/frc-team7587
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -15,6 +15,9 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -23,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.conveyor.ConveyorIOSpark;
@@ -37,7 +41,13 @@ import frc.robot.subsystems.feeder.FeederIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSpark;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIOSpark;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.util.Set;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -51,6 +61,7 @@ public class RobotContainer {
   // Subsystems
   // private final Vision vision;
   private final Drive drive;
+  private final Vision vision;
   private final Intake intake = new Intake(new IntakeIOSpark());
   private final Shooter shooter = new Shooter(new ShooterIOSpark());
   private final Feeder feeder = new Feeder(new FeederIOSpark());
@@ -80,10 +91,10 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement,
-        //         new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
         break;
 
       case SIM:
@@ -95,12 +106,11 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement,
-        //         new VisionIOPhotonVisionSim(
-        //             VisionConstants.camera0Name, VisionConstants.robotToCamera0,
-        // drive::getPose));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
         break;
 
       default:
@@ -113,7 +123,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         break;
     }
 
@@ -204,6 +214,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Conveyor SysId (Dynamic Reverse)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    autoChooser.addOption("AutoAim Interpolation Sweep (Sim)", autoAimInterpolationSweep());
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -223,26 +234,58 @@ public class RobotContainer {
             () -> controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
-    controller.rightTrigger().toggleOnTrue(intake.outtakeFuel());
-    controller.leftBumper().whileTrue(intake.turntoDown());
-    controller.rightBumper().whileTrue(intake.turntoUp());
+    // Hold X for temporary robot-relative drive.
+    controller
+        .x()
+        .whileTrue(
+            DriveCommands.joystickDriveRobotRelative(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX()));
+
+    // TESTING BINDS
+    // controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
+    // controller.rightTrigger().toggleOnTrue(intake.outtakeFuel());
+    // controller.leftBumper().whileTrue(intake.turntoDown());
+    // controller.rightBumper().whileTrue(intake.turntoUp());
+
+    // controller
+    //     .povUp()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             shooter.shootFuel(),
+    //             Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
+    // controller
+    //     .povDown()
+    //     .whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
+    // controller.povLeft().whileTrue(shooter.pivotShooterUp());
+    // controller.povRight().whileTrue(shooter.pivotShooterDown());
+    // controller.x().whileTrue(feeder.feedFuel());
+    // controller.y().whileTrue(feeder.feedFuelReverse());
+    // controller.a().toggleOnTrue(conveyor.transportBalls());
+    // controller.b().toggleOnTrue(conveyor.transportBallsReverse());
+    // controller.back().whileTrue(new AutoAimShooter(drive, shooter, intake));
 
     controller
-        .povUp()
+        .rightTrigger()
         .whileTrue(
             Commands.parallel(
                 shooter.shootFuel(),
-                Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
-    controller
-        .povDown()
-        .whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
-    controller.povLeft().whileTrue(shooter.pivotShooterUp());
-    controller.povRight().whileTrue(shooter.pivotShooterDown());
-    controller.x().whileTrue(feeder.feedFuel());
-    controller.y().whileTrue(feeder.feedFuelReverse());
+                Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
+
+    controller.leftTrigger().toggleOnTrue(intake.outtakeFuel());
+    controller.rightBumper().whileTrue(shooter.pivotShooterUp());
+    controller.leftBumper().whileTrue(shooter.pivotShooterDown());
+
     controller.a().toggleOnTrue(conveyor.transportBalls());
     controller.b().toggleOnTrue(conveyor.transportBallsReverse());
+    controller.y().whileTrue(new AutoAimShooter(drive, shooter, intake));
+
+    controller.povUp().whileTrue(intake.turntoUp());
+    controller.povDown().whileTrue(intake.turntoDown());
+    controller.povLeft().whileTrue(intake.outtakeFuel());
+    controller.povRight().whileTrue(feeder.feedFuel());
 
     // // Lock to 0° when A button is held
     // controller
@@ -297,6 +340,25 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  private Command autoAimInterpolationSweep() {
+    Translation2d hubCenter = FieldConstants.Hub.blueCenter.getTranslation();
+    double hubY = hubCenter.getY();
+    double holdTimeSec = 0.75;
+    Command sweep = Commands.none();
+    for (double distanceMeters : ShooterConstants.AutoAim.kDistanceMeters) {
+      double sampleX = hubCenter.getX() + distanceMeters;
+      sweep =
+          sweep.andThen(
+              Commands.sequence(
+                  Commands.runOnce(
+                      () -> drive.setPose(new Pose2d(sampleX, hubY, new Rotation2d())), drive),
+                  Commands.deadline(
+                      Commands.waitSeconds(holdTimeSec),
+                      new AutoAimShooter(drive, shooter, intake))));
+    }
+    return sweep.withName("AutoAimInterpolationSweep");
   }
 
   public Command pathfindToClosestHub(boolean leftSide) {

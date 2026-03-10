@@ -12,12 +12,13 @@ public class ShooterConstants {
     public static final int kPivotMotorID = 13;
 
     public static final double kPivotSpeedUp = 0.1;
-    public static final double kPivotSpeedDown = -0.1;
+    public static final double kPivotSpeedDown = -0.038;
 
-    public static final double kP = 0.07;
+    public static final double kP = 0.15;
     public static final double kI = 0.0;
-    public static final double kD = 0.0;
+    public static final double kD = 0.015;
     public static final double kFF = 0.00375;
+    public static final double kGravityFFVolts = 0.3;
 
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;
@@ -26,10 +27,10 @@ public class ShooterConstants {
   public class Top {
     public static final int kTopMotorID = 16;
 
-    public static final double kOutSpeed = 0.8;
-    public static final double kInSpeed = -0.8;
-    public static final double kOutTargetRpm = 4200.0;
-    public static final double kInTargetRpm = -4200.0;
+    public static final double kOutSpeed = 0.95;
+    public static final double kInSpeed = -0.95;
+    public static final double kOutTargetRpm = 5000.0;
+    public static final double kInTargetRpm = -5000.0;
     public static final double kSpeedToleranceRpm = 200.0;
     public static final double kSpeedStableTimeSec = 0.1;
 
@@ -40,10 +41,19 @@ public class ShooterConstants {
   public class Bottom {
     public static final int kBottomMotorID = 14;
 
-    public static final double kOutSpeed = 0.8;
-    public static final double kInSpeed = -0.8;
+    public static final double kOutSpeed = 0.95;
+    public static final double kInSpeed = -0.95;
 
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;
+  }
+
+  public class AutoAim {
+    // Placeholder interpolation tables, tune on-field.
+    public static final double[] kDistanceMeters = {1.5, 2.5, 3.5, 4.5, 5.5};
+    public static final double[] kPivotPosition = {0.15, 0.23, 0.31, 0.39, 0.47};
+    public static final double[] kShooterPercentOutput = {0.62, 0.68, 0.74, 0.80, 0.86};
+    public static final double[] kShooterTargetRpm = {3200.0, 3600.0, 4000.0, 4400.0, 4800.0};
+    public static final double[] kIntakePercentOutput = {0.12, 0.14, 0.16, 0.18, 0.20};
   }
 }
