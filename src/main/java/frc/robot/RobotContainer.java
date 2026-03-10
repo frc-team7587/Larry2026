@@ -229,27 +229,57 @@ public class RobotContainer {
             () -> controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
-    controller.rightTrigger().toggleOnTrue(intake.outtakeFuel());
-    controller.leftBumper().whileTrue(intake.turntoDown());
-    controller.rightBumper().whileTrue(intake.turntoUp());
+    // Hold X for temporary robot-relative drive.
+    controller
+        .x()
+        .whileTrue(
+            DriveCommands.joystickDriveRobotRelative(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX()));
+
+    // TESTING BINDS
+    // controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
+    // controller.rightTrigger().toggleOnTrue(intake.outtakeFuel());
+    // controller.leftBumper().whileTrue(intake.turntoDown());
+    // controller.rightBumper().whileTrue(intake.turntoUp());
+
+    // controller
+    //     .povUp()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             shooter.shootFuel(),
+    //             Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
+    // controller
+    //     .povDown()
+    //     .whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
+    // controller.povLeft().whileTrue(shooter.pivotShooterUp());
+    // controller.povRight().whileTrue(shooter.pivotShooterDown());
+    // controller.x().whileTrue(feeder.feedFuel());
+    // controller.y().whileTrue(feeder.feedFuelReverse());
+    // controller.a().toggleOnTrue(conveyor.transportBalls());
+    // controller.b().toggleOnTrue(conveyor.transportBallsReverse());
+    // controller.back().whileTrue(new AutoAimShooter(drive, shooter, intake));
 
     controller
-        .povUp()
+        .rightTrigger()
         .whileTrue(
             Commands.parallel(
                 shooter.shootFuel(),
                 Commands.waitUntil(shooter::atSpeed).andThen(feeder.feedFuel())));
-    controller
-        .povDown()
-        .whileTrue(Commands.parallel(shooter.shootFuelReverse(), feeder.feedFuelReverse()));
-    controller.povLeft().whileTrue(shooter.pivotShooterUp());
-    controller.povRight().whileTrue(shooter.pivotShooterDown());
-    controller.x().whileTrue(feeder.feedFuel());
-    controller.y().whileTrue(feeder.feedFuelReverse());
+
+    controller.leftTrigger().toggleOnTrue(intake.outtakeFuel());
+    controller.rightBumper().whileTrue(shooter.pivotShooterUp());
+    controller.leftBumper().whileTrue(shooter.pivotShooterDown());
+
     controller.a().toggleOnTrue(conveyor.transportBalls());
     controller.b().toggleOnTrue(conveyor.transportBallsReverse());
-    controller.back().whileTrue(new AutoAimShooter(drive, shooter, intake));
+    controller.y().whileTrue(new AutoAimShooter(drive, shooter, intake));
+
+    controller.povUp().whileTrue(intake.turntoUp());
+    controller.povDown().whileTrue(intake.turntoDown());
+    controller.povLeft().whileTrue(intake.outtakeFuel());
 
     // // Lock to 0° when A button is held
     // controller
