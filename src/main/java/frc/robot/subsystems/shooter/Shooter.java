@@ -99,6 +99,15 @@ public class Shooter extends SubsystemBase {
         this::stopShooter);
   }
 
+  public Command shootFuelAtRPM(double targetRpm) {
+    return startEnd(
+        () -> {
+          setShooterSpeedWithTargetRpm(
+              ShooterConstants.Top.kOutSpeed, targetRpm);
+        },
+        this::stopShooter);
+  }
+
   public Command shootFuelReverse() {
     return startEnd(
         () -> {

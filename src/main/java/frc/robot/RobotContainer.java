@@ -308,7 +308,7 @@ public class RobotContainer {
 
     controller.a().toggleOnTrue(conveyor.transportBallsReverse());
     controller.b().toggleOnTrue(conveyor.transportBalls());
-    controller.y().whileTrue(new AutoAimShooter(drive, vision, shooter));
+    controller.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
     controller
         .rightTrigger()
         .whileTrue(
