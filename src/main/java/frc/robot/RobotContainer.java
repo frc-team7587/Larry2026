@@ -42,6 +42,9 @@ import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.feeder.FeederIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSpark;
+import frc.robot.subsystems.marquee.MarqueeMessage;
+import frc.robot.subsystems.marquee.MarqueeMessageBuilder;
+import frc.robot.subsystems.marquee.MarqueeSubsystem;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIOSpark;
@@ -50,6 +53,9 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -60,6 +66,32 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  /**
+   * Messages to display on the marquee
+   */
+  private static final List<MarqueeMessage> kMessagesToDisplay;
+
+  /**
+   * Populates the message list. TODO: add all sponsors.
+   */
+  static {
+    kMessagesToDisplay = new ArrayList<>();
+    kMessagesToDisplay.add(
+      new MarqueeMessageBuilder("Thankk you, Sponsors!",2000)
+      .setForegroundGreen(63)
+      .setForegroundRed(63)
+      .setDelay1(40)
+      .build());
+    kMessagesToDisplay.add(new MarqueeMessageBuilder("ADP", 3000)
+        .setForegroundRed(63)
+        .setDelay1(40)
+        .build());
+    kMessagesToDisplay.add(new MarqueeMessageBuilder("Metuchen Diner", 3000)
+        .setForegroundBlue(63)
+        .setDelay1(40)
+        .build());
+  }
+
   // Subsystems
   // private final Vision vision;
   private final Drive drive;
@@ -69,6 +101,8 @@ public class RobotContainer {
   private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
   private final Climber climber = new Climber(new ClimberIOSpark());
+  private final MarqueeSubsystem marquee =
+      MarqueeSubsystem.usbConnection(kMessagesToDisplay, 20);
 
   // Input devices
   private final CommandXboxController controller = new CommandXboxController(0);
