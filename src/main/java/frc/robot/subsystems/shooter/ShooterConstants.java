@@ -6,6 +6,8 @@ public class ShooterConstants {
     public static final double kNoTargetRpm = 0.0;
     public static final double kNoStableTimestamp = -1.0;
     public static final double kTargetEpsilonRpm = 1e-6;
+    public static final double kDashboardDefaultTargetRpm = 3500.0;
+    public static final double kDashboardMaxTargetRpm = 5500.0;
   }
 
   public class Pivot {
@@ -22,6 +24,8 @@ public class ShooterConstants {
 
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;
+
+    public static final double kBottomPosition = 0.0;
   }
 
   public class Top {
@@ -49,11 +53,18 @@ public class ShooterConstants {
   }
 
   public class AutoAim {
-    // Placeholder interpolation tables, tune on-field.
-    public static final double[] kDistanceMeters = {1.5, 2.5, 3.5, 4.5, 5.5};
-    public static final double[] kPivotPosition = {0.15, 0.23, 0.31, 0.39, 0.47};
-    public static final double[] kShooterPercentOutput = {0.62, 0.68, 0.74, 0.80, 0.86};
-    public static final double[] kShooterTargetRpm = {3200.0, 3600.0, 4000.0, 4400.0, 4800.0};
-    public static final double[] kIntakePercentOutput = {0.12, 0.14, 0.16, 0.18, 0.20};
+    // These values are meant to be tuned on-robot while watching logs.
+    public static final double kVisionDistanceScale = 1.0;
+    public static final double kVisionDistanceBiasMeters = 0.0;
+
+    public static final double[] kDistanceMeters = {2.509, 3.01, 3.55, 4.01};
+    public static final double[] kPivotPosition = {-0.05, 0.1667, 2.11, 3.0};
+    public static final double[] kShooterPercentOutput = {
+      0.58, 0.62, 0.66, 0.70, 0.74, 0.79, 0.84, 0.89, 0.94
+    };
+    public static final double[] kShooterTargetRpm = {3800, 4150, 4700, 4500};
+    // public static final double[] kIntakePercentOutput = {
+    //   0.10, 0.11, 0.12, 0.13, 0.145, 0.16, 0.175, 0.19, 0.20
+    // };
   }
 }

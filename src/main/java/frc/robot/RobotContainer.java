@@ -22,10 +22,10 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climber.Climber;
@@ -78,6 +78,8 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private static final String shooterDashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
+  private static final String shooterDashboardOutputKey = "Shooter/DashboardMappedOutput";
 
   private static final PathConstraints hubPathfindConstraints =
       new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
@@ -132,100 +134,110 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    SmartDashboard.putNumber(
+        shooterDashboardTargetRpmKey, ShooterConstants.Control.kDashboardDefaultTargetRpm);
+    SmartDashboard.putNumber(shooterDashboardOutputKey, 0.0);
+    SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", 0.0);
+    SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", 0.0);
+    SmartDashboard.putNumber("Shooter/PivotEncoderPosition", 0.0);
 
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Shooter Wheel SysId (Quasistatic Forward)",
-        shooter.wheelSysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Shooter Wheel SysId (Quasistatic Reverse)",
-        shooter.wheelSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Shooter Wheel SysId (Dynamic Forward)",
-        shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Shooter Wheel SysId (Dynamic Reverse)",
-        shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Feeder SysId (Quasistatic Forward)",
-        feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Feeder SysId (Quasistatic Reverse)",
-        feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Feeder SysId (Dynamic Forward)", feeder.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Feeder SysId (Dynamic Reverse)", feeder.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Shooter Pivot SysId (Quasistatic Forward)",
-        shooter.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Shooter Pivot SysId (Quasistatic Reverse)",
-        shooter.pivotSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Shooter Pivot SysId (Dynamic Forward)",
-        shooter.pivotSysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Shooter Pivot SysId (Dynamic Reverse)",
-        shooter.pivotSysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Intake Roller SysId (Quasistatic Forward)",
-        intake.rollerSysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Intake Roller SysId (Quasistatic Reverse)",
-        intake.rollerSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Intake Roller SysId (Dynamic Forward)",
-        intake.rollerSysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Intake Roller SysId (Dynamic Reverse)",
-        intake.rollerSysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Intake Pivot SysId (Quasistatic Forward)",
-        intake.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Intake Pivot SysId (Quasistatic Reverse)",
-        intake.pivotSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Intake Pivot SysId (Dynamic Forward)",
-        intake.pivotSysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Intake Pivot SysId (Dynamic Reverse)",
-        intake.pivotSysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Conveyor SysId (Quasistatic Forward)",
-        conveyor.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Conveyor SysId (Quasistatic Reverse)",
-        conveyor.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Conveyor SysId (Dynamic Forward)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Conveyor SysId (Dynamic Reverse)", conveyor.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Climber SysId (Quasistatic Forward)",
-        climber.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Climber SysId (Quasistatic Reverse)",
-        climber.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Climber SysId (Dynamic Forward)", climber.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Climber SysId (Dynamic Reverse)", climber.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // // Set up SysId routines
+    // autoChooser.addOption(
+    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    // autoChooser.addOption(
+    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Forward)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Reverse)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Shooter Wheel SysId (Quasistatic Forward)",
+    //     shooter.wheelSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Shooter Wheel SysId (Quasistatic Reverse)",
+    //     shooter.wheelSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Shooter Wheel SysId (Dynamic Forward)",
+    //     shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Shooter Wheel SysId (Dynamic Reverse)",
+    //     shooter.wheelSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Feeder SysId (Quasistatic Forward)",
+    //     feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Feeder SysId (Quasistatic Reverse)",
+    //     feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Feeder SysId (Dynamic Forward)", feeder.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Feeder SysId (Dynamic Reverse)", feeder.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Shooter Pivot SysId (Quasistatic Forward)",
+    //     shooter.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Shooter Pivot SysId (Quasistatic Reverse)",
+    //     shooter.pivotSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Shooter Pivot SysId (Dynamic Forward)",
+    //     shooter.pivotSysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Shooter Pivot SysId (Dynamic Reverse)",
+    //     shooter.pivotSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Intake Roller SysId (Quasistatic Forward)",
+    //     intake.rollerSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Intake Roller SysId (Quasistatic Reverse)",
+    //     intake.rollerSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Intake Roller SysId (Dynamic Forward)",
+    //     intake.rollerSysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Intake Roller SysId (Dynamic Reverse)",
+    //     intake.rollerSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Intake Pivot SysId (Quasistatic Forward)",
+    //     intake.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Intake Pivot SysId (Quasistatic Reverse)",
+    //     intake.pivotSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Intake Pivot SysId (Dynamic Forward)",
+    //     intake.pivotSysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Intake Pivot SysId (Dynamic Reverse)",
+    //     intake.pivotSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Conveyor SysId (Quasistatic Forward)",
+    //     conveyor.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Conveyor SysId (Quasistatic Reverse)",
+    //     conveyor.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Conveyor SysId (Dynamic Forward)",
+    // conveyor.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Conveyor SysId (Dynamic Reverse)",
+    // conveyor.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Climber SysId (Quasistatic Forward)",
+    //     climber.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Climber SysId (Quasistatic Reverse)",
+    //     climber.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Climber SysId (Dynamic Forward)",
+    // climber.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Climber SysId (Dynamic Reverse)",
+    // climber.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     autoChooser.addOption("AutoAim Interpolation Sweep (Sim)", autoAimInterpolationSweep());
     // Configure the button bindings
@@ -278,22 +290,31 @@ public class RobotContainer {
     // controller.y().whileTrue(feeder.feedFuelReverse());
     // controller.a().toggleOnTrue(conveyor.transportBalls());
     // controller.b().toggleOnTrue(conveyor.transportBallsReverse());
-    // controller.back().whileTrue(new AutoAimShooter(drive, shooter, intake));
+    // controller.back().whileTrue(new AutoAimShooter(drive, vision, shooter));
 
+    // controller
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             shooter.shootFuel(),
+    //             Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
+
+    controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
+
+    controller.start().whileTrue(intake.outtakeFuel());
+
+    controller.rightBumper().whileTrue(shooter.pivotShooterUp());
+    controller.leftBumper().whileTrue(shooter.pivotShooterDown());
+
+    controller.a().toggleOnTrue(conveyor.transportBallsReverse());
+    controller.b().toggleOnTrue(conveyor.transportBalls());
+    controller.y().whileTrue(new AutoAimShooter(drive, vision, shooter));
     controller
         .rightTrigger()
         .whileTrue(
             Commands.parallel(
                 shooter.shootFuel(),
-                Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
-
-    controller.leftTrigger().toggleOnTrue(intake.outtakeFuel());
-    controller.rightBumper().whileTrue(shooter.pivotShooterUp());
-    controller.leftBumper().whileTrue(shooter.pivotShooterDown());
-
-    controller.a().toggleOnTrue(conveyor.transportBalls());
-    controller.b().toggleOnTrue(conveyor.transportBallsReverse());
-    controller.y().whileTrue(new AutoAimShooter(drive, shooter, intake));
+                Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
 
     controller.povUp().whileTrue(intake.turntoUp());
     controller.povDown().whileTrue(intake.turntoDown());
@@ -369,7 +390,7 @@ public class RobotContainer {
                       () -> drive.setPose(new Pose2d(sampleX, hubY, new Rotation2d())), drive),
                   Commands.deadline(
                       Commands.waitSeconds(holdTimeSec),
-                      new AutoAimShooter(drive, shooter, intake))));
+                      new AutoAimShooter(drive, vision, shooter))));
     }
     return sweep.withName("AutoAimInterpolationSweep");
   }

@@ -35,6 +35,9 @@ public interface ShooterIO {
    */
   public void setPivotPosition(double position);
 
+  /** Sets the pivot encoder to a known position. */
+  public void setPivotEncoderPosition(double position);
+
   /**
    * Gets the encoder value of the pivot motor.
    *

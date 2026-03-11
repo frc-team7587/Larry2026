@@ -79,6 +79,11 @@ public class ShooterIOSpark implements ShooterIO {
   }
 
   @Override
+  public void setPivotEncoderPosition(double position) {
+    pivotEncoder.setPosition(position);
+  }
+
+  @Override
   public double getPivotPosition() {
     return pivotEncoder.getPosition();
   }

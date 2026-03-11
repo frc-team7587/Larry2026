@@ -33,9 +33,12 @@ public class VisionIOLimelight implements VisionIO {
   private final Supplier<Rotation2d> rotationSupplier;
   private final DoubleArrayPublisher orientationPublisher;
 
+  private final DoubleSubscriber validTargetSubscriber;
+  private final DoubleSubscriber tidSubscriber;
   private final DoubleSubscriber latencySubscriber;
   private final DoubleSubscriber txSubscriber;
   private final DoubleSubscriber tySubscriber;
+  private final DoubleArraySubscriber targetPoseRobotSpaceSubscriber;
   private final DoubleArraySubscriber megatag1Subscriber;
   private final DoubleArraySubscriber megatag2Subscriber;
 
@@ -46,12 +49,16 @@ public class VisionIOLimelight implements VisionIO {
    * @param rotationSupplier Supplier for the current estimated rotation, used for MegaTag 2.
    */
   public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier) {
-    var table = NetworkTableInstance.getDefault().getTable("limelight");
+    var table = NetworkTableInstance.getDefault().getTable(name);
     this.rotationSupplier = rotationSupplier;
     orientationPublisher = table.getDoubleArrayTopic("robot_orientation_set").publish();
+    validTargetSubscriber = table.getDoubleTopic("tv").subscribe(0.0);
+    tidSubscriber = table.getDoubleTopic("tid").subscribe(-1.0);
     latencySubscriber = table.getDoubleTopic("tl").subscribe(0.0);
     txSubscriber = table.getDoubleTopic("tx").subscribe(0.0);
     tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
+    targetPoseRobotSpaceSubscriber =
+        table.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[] {});
     megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
     megatag2Subscriber =
         table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
@@ -63,10 +70,24 @@ public class VisionIOLimelight implements VisionIO {
     inputs.connected =
         ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
 
+    double[] targetPoseRobotSpace = targetPoseRobotSpaceSubscriber.get();
+    double distanceMeters = Double.NaN;
+    if (targetPoseRobotSpace.length >= 3) {
+      distanceMeters =
+          Math.sqrt(
+              targetPoseRobotSpace[0] * targetPoseRobotSpace[0]
+                  + targetPoseRobotSpace[1] * targetPoseRobotSpace[1]
+                  + targetPoseRobotSpace[2] * targetPoseRobotSpace[2]);
+    }
+
     // Update target observation
     inputs.latestTargetObservation =
         new TargetObservation(
-            Rotation2d.fromDegrees(txSubscriber.get()), Rotation2d.fromDegrees(tySubscriber.get()));
+            validTargetSubscriber.get() > 0.5,
+            (int) Math.round(tidSubscriber.get()),
+            distanceMeters,
+            Rotation2d.fromDegrees(txSubscriber.get()),
+            Rotation2d.fromDegrees(tySubscriber.get()));
 
     // Update orientation for MegaTag 2
     orientationPublisher.accept(
@@ -84,22 +105,11 @@ public class VisionIOLimelight implements VisionIO {
       }
       poseObservations.add(
           new PoseObservation(
-              // Timestamp, based on server timestamp of publish and latency
               rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
-
-              // 3D pose estimate
               parsePose(rawSample.value),
-
-              // Ambiguity, using only the first tag because ambiguity isn't applicable for multitag
               rawSample.value.length >= 18 ? rawSample.value[17] : 0.0,
-
-              // Tag count
               (int) rawSample.value[7],
-
-              // Average tag distance
               rawSample.value[9],
-
-              // Observation type
               PoseObservationType.MEGATAG_1));
     }
     for (var rawSample : megatag2Subscriber.readQueue()) {
@@ -109,32 +119,19 @@ public class VisionIOLimelight implements VisionIO {
       }
       poseObservations.add(
           new PoseObservation(
-              // Timestamp, based on server timestamp of publish and latency
               rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
-
-              // 3D pose estimate
               parsePose(rawSample.value),
-
-              // Ambiguity, zeroed because the pose is already disambiguated
               0.0,
-
-              // Tag count
               (int) rawSample.value[7],
-
-              // Average tag distance
               rawSample.value[9],
-
-              // Observation type
               PoseObservationType.MEGATAG_2));
     }
 
-    // Save pose observations to inputs object
     inputs.poseObservations = new PoseObservation[poseObservations.size()];
     for (int i = 0; i < poseObservations.size(); i++) {
       inputs.poseObservations[i] = poseObservations.get(i);
     }
 
-    // Save tag IDs to inputs objects
     inputs.tagIds = new int[tagIds.size()];
     int i = 0;
     for (int id : tagIds) {

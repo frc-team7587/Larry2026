@@ -2,13 +2,18 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
+  private static final String dashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
+  private static final String dashboardOutputKey = "Shooter/DashboardMappedOutput";
+
   private final ShooterIO shooter;
   private final SysIdRoutine wheelSysId;
   private final SysIdRoutine pivotSysId;
@@ -35,12 +40,39 @@ public class Shooter extends SubsystemBase {
                 (state) -> Logger.recordOutput("Shooter/PivotSysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> shooter.setPivotVoltage(voltage.in(Volts)), null, this));
+
+    shooter.setPivotEncoderPosition(ShooterConstants.Pivot.kBottomPosition);
+    SmartDashboard.putNumber(
+        dashboardTargetRpmKey, ShooterConstants.Control.kDashboardDefaultTargetRpm);
+    SmartDashboard.putNumber(dashboardOutputKey, 0.0);
   }
 
   public void setShooterSpeedWithTargetRpm(double speed, double targetRpm) {
     targetShooterVelocityRpm = targetRpm;
     rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
     shooter.setShooterSpeed(speed);
+  }
+
+  public void runShooterAtDashboardRpm() {
+    double requestedRpm =
+        SmartDashboard.getNumber(
+            dashboardTargetRpmKey, ShooterConstants.Control.kDashboardDefaultTargetRpm);
+    double clampedRpm =
+        MathUtil.clamp(
+            requestedRpm,
+            -ShooterConstants.Control.kDashboardMaxTargetRpm,
+            ShooterConstants.Control.kDashboardMaxTargetRpm);
+    double mappedOutput = clampedRpm / ShooterConstants.Control.kDashboardMaxTargetRpm;
+
+    setShooterSpeedWithTargetRpm(mappedOutput, clampedRpm);
+    SmartDashboard.putNumber(dashboardOutputKey, mappedOutput);
+    Logger.recordOutput("Shooter/DashboardRequestedTargetRpm", requestedRpm);
+    Logger.recordOutput("Shooter/DashboardClampedTargetRpm", clampedRpm);
+    Logger.recordOutput("Shooter/DashboardMappedOutput", mappedOutput);
+  }
+
+  public Command dashboardShootTune() {
+    return runEnd(this::runShooterAtDashboardRpm, this::stopShooter);
   }
 
   public void setPivotPosition(double position) {
@@ -55,6 +87,7 @@ public class Shooter extends SubsystemBase {
     shooter.setShooterSpeed(ShooterConstants.Control.kStoppedSpeed);
     targetShooterVelocityRpm = ShooterConstants.Control.kNoTargetRpm;
     rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
+    SmartDashboard.putNumber(dashboardOutputKey, 0.0);
   }
 
   public Command shootFuel() {
@@ -87,9 +120,14 @@ public class Shooter extends SubsystemBase {
     return shooter.getShooterVelocityRpm();
   }
 
+  public double getPivotPosition() {
+    return shooter.getPivotPosition();
+  }
+
   @Override
   public void periodic() {
     double velocityRpm = shooter.getShooterVelocityRpm();
+    double pivotPosition = shooter.getPivotPosition();
     double rpmError = targetShooterVelocityRpm - velocityRpm;
     boolean correctDirection = targetShooterVelocityRpm * velocityRpm > 0.0;
     boolean rpmReadyForFeed =
@@ -106,6 +144,8 @@ public class Shooter extends SubsystemBase {
     }
 
     boolean atRpm = atRPM();
+    Logger.recordOutput("Shooter/PivotEncoderPosition", pivotPosition);
+    Logger.recordOutput("Shooter/PivotPosition", pivotPosition);
     Logger.recordOutput("Shooter/VelocityRpm", velocityRpm);
     Logger.recordOutput("Shooter/TargetVelocityRpm", targetShooterVelocityRpm);
     Logger.recordOutput("Shooter/RpmError", rpmError);
@@ -114,6 +154,9 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/RpmWithinTolerance", speedWithinTolerance);
     Logger.recordOutput("Shooter/AtRPM", atRpm);
     Logger.recordOutput("Shooter/atRPM", atRpm);
+    SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", velocityRpm);
+    SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", targetShooterVelocityRpm);
+    SmartDashboard.putNumber("Shooter/PivotEncoderPosition", pivotPosition);
   }
 
   public Command pivotShooterUp() {
