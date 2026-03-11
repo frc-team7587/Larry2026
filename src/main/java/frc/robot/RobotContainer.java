@@ -390,7 +390,7 @@ public class RobotContainer {
                       () -> drive.setPose(new Pose2d(sampleX, hubY, new Rotation2d())), drive),
                   Commands.deadline(
                       Commands.waitSeconds(holdTimeSec),
-                      new AutoAimShooter(drive, vision, shooter))));
+                      new AutoAimShooter(drive, vision, shooter, feeder))));
     }
     return sweep.withName("AutoAimInterpolationSweep");
   }
