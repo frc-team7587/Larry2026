@@ -13,7 +13,8 @@ import frc.robot.Configs.IntakeConfig;
 public class IntakeIOSpark implements IntakeIO {
   private final SparkMax pivotLeaderMotor;
   private final SparkMax pivotFollowerMotor;
-  private final SparkFlex intakeMotor;
+  private final SparkFlex intakeLeaderMotor;
+  private final SparkFlex intakeFollowerMotor;
 
   private final RelativeEncoder pivotLeaderEncoder;
   private final SparkClosedLoopController pivotLeaderController;
@@ -21,7 +22,8 @@ public class IntakeIOSpark implements IntakeIO {
   public IntakeIOSpark() {
     pivotLeaderMotor = new SparkMax(IntakeConstants.Pivot.kLeaderID, MotorType.kBrushless);
     pivotFollowerMotor = new SparkMax(IntakeConstants.Pivot.kFollowerID, MotorType.kBrushless);
-    intakeMotor = new SparkFlex(IntakeConstants.Intake.kIntakeMotorID, MotorType.kBrushless);
+    intakeLeaderMotor = new SparkFlex(IntakeConstants.Intake.kLeaderMotorID, MotorType.kBrushless);
+    intakeFollowerMotor = new SparkFlex(IntakeConstants.Intake.kFollowerMotorID, MotorType.kBrushless);
 
     pivotLeaderEncoder = pivotLeaderMotor.getEncoder();
     pivotLeaderController = pivotLeaderMotor.getClosedLoopController();
@@ -34,20 +36,24 @@ public class IntakeIOSpark implements IntakeIO {
         IntakeConfig.pivotMotorFollowerConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
-    intakeMotor.configure(
-        IntakeConfig.intakeMotorConfig,
+    intakeLeaderMotor.configure(
+        IntakeConfig.intakeMotorLeaderConfig,
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
+    intakeFollowerMotor.configure(
+        IntakeConfig.intakeMotorFollowerConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
   }
 
   @Override
   public void setIntakeSpeed(double speed) {
-    intakeMotor.set(speed);
+    intakeLeaderMotor.set(speed);
   }
 
   @Override
   public void setIntakeVoltage(double volts) {
-    intakeMotor.setVoltage(volts);
+    intakeLeaderMotor.setVoltage(volts);
   }
 
   @Override

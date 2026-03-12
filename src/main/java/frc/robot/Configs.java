@@ -12,7 +12,8 @@ public class Configs {
   public static final class IntakeConfig {
     public static final SparkMaxConfig pivotMotorLeaderConfig = new SparkMaxConfig();
     public static final SparkMaxConfig pivotMotorFollowerConfig = new SparkMaxConfig();
-    public static final SparkMaxConfig intakeMotorConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig intakeMotorLeaderConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig intakeMotorFollowerConfig = new SparkMaxConfig();
     public static final SoftLimitConfig intakeSoftLimit = new SoftLimitConfig();
 
     static {
@@ -33,11 +34,14 @@ public class Configs {
       pivotMotorFollowerConfig
           .apply(pivotMotorLeaderConfig)
           .follow(IntakeConstants.Pivot.kLeaderID, true);
-      intakeMotorConfig
+      intakeMotorLeaderConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
           .smartCurrentLimit(60)
           .inverted(false);
+      intakeMotorFollowerConfig
+          .apply(intakeMotorLeaderConfig)
+          .follow(IntakeConstants.Intake.kLeaderMotorID, false);
     }
   }
 
