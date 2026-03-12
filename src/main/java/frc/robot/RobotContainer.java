@@ -185,6 +185,11 @@ public class RobotContainer {
       .setForegroundBlue(31)
       .setForegroundGreen(31)
       .build());
+      kMessagesToDisplay.add(
+        messageBuilder("Jersey Mike's", 0)
+        .setForegroundGreen(31)
+        .setForegroundRed(31)
+        .build());
   }
 
   // Subsystems
