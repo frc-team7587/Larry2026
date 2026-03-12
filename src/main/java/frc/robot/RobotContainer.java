@@ -304,7 +304,7 @@ public class RobotContainer {
     controller.start().whileTrue(intake.outtakeFuel());
 
     controller.rightBumper().whileTrue(shooter.pivotShooterUp());
-    controller.leftBumper().whileTrue(shooter.pivotShooterDown());
+    controller.leftBumper().whileTrue(intake.intakeFuel());
 
     controller.a().toggleOnTrue(conveyor.transportBallsReverse());
     controller.b().toggleOnTrue(conveyor.transportBalls());
@@ -313,8 +313,14 @@ public class RobotContainer {
         .rightTrigger()
         .whileTrue(
             Commands.parallel(
-                shooter.shootFuel(),
-                Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
+                new AutoAimShooter(drive, vision, shooter, feeder),
+                Commands.waitSeconds(1.0).andThen(feeder.feedFuel())));
+    // controller
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             shooter.dashboardShootTune(),
+    //             Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
 
     controller.povUp().whileTrue(intake.turntoUp());
     controller.povDown().whileTrue(intake.turntoDown());

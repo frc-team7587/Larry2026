@@ -13,14 +13,14 @@ public class ShooterConstants {
   public class Pivot {
     public static final int kPivotMotorID = 13;
 
-    public static final double kPivotSpeedUp = 0.1;
-    public static final double kPivotSpeedDown = -0.038;
+    public static final double kPivotSpeedUp = 0.05;
+    public static final double kPivotSpeedDown = -0.05;
 
-    public static final double kP = 0.15;
+    public static final double kP = 0.26;
     public static final double kI = 0.0;
-    public static final double kD = 0.015;
+    public static final double kD = 0.01;
     public static final double kFF = 0.00375;
-    public static final double kGravityFFVolts = 0.3;
+    public static final double kGravityFFVolts = 0.4;
 
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;
@@ -57,12 +57,12 @@ public class ShooterConstants {
     public static final double kVisionDistanceScale = 1.0;
     public static final double kVisionDistanceBiasMeters = 0.0;
 
-    public static final double[] kDistanceMeters = {2.509, 4.01};
-    public static final double[] kPivotPosition = {2.11, 3.0};
+    public static final double[] kDistanceMeters = {2.62, 2.82, 3, 3.2, 3.41, 3.7, 4.0};
+    public static final double[] kPivotPosition = {2.42, 2.78, 3, 3.2, 3.3, 3.42, 3.5};
     // public static final double[] kShooterPercentOutput = {
     //   0.58, 0.62, 0.66, 0.70, 0.74, 0.79, 0.84, 0.89, 0.94
     // };
-    public static final double[] kShooterTargetRpm = {3800, 4500};
+    public static final double[] kShooterTargetRpm = {3900, 3950, 3950, 4000, 4050, 4300, 4700};
     // public static final double[] kIntakePercentOutput = {
     //   0.10, 0.11, 0.12, 0.13, 0.145, 0.16, 0.175, 0.19, 0.20
     // };
