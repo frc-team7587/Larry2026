@@ -72,11 +72,20 @@ public class AutoAimShooter extends Command {
     double clampedDistance = MathUtil.clamp(distanceMeters, minDistanceMeters, maxDistanceMeters);
 
     double pivotSetpoint = pivotMap.get(clampedDistance);
+
     double shooterTargetRpm = shooterRpmMap.get(clampedDistance);
 
     shooter.setPivotPosition(pivotSetpoint);
     // shootertuned(shooterTargetRpm);
-    shooter.setShooterSpeedWithTargetRpm(ShooterConstants.Top.kOutSpeed, shooterTargetRpm);
+
+    double clampedRpm =
+        MathUtil.clamp(
+            shooterTargetRpm,
+            -ShooterConstants.Control.kDashboardMaxTargetRpm,
+            ShooterConstants.Control.kDashboardMaxTargetRpm);
+    double mappedOutput = clampedRpm / ShooterConstants.Control.kDashboardMaxTargetRpm;
+
+    shooter.setShooterSpeedWithTargetRpm(mappedOutput, shooterTargetRpm);
 
     Logger.recordOutput("Shooter/AutoAim/UsingVisionDistance", usingVisionDistance);
     Logger.recordOutput("Shooter/AutoAim/RawVisionDistanceMeters", rawVisionDistanceMeters);

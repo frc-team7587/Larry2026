@@ -57,12 +57,18 @@ public class ShooterConstants {
     public static final double kVisionDistanceScale = 1.0;
     public static final double kVisionDistanceBiasMeters = 0.0;
 
-    public static final double[] kDistanceMeters = {2.62, 2.82, 3, 3.2, 3.41, 3.7, 4.0};
-    public static final double[] kPivotPosition = {2.42, 2.78, 3, 3.2, 3.3, 3.42, 3.5};
+    public static final double[] kDistanceMeters = {
+      1.8, 2.0, 2.2, 2.41, 2.6, 2.8, 3.0, 3.2, 3.5, 3.8, 4.0
+    };
+    public static final double[] kPivotPosition = {
+      1.7, 2.0, 2.24, 2.35, 2.47, 2.57, 2.6, 2.71, 2.83, 3.0, 3.16
+    };
     // public static final double[] kShooterPercentOutput = {
     //   0.58, 0.62, 0.66, 0.70, 0.74, 0.79, 0.84, 0.89, 0.94
     // };
-    public static final double[] kShooterTargetRpm = {3900, 3950, 3950, 4000, 4050, 4300, 4700};
+    public static final double[] kShooterTargetRpm = {
+      3850, 3900, 3900, 3900, 4000, 4100, 4150, 4200, 4300, 4350, 4400
+    };
     // public static final double[] kIntakePercentOutput = {
     //   0.10, 0.11, 0.12, 0.13, 0.145, 0.16, 0.175, 0.19, 0.20
     // };

@@ -23,7 +23,8 @@ public class IntakeIOSpark implements IntakeIO {
     pivotLeaderMotor = new SparkMax(IntakeConstants.Pivot.kLeaderID, MotorType.kBrushless);
     pivotFollowerMotor = new SparkMax(IntakeConstants.Pivot.kFollowerID, MotorType.kBrushless);
     intakeLeaderMotor = new SparkFlex(IntakeConstants.Intake.kLeaderMotorID, MotorType.kBrushless);
-    intakeFollowerMotor = new SparkFlex(IntakeConstants.Intake.kFollowerMotorID, MotorType.kBrushless);
+    intakeFollowerMotor =
+        new SparkFlex(IntakeConstants.Intake.kFollowerMotorID, MotorType.kBrushless);
 
     pivotLeaderEncoder = pivotLeaderMotor.getEncoder();
     pivotLeaderController = pivotLeaderMotor.getClosedLoopController();

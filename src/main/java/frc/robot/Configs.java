@@ -41,7 +41,7 @@ public class Configs {
           .inverted(false);
       intakeMotorFollowerConfig
           .apply(intakeMotorLeaderConfig)
-          .follow(IntakeConstants.Intake.kLeaderMotorID, false);
+          .follow(IntakeConstants.Intake.kLeaderMotorID, true);
     }
   }
 
