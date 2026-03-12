@@ -216,6 +216,11 @@ public class Drive extends SubsystemBase {
     // // Update gyro alert
     // gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
 
+    Logger.recordOutput("Drive/Odometry/GyroConnected", gyroInputs.connected);
+    Logger.recordOutput("Drive/Odometry/GyroYawDeg", gyroInputs.yawPosition.getDegrees());
+    Logger.recordOutput("Drive/Odometry/PoseRotationDeg", getRotation().getDegrees());
+    Logger.recordOutput("Drive/Odometry/PoseX", getPose().getX());
+    Logger.recordOutput("Drive/Odometry/PoseY", getPose().getY());
   }
 
   /** Updates the field relative position of the robot. */
@@ -346,7 +351,10 @@ public class Drive extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
-    poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    Rotation2d gyroRotation = gyroInputs.yawPosition;
+    Logger.recordOutput("Drive/Odometry/SetPoseTarget", pose);
+    Logger.recordOutput("Drive/Odometry/SetPoseGyroDeg", gyroRotation.getDegrees());
+    poseEstimator.resetPosition(gyroRotation, getModulePositions(), pose);
   }
 
   /** Adds a new timestamped vision measurement. */
