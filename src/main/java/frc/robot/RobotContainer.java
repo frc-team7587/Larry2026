@@ -71,7 +71,8 @@ public class RobotContainer {
   private final Climber climber = new Climber(new ClimberIOSpark());
 
   // Input devices
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandXboxController operator = new CommandXboxController(1);
   private final Joystick keyboard = new Joystick(1);
   double speed = keyboard.getRawAxis(1); // Mapped to W/S
   double turn = keyboard.getRawAxis(4); // Mapped to A/D
@@ -264,13 +265,52 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+
+    /*
+     * Driver Binds
+     */
+
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driver.getLeftY(),
+            () -> -driver.getLeftX(),
+            () -> -driver.getRightX()));
+
+    driver.povUp().whileTrue(climber.climbUp());
+    driver.povDown().whileTrue(climber.climbDown());
+
+    driver
+        .y()
+        .whileTrue(
+            DriveCommands.joystickDriveAlignToHub(
+                drive, () -> -driver.getLeftY(), () -> -driver.getLeftX()));
+
+    /*
+     * Operator Binds
+     */
+
+    operator.leftTrigger().toggleOnTrue(intake.intakeFuel());
+
+    operator.start().whileTrue(intake.outtakeFuel());
+
+    operator.rightBumper().whileTrue(shooter.pivotShooterUp());
+    operator.leftBumper().whileTrue(shooter.pivotShooterDown());
+
+    operator.a().toggleOnTrue(conveyor.transportBallsReverse());
+    operator.b().toggleOnTrue(conveyor.transportBalls());
+    operator.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
+
+    operator
+        .rightTrigger()
+        .whileTrue(
+            Commands.parallel(
+                new AutoAimShooter(drive, vision, shooter, feeder),
+                Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+
+    operator.povUp().whileTrue(intake.turntoUp());
+    operator.povDown().whileTrue(intake.turntoDown());
 
     // Hold X for temporary robot-relative drive.
     // controller
@@ -312,39 +352,6 @@ public class RobotContainer {
     //             shooter.shootFuel(),
     //             Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
 
-    controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
-
-    controller.start().whileTrue(intake.outtakeFuel());
-
-    controller.rightBumper().whileTrue(shooter.pivotShooterUp());
-    controller.leftBumper().whileTrue(shooter.pivotShooterDown());
-
-    controller.a().toggleOnTrue(conveyor.transportBallsReverse());
-    controller.b().toggleOnTrue(conveyor.transportBalls());
-    controller.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
-    controller
-        .x()
-        .whileTrue(
-            DriveCommands.joystickDriveAlignToHub(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
-    controller
-        .rightTrigger()
-        .whileTrue(
-            Commands.parallel(
-                new AutoAimShooter(drive, vision, shooter, feeder),
-                Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
-    // controller
-    //     .rightTrigger()
-    //     .whileTrue(
-    //         Commands.parallel(
-    //             shooter.dashboardShootTune(),
-    //             Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
-
-    controller.povUp().whileTrue(intake.turntoUp());
-    controller.povDown().whileTrue(intake.turntoDown());
-    controller.povRight().whileTrue(climber.climbUp());
-    controller.povLeft().whileTrue(climber.climbDown());
-
     // // Lock to 0 degrees when A button is held
     // controller
     //     .a()
@@ -358,6 +365,13 @@ public class RobotContainer {
     // // Switch to X pattern when X button is pressed
     // controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
+    // controller
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             shooter.dashboardShootTune(),
+    //             Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
+  
     // // Reset gyro to 0 degrees when B button is pressed
     // controller
     //     .start()
