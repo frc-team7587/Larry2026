@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climber.Climber;
@@ -72,7 +73,8 @@ public class RobotContainer {
   private final Climber climber = new Climber(new ClimberIOSpark());
 
   // Input devices
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandXboxController operator = new CommandXboxController(1);
   private final Joystick keyboard = new Joystick(1);
   double speed = keyboard.getRawAxis(1); // Mapped to W/S
   double turn = keyboard.getRawAxis(4); // Mapped to A/D
@@ -81,6 +83,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private static final String shooterDashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
   private static final String shooterDashboardOutputKey = "Shooter/DashboardMappedOutput";
+  private static final double driverSlowModeScale = 0.35;
 
   private static final PathConstraints hubPathfindConstraints =
       new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
@@ -272,13 +275,55 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+
+    /*
+     * Driver Binds
+     */
+
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            this::getDriverScaledLeftY,
+            this::getDriverScaledLeftX,
+            this::getDriverScaledRightX));
+
+    driver.povUp().whileTrue(climber.climbUp());
+    driver.povDown().whileTrue(climber.climbDown());
+
+    driver
+        .y()
+        .whileTrue(
+            DriveCommands.joystickDriveAlignToHub(
+                drive, this::getDriverScaledLeftY, this::getDriverScaledLeftX));
+
+    /*
+     * Operator Binds
+     */
+
+    operator.leftTrigger().toggleOnTrue(intake.intakeFuel());
+
+    operator.start().whileTrue(intake.outtakeFuel());
+
+    operator.rightBumper().whileTrue(shooter.pivotShooterUp());
+    operator.leftBumper().whileTrue(shooter.pivotShooterDown());
+
+    operator.a().toggleOnTrue(conveyor.transportBallsReverse());
+    operator.b().toggleOnTrue(conveyor.transportBalls());
+    operator.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
+
+    Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
+    Trigger autoAimShotTrigger = operator.rightTrigger().and(operator.x().negate());
+
+    manualHubShotTrigger.whileTrue(Commands.parallel(shooter.shootFuel(), feeder.feedFuel()));
+    autoAimShotTrigger
+        .whileTrue(
+            Commands.parallel(
+                new AutoAimShooter(drive, vision, shooter, feeder),
+                Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+
+    operator.povUp().whileTrue(intake.turntoUp());
+    operator.povDown().whileTrue(intake.turntoDown());
 
     // Hold X for temporary robot-relative drive.
     // controller
@@ -320,39 +365,6 @@ public class RobotContainer {
     //             shooter.shootFuel(),
     //             Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
 
-    controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
-
-    controller.start().whileTrue(intake.outtakeFuel());
-
-    controller.rightBumper().whileTrue(shooter.pivotShooterUp());
-    controller.leftBumper().whileTrue(shooter.pivotShooterDown());
-
-    controller.a().toggleOnTrue(conveyor.transportBallsReverse());
-    controller.b().toggleOnTrue(conveyor.transportBalls());
-    controller.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
-    controller
-        .x()
-        .whileTrue(
-            DriveCommands.joystickDriveAlignToHub(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
-    controller
-        .rightTrigger()
-        .whileTrue(
-            Commands.parallel(
-                new AutoAimShooter(drive, vision, shooter, feeder),
-                Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
-    // controller
-    //     .rightTrigger()
-    //     .whileTrue(
-    //         Commands.parallel(
-    //             shooter.dashboardShootTune(),
-    //             Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
-
-    controller.povUp().whileTrue(intake.turntoUp());
-    controller.povDown().whileTrue(intake.turntoDown());
-    controller.povRight().whileTrue(climber.climbUp());
-    controller.povLeft().whileTrue(climber.climbDown());
-
     // // Lock to 0 degrees when A button is held
     // controller
     //     .a()
@@ -366,6 +378,13 @@ public class RobotContainer {
     // // Switch to X pattern when X button is pressed
     // controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
+    // controller
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             shooter.dashboardShootTune(),
+    //             Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
+  
     // // Reset gyro to 0 degrees when B button is pressed
     // controller
     //     .start()
@@ -433,5 +452,21 @@ public class RobotContainer {
             AutoBuilder.pathfindToPose(
                 drive.getClosestAprilTagOnHub(leftSide), hubPathfindConstraints, 0.0),
         Set.of(drive));
+  }
+
+  private double getDriverScaledLeftY() {
+    return -driver.getLeftY() * getDriverSlowModeScale();
+  }
+
+  private double getDriverScaledLeftX() {
+    return -driver.getLeftX() * getDriverSlowModeScale();
+  }
+
+  private double getDriverScaledRightX() {
+    return -driver.getRightX() * getDriverSlowModeScale();
+  }
+
+  private double getDriverSlowModeScale() {
+    return driver.rightTrigger().getAsBoolean() ? driverSlowModeScale : 1.0;
   }
 }
