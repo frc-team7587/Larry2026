@@ -13,6 +13,7 @@
 
 package frc.robot.commands;
 
+import frc.robot.FieldConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -30,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.util.AllianceFlipUtil;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -179,6 +181,26 @@ public class DriveCommands {
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+  }
+
+  /** Field relative drive command that keeps the shooter side pointed at the hub. */
+  public static Command joystickDriveAlignToHub(
+      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    return joystickDriveAtAngle(
+            drive,
+            xSupplier,
+            ySupplier,
+            () -> {
+              Pose2d robotPose = drive.getPose();
+              Translation2d hubCenter =
+                  AllianceFlipUtil.apply(FieldConstants.Hub.blueCenter).getTranslation();
+              Translation2d awayFromHub = robotPose.getTranslation().minus(hubCenter);
+              if (awayFromHub.getNorm() < 1e-6) {
+                return drive.getRotation();
+              }
+              return awayFromHub.getAngle();
+            })
+        .withName("JoystickDriveAlignToHub");
   }
 
   /**
