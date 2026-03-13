@@ -13,7 +13,6 @@
 
 package frc.robot.commands;
 
-import frc.robot.FieldConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -29,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.FieldConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.util.AllianceFlipUtil;
@@ -196,9 +196,9 @@ public class DriveCommands {
                   AllianceFlipUtil.apply(FieldConstants.Hub.blueCenter).getTranslation();
               Translation2d awayFromHub = robotPose.getTranslation().minus(hubCenter);
               if (awayFromHub.getNorm() < 1e-6) {
-                return drive.getRotation();
+                return Rotation2d.fromDegrees(drive.getRotation().getDegrees() - 90);
               }
-              return awayFromHub.getAngle();
+              return Rotation2d.fromDegrees(awayFromHub.getAngle().getDegrees() - 90);
             })
         .withName("JoystickDriveAlignToHub");
   }
@@ -206,7 +206,7 @@ public class DriveCommands {
   /**
    * Measures the velocity feedforward constants for the drive motors.
    *
-   * <p>This command should only be used in voltage control mode.
+   * <p>This command should only be used in voltage control mode. b v
    */
   public static Command feedforwardCharacterization(Drive drive) {
     List<Double> velocitySamples = new LinkedList<>();
