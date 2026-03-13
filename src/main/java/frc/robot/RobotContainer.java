@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climber.Climber;
@@ -81,6 +82,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private static final String shooterDashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
   private static final String shooterDashboardOutputKey = "Shooter/DashboardMappedOutput";
+  private static final double driverSlowModeScale = 0.35;
 
   private static final PathConstraints hubPathfindConstraints =
       new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
@@ -274,9 +276,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -driver.getLeftY(),
-            () -> -driver.getLeftX(),
-            () -> -driver.getRightX()));
+            this::getDriverScaledLeftY,
+            this::getDriverScaledLeftX,
+            this::getDriverScaledRightX));
 
     driver.povUp().whileTrue(climber.climbUp());
     driver.povDown().whileTrue(climber.climbDown());
@@ -285,7 +287,7 @@ public class RobotContainer {
         .y()
         .whileTrue(
             DriveCommands.joystickDriveAlignToHub(
-                drive, () -> -driver.getLeftY(), () -> -driver.getLeftX()));
+                drive, this::getDriverScaledLeftY, this::getDriverScaledLeftX));
 
     /*
      * Operator Binds
@@ -302,8 +304,11 @@ public class RobotContainer {
     operator.b().toggleOnTrue(conveyor.transportBalls());
     operator.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
 
-    operator
-        .rightTrigger()
+    Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
+    Trigger autoAimShotTrigger = operator.rightTrigger().and(operator.x().negate());
+
+    manualHubShotTrigger.whileTrue(Commands.parallel(shooter.shootFuel(), feeder.feedFuel()));
+    autoAimShotTrigger
         .whileTrue(
             Commands.parallel(
                 new AutoAimShooter(drive, vision, shooter, feeder),
@@ -439,5 +444,21 @@ public class RobotContainer {
             AutoBuilder.pathfindToPose(
                 drive.getClosestAprilTagOnHub(leftSide), hubPathfindConstraints, 0.0),
         Set.of(drive));
+  }
+
+  private double getDriverScaledLeftY() {
+    return -driver.getLeftY() * getDriverSlowModeScale();
+  }
+
+  private double getDriverScaledLeftX() {
+    return -driver.getLeftX() * getDriverSlowModeScale();
+  }
+
+  private double getDriverScaledRightX() {
+    return -driver.getRightX() * getDriverSlowModeScale();
+  }
+
+  private double getDriverSlowModeScale() {
+    return driver.rightTrigger().getAsBoolean() ? driverSlowModeScale : 1.0;
   }
 }
