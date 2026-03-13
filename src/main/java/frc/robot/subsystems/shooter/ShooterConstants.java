@@ -56,6 +56,7 @@ public class ShooterConstants {
     // These values are meant to be tuned on-robot while watching logs.
     public static final double kVisionDistanceScale = 1.0;
     public static final double kVisionDistanceBiasMeters = 0.0;
+    public static final double kVisionMaxBlendSpeedMetersPerSec = 1.0;
 
     public static final double[] kDistanceMeters = {
       1.8, 2.0, 2.2, 2.41, 2.6, 2.8, 3.0, 3.2, 3.5, 3.8, 4.0
@@ -72,5 +73,20 @@ public class ShooterConstants {
     // public static final double[] kIntakePercentOutput = {
     //   0.10, 0.11, 0.12, 0.13, 0.145, 0.16, 0.175, 0.19, 0.20
     // };
+
+    public class Potential {
+      public static final double kBaseLookaheadSec = 0.12;
+      public static final double kDistanceLookaheadPerMeterSec = 0.03;
+      public static final double kVelocityLookaheadPerMeterPerSec = 0.02;
+      public static final double kMinLookaheadSec = 0.05;
+      public static final double kMaxLookaheadSec = 0.35;
+      public static final double kHeadingRateSampleSec = 0.04;
+      public static final double kFullReductionHeadingErrorRad = Math.toRadians(14.0);
+      public static final double kMinTranslationScale = 0.35;
+      public static final double kVelocityForFullReductionMetersPerSec = 3.5;
+      public static final double kHeadingVelocityFeedforward = 0.7;
+      public static final double kOnTargetHeadingToleranceRad = Math.toRadians(2.5);
+      public static final double kOnTargetOmegaToleranceRadPerSec = Math.toRadians(35.0);
+    }
   }
 }

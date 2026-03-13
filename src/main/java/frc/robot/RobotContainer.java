@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.MovingAutoAimDrive;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.conveyor.Conveyor;
@@ -50,6 +51,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.AllianceFlipUtil;
 import java.util.Set;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -324,10 +326,7 @@ public class RobotContainer {
     controller.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
     controller
         .rightTrigger()
-        .whileTrue(
-            Commands.parallel(
-                new AutoAimShooter(drive, vision, shooter, feeder),
-                Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+        .whileTrue(createMovingShotCommand());
     // controller
     //     .rightTrigger()
     //     .whileTrue(
@@ -420,5 +419,19 @@ public class RobotContainer {
             AutoBuilder.pathfindToPose(
                 drive.getClosestAprilTagOnHub(leftSide), hubPathfindConstraints, 0.0),
         Set.of(drive));
+  }
+
+  private Command createMovingShotCommand() {
+    MovingAutoAimDrive movingAutoAimDrive =
+        new MovingAutoAimDrive(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.Hub.blueCenter).getTranslation());
+    return Commands.parallel(
+        movingAutoAimDrive,
+        new AutoAimShooter(drive, vision, shooter, feeder),
+        Commands.waitUntil(() -> shooter.atRPM() && movingAutoAimDrive.isAligned())
+            .andThen(feeder.feedFuel()));
   }
 }

@@ -12,6 +12,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.MovingShotAiming;
 import java.util.OptionalDouble;
 import org.littletonrobotics.junction.Logger;
 
@@ -58,6 +59,14 @@ public class AutoAimShooter extends Command {
     Translation2d hubCenter =
         AllianceFlipUtil.apply(FieldConstants.Hub.blueCenter).getTranslation();
     double odometryDistanceMeters = robotPose.getTranslation().getDistance(hubCenter);
+    var fieldRelativeSpeeds = drive.getFieldRelativeChassisSpeeds();
+    Translation2d fieldRelativeVelocity =
+        new Translation2d(fieldRelativeSpeeds.vxMetersPerSecond, fieldRelativeSpeeds.vyMetersPerSecond);
+    MovingShotAiming.AimSolution aimSolution =
+        MovingShotAiming.solve(robotPose, fieldRelativeSpeeds, fieldRelativeVelocity, hubCenter);
+    double predictedDistanceMeters = aimSolution.predictedDistanceMeters();
+    double distanceLeadMeters = predictedDistanceMeters - odometryDistanceMeters;
+    double translationSpeedMetersPerSec = fieldRelativeVelocity.getNorm();
 
     boolean usingVisionDistance = visionDistanceMeters.isPresent();
     double rawVisionDistanceMeters = visionDistanceMeters.orElse(Double.NaN);
@@ -67,8 +76,11 @@ public class AutoAimShooter extends Command {
                 + ShooterConstants.AutoAim.kVisionDistanceBiasMeters
             : Double.NaN;
 
-    double distanceMeters =
-        usingVisionDistance ? adjustedVisionDistanceMeters : odometryDistanceMeters;
+    boolean blendVisionDistance =
+        usingVisionDistance
+            && translationSpeedMetersPerSec <= ShooterConstants.AutoAim.kVisionMaxBlendSpeedMetersPerSec;
+    double baseDistanceMeters = blendVisionDistance ? adjustedVisionDistanceMeters : odometryDistanceMeters;
+    double distanceMeters = baseDistanceMeters + distanceLeadMeters;
     double clampedDistance = MathUtil.clamp(distanceMeters, minDistanceMeters, maxDistanceMeters);
 
     double pivotSetpoint = pivotMap.get(clampedDistance);
@@ -92,6 +104,11 @@ public class AutoAimShooter extends Command {
     Logger.recordOutput(
         "Shooter/AutoAim/AdjustedVisionDistanceMeters", adjustedVisionDistanceMeters);
     Logger.recordOutput("Shooter/AutoAim/OdometryDistanceMeters", odometryDistanceMeters);
+    Logger.recordOutput("Shooter/AutoAim/PredictedDistanceMeters", predictedDistanceMeters);
+    Logger.recordOutput("Shooter/AutoAim/DistanceLeadMeters", distanceLeadMeters);
+    Logger.recordOutput("Shooter/AutoAim/TranslationSpeedMetersPerSec", translationSpeedMetersPerSec);
+    Logger.recordOutput("Shooter/AutoAim/VisionDistanceBlended", blendVisionDistance);
+    Logger.recordOutput("Shooter/AutoAim/LookaheadSec", aimSolution.lookaheadSeconds());
     Logger.recordOutput("Shooter/AutoAim/DistanceMeters", distanceMeters);
     Logger.recordOutput("Shooter/AutoAim/DistanceClampedMeters", clampedDistance);
     Logger.recordOutput("Shooter/AutoAim/PivotSetpoint", pivotSetpoint);
