@@ -14,6 +14,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -153,6 +154,13 @@ public class RobotContainer {
     SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", 0.0);
     SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", 0.0);
     SmartDashboard.putNumber("Shooter/PivotEncoderPosition", 0.0);
+
+    NamedCommands.registerCommand(
+        "shoot preload",
+        Commands.parallel(
+            new AutoAimShooter(drive, vision, shooter, feeder),
+            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+    NamedCommands.registerCommand("active floor", conveyor.transportBalls());
 
     // // Set up SysId routines
     // autoChooser.addOption(

@@ -61,7 +61,7 @@ public class ShooterConstants {
       1.8, 2.0, 2.2, 2.41, 2.6, 2.8, 3.0, 3.2, 3.5, 3.8, 4.0
     };
     public static final double[] kPivotPosition = {
-      1.9, 2.2, 2.44, 2.55, 2.67, 2.77, 2.8, 2.91, 3.03, 3.2, 3.36
+      2.0, 2.3, 2.54, 2.65, 2.77, 2.87, 2.9, 3.01, 3.13, 3.31, 3.46
     };
     // public static final double[] kShooterPercentOutput = {
     //   0.58, 0.62, 0.66, 0.70, 0.74, 0.79, 0.84, 0.89, 0.94
