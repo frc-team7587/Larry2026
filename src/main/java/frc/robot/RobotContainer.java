@@ -84,6 +84,26 @@ public class RobotContainer {
   private static final PathConstraints hubPathfindConstraints =
       new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
 
+  private static Vision createVision(Drive drive) {
+    if (!Constants.enableVision) {
+      return new Vision(drive::addVisionMeasurement, new VisionIO() {});
+    }
+
+    switch (Constants.currentMode) {
+      case REAL:
+        return new Vision(
+            drive::addVisionMeasurement,
+            new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+      case SIM:
+        return new Vision(
+            drive::addVisionMeasurement,
+            new VisionIOPhotonVisionSim(
+                VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+      default:
+        return new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+    }
+  }
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -96,10 +116,7 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+        vision = createVision(drive);
         break;
 
       case SIM:
@@ -111,11 +128,7 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+        vision = createVision(drive);
         break;
 
       default:
@@ -128,7 +141,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision = createVision(drive);
         break;
     }
 
@@ -255,19 +268,19 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> controller.getLeftY(),
-            () -> controller.getLeftX(),
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
     // Hold X for temporary robot-relative drive.
-    controller
-        .x()
-        .whileTrue(
-            DriveCommands.joystickDriveRobotRelative(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> -controller.getRightX()));
+    // controller
+    //     .x()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveRobotRelative(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> -controller.getRightX()));
 
     // TESTING BINDS
     // controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
@@ -299,7 +312,7 @@ public class RobotContainer {
     //             shooter.shootFuel(),
     //             Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
 
-    controller.leftTrigger().whileTrue(intake.intakeFuel());
+    controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
 
     controller.start().whileTrue(intake.outtakeFuel());
 
@@ -327,7 +340,7 @@ public class RobotContainer {
     controller.povRight().whileTrue(climber.climbUp());
     controller.povLeft().whileTrue(climber.climbDown());
 
-    // // Lock to 0° when A button is held
+    // // Lock to 0 degrees when A button is held
     // controller
     //     .a()
     //     .whileTrue(d
@@ -340,7 +353,7 @@ public class RobotContainer {
     // // Switch to X pattern when X button is pressed
     // controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // // Reset gyro to 0° when B button is pressed
+    // // Reset gyro to 0 degrees when B button is pressed
     // controller
     //     .start()
     //     .onTrue(
