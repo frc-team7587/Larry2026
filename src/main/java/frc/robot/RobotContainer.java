@@ -323,6 +323,11 @@ public class RobotContainer {
     controller.b().toggleOnTrue(conveyor.transportBalls());
     controller.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
     controller
+        .x()
+        .whileTrue(
+            DriveCommands.joystickDriveAlignToHub(
+                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
+    controller
         .rightTrigger()
         .whileTrue(
             Commands.parallel(
