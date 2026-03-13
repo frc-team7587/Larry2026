@@ -455,4 +455,12 @@ public class Drive extends SubsystemBase {
 
     return AllianceFlipUtil.apply(hubPoses[closestPose]);
   }
+
+  public void applySlowMode() {
+    speedIndex = kslowModeConstant;
+  }
+
+  public void resetSpeedIndex() {
+    speedIndex = 1;
+  }
 }

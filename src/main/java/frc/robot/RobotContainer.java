@@ -296,6 +296,8 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDriveAlignToHub(
                 drive, this::getDriverScaledLeftY, this::getDriverScaledLeftX));
+    
+    driver.rightTrigger().whileTrue(DriveCommands.slowMode(drive));
 
     /*
      * Operator Binds
@@ -316,11 +318,10 @@ public class RobotContainer {
     Trigger autoAimShotTrigger = operator.rightTrigger().and(operator.x().negate());
 
     manualHubShotTrigger.whileTrue(Commands.parallel(shooter.shootFuel(), feeder.feedFuel()));
-    autoAimShotTrigger
-        .whileTrue(
-            Commands.parallel(
-                new AutoAimShooter(drive, vision, shooter, feeder),
-                Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+    autoAimShotTrigger.whileTrue(
+        Commands.parallel(
+            new AutoAimShooter(drive, vision, shooter, feeder),
+            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     operator.povUp().whileTrue(intake.turntoUp());
     operator.povDown().whileTrue(intake.turntoDown());
@@ -384,7 +385,7 @@ public class RobotContainer {
     //         Commands.parallel(
     //             shooter.dashboardShootTune(),
     //             Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
-  
+
     // // Reset gyro to 0 degrees when B button is pressed
     // controller
     //     .start()

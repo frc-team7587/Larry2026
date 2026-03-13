@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
@@ -196,9 +197,9 @@ public class DriveCommands {
                   AllianceFlipUtil.apply(FieldConstants.Hub.blueCenter).getTranslation();
               Translation2d awayFromHub = robotPose.getTranslation().minus(hubCenter);
               if (awayFromHub.getNorm() < 1e-6) {
-                return Rotation2d.fromDegrees(drive.getRotation().getDegrees() - 90);
+                return Rotation2d.fromDegrees(drive.getRotation().getDegrees() - 80);
               }
-              return Rotation2d.fromDegrees(awayFromHub.getAngle().getDegrees() - 90);
+              return Rotation2d.fromDegrees(awayFromHub.getAngle().getDegrees() - 80);
             })
         .withName("JoystickDriveAlignToHub");
   }
@@ -340,5 +341,9 @@ public class DriveCommands {
     double[] positions = new double[4];
     Rotation2d lastAngle = new Rotation2d();
     double gyroDelta = 0.0;
+  }
+
+  public static StartEndCommand slowMode(Drive drive) {
+    return new StartEndCommand(() -> drive.applySlowMode(), () -> drive.resetSpeedIndex(), drive);
   }
 }
