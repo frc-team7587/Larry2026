@@ -296,7 +296,7 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDriveAlignToHub(
                 drive, this::getDriverScaledLeftY, this::getDriverScaledLeftX));
-    
+
     driver.rightTrigger().whileTrue(DriveCommands.slowMode(drive));
 
     /*
