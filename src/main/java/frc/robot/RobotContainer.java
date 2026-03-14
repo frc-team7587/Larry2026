@@ -16,6 +16,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -149,6 +150,16 @@ public class RobotContainer {
         break;
     }
 
+    NamedCommands.registerCommand(
+        "shoot preload",
+        Commands.parallel(
+                new AutoAimShooter(drive, vision, shooter, feeder),
+                Commands.waitSeconds(0.8).andThen(feeder.feedFuel()))
+            .withTimeout(10));
+
+    NamedCommands.registerCommand("active floor", conveyor.transportBalls().withTimeout(10));
+    NamedCommands.registerCommand("intake down", intake.setPivotPosition(0));
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     SmartDashboard.putNumber(
@@ -157,13 +168,6 @@ public class RobotContainer {
     SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", 0.0);
     SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", 0.0);
     SmartDashboard.putNumber("Shooter/PivotEncoderPosition", 0.0);
-
-    NamedCommands.registerCommand(
-        "shoot preload",
-        Commands.parallel(
-            new AutoAimShooter(drive, vision, shooter, feeder),
-            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
-    NamedCommands.registerCommand("active floor", conveyor.transportBalls());
 
     // // Set up SysId routines
     // autoChooser.addOption(
@@ -284,9 +288,13 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            this::getDriverScaledLeftY,
-            this::getDriverScaledLeftX,
-            this::getDriverScaledRightX));
+            () ->
+                -MathUtil.applyDeadband(
+                    (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftY(), 0.05),
+            () ->
+                -MathUtil.applyDeadband(
+                    (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftX(), 0.05),
+            () -> -MathUtil.applyDeadband(0.5 * driver.getRightX(), 0.05)));
 
     driver.povUp().whileTrue(climber.climbUp());
     driver.povDown().whileTrue(climber.climbDown());
@@ -297,7 +305,14 @@ public class RobotContainer {
             DriveCommands.joystickDriveAlignToHub(
                 drive, this::getDriverScaledLeftY, this::getDriverScaledLeftX));
 
-    driver.rightTrigger().whileTrue(DriveCommands.slowMode(drive));
+    // driver
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         DriveCommands.joystickDrive(
+    //             drive,
+    //             () -> -driver.getLeftY() * 0.5,
+    //             () -> -driver.getLeftX() * 0.5,
+    //             () -> -driver.getRightX() * 0.5));
 
     /*
      * Operator Binds

@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "enter from left"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -19,6 +25,12 @@
                 "data": {
                   "name": "active floor"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake down"
+                }
               }
             ]
           }
@@ -26,7 +38,13 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 30.0
+            "waitTime": 10.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "leave left"
           }
         }
       ]
