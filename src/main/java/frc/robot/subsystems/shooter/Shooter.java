@@ -76,7 +76,11 @@ public class Shooter extends SubsystemBase {
     return runEnd(this::runShooterAtDashboardRpm, this::stopShooter);
   }
 
-  public void setPivotPosition(double position) {
+  public Command setPivotPositionCom(double position) {
+    return runOnce(() -> shooter.setPivotPosition(position));
+  }
+
+  public void setPivotPositionVoid(double position) {
     shooter.setPivotPosition(position);
   }
 

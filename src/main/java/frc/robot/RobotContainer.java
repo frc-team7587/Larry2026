@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -153,13 +154,15 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "shoot preload",
         Commands.parallel(
-                new AutoAimShooter(drive, vision, shooter, feeder),
-                Commands.waitSeconds(0.8).andThen(feeder.feedFuel()))
-            .withTimeout(10));
+            new AutoAimShooter(drive, vision, shooter, feeder),
+            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
-    NamedCommands.registerCommand("active floor", conveyor.transportBalls().withTimeout(10));
+    NamedCommands.registerCommand("active floor", conveyor.transportBalls());
     NamedCommands.registerCommand("intake down", intake.setPivotPosition(0));
-
+    NamedCommands.registerCommand("shooter down", shooter.setPivotPositionCom(0));
+    NamedCommands.registerCommand("intake fuel", intake.intakeFuel());
+    NamedCommands.registerCommand("intake up", intake.turntoUp());
+    ;
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     SmartDashboard.putNumber(
@@ -174,7 +177,7 @@ public class RobotContainer {
     //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     // autoChooser.addOption(
     //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    // autoChooser.addOption(
+    // autoChooser.addOption(b
     //     "Drive SysId (Quasistatic Forward)",
     //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     // autoChooser.addOption(
@@ -318,15 +321,38 @@ public class RobotContainer {
      * Operator Binds
      */
 
-    operator.leftTrigger().toggleOnTrue(intake.intakeFuel());
+    operator
+        .leftTrigger()
+        .toggleOnTrue(
+            Commands.parallel(
+                intake.intakeFuel(),
+                Commands.startEnd(
+                    () -> operator.setRumble(RumbleType.kLeftRumble, 1.0),
+                    () -> operator.setRumble(RumbleType.kLeftRumble, 0.0))));
 
     operator.start().whileTrue(intake.outtakeFuel());
 
     operator.rightBumper().whileTrue(shooter.pivotShooterUp());
     operator.leftBumper().whileTrue(shooter.pivotShooterDown());
 
-    operator.a().toggleOnTrue(conveyor.transportBallsReverse());
-    operator.b().toggleOnTrue(conveyor.transportBalls());
+    operator
+        .a()
+        .toggleOnTrue(
+            Commands.parallel(
+                conveyor.transportBallsReverse(),
+                Commands.startEnd(
+                    () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
+                    () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
+
+    operator
+        .b()
+        .toggleOnTrue(
+            Commands.parallel(
+                conveyor.transportBalls(),
+                Commands.startEnd(
+                    () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
+                    () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
+
     operator.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
 
     Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());

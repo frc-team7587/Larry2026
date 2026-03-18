@@ -20,7 +20,7 @@ public class ShooterConstants {
     public static final double kI = 0.0;
     public static final double kD = 0.01;
     public static final double kFF = 0.00375;
-    public static final double kGravityFFVolts = 0.4;
+    public static final double kGravityFFVolts = 0.55;
 
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;

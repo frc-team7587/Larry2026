@@ -11,9 +11,15 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.0
+                }
+              },
               {
                 "type": "named",
                 "data": {
@@ -36,15 +42,59 @@
           }
         },
         {
-          "type": "wait",
+          "type": "deadline",
           "data": {
-            "waitTime": 5.0
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "right to center"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake fuel"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "leave right"
+            "pathName": "center to right"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 15.0
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shoot preload"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "active floor"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake up"
+                }
+              }
+            ]
           }
         }
       ]
