@@ -111,13 +111,7 @@ public final class MarqueeSubsystem extends SubsystemBase {
         mTimeDisplayedMS += mMillisecondsPerTick;
         // ++mIterationCount;
         if (mWhenToAdvanceMS <= mTimeDisplayedMS) {
-            // System.out.println("Display expired at ");
-            // System.out.print(mTimeDisplayedMS);
-            // System.out.print(" milliseconds after ");
-            // System.out.print(mIterationCount);
-            // System.out.println(" iterations.");
             mTimeDisplayedMS = 0;
-            // mIterationCount = 0;
             if (mActiveMessages.size() <= mMessageIndex) {
                 mMessageIndex = 0;
                 mActiveMessages = mMessages;
@@ -126,8 +120,6 @@ public final class MarqueeSubsystem extends SubsystemBase {
             DataLogManager.log("Sending: " + showMe);
             showMessage(showMe);
             mWhenToAdvanceMS = showMe.durationMs();
-            // System.out.print("Display duration: ");
-            // System.out.println(mWhenToAdvanceMS);
             ++mMessageIndex;
         }
     }
