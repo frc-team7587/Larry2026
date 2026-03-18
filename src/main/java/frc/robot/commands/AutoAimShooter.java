@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.feeder.Feeder;
@@ -16,7 +15,9 @@ import frc.robot.util.AllianceFlipUtil;
 import java.util.OptionalDouble;
 import org.littletonrobotics.junction.Logger;
 
-/** Continuously aims the shooter pivot from distance-to-hub interpolation tables. */
+/**
+ * Continuously aims the shooter pivot and wheel speed from distance-to-hub interpolation tables.
+ */
 public class AutoAimShooter extends Command {
   private final Drive drive;
   private final Vision vision;
@@ -24,7 +25,6 @@ public class AutoAimShooter extends Command {
   private final Feeder feeder;
 
   private final InterpolatingDoubleTreeMap pivotMap = new InterpolatingDoubleTreeMap();
-  //private final InterpolatingDoubleTreeMap shooterOutputMap = new InterpolatingDoubleTreeMap();
   private final InterpolatingDoubleTreeMap shooterRpmMap = new InterpolatingDoubleTreeMap();
 
   private final double minDistanceMeters;
@@ -39,7 +39,6 @@ public class AutoAimShooter extends Command {
     for (int i = 0; i < ShooterConstants.AutoAim.kDistanceMeters.length; i++) {
       double distance = ShooterConstants.AutoAim.kDistanceMeters[i];
       pivotMap.put(distance, ShooterConstants.AutoAim.kPivotPosition[i]);
-      //shooterOutputMap.put(distance, ShooterConstants.AutoAim.kShooterPercentOutput[i]);
       shooterRpmMap.put(distance, ShooterConstants.AutoAim.kShooterTargetRpm[i]);
     }
 
@@ -47,6 +46,8 @@ public class AutoAimShooter extends Command {
     maxDistanceMeters =
         ShooterConstants.AutoAim.kDistanceMeters[
             ShooterConstants.AutoAim.kDistanceMeters.length - 1];
+
+    addRequirements(shooter);
   }
 
   @Override
@@ -71,14 +72,20 @@ public class AutoAimShooter extends Command {
     double clampedDistance = MathUtil.clamp(distanceMeters, minDistanceMeters, maxDistanceMeters);
 
     double pivotSetpoint = pivotMap.get(clampedDistance);
-    //double shooterOutput = shooterOutputMap.get(clampedDistance);
+
     double shooterTargetRpm = shooterRpmMap.get(clampedDistance);
 
-    shooter.setPivotPosition(pivotSetpoint);
-    Commands.parallel(
-        shooter.shootFuelAtRPM(shooterTargetRpm),
-        Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel()));
-    
+    shooter.setPivotPositionVoid(pivotSetpoint);
+    // shootertuned(shooterTargetRpm);
+
+    double clampedRpm =
+        MathUtil.clamp(
+            shooterTargetRpm,
+            -ShooterConstants.Control.kDashboardMaxTargetRpm,
+            ShooterConstants.Control.kDashboardMaxTargetRpm);
+    double mappedOutput = clampedRpm / ShooterConstants.Control.kDashboardMaxTargetRpm;
+
+    shooter.setShooterSpeedWithTargetRpm(mappedOutput, shooterTargetRpm);
 
     Logger.recordOutput("Shooter/AutoAim/UsingVisionDistance", usingVisionDistance);
     Logger.recordOutput("Shooter/AutoAim/RawVisionDistanceMeters", rawVisionDistanceMeters);
@@ -89,22 +96,23 @@ public class AutoAimShooter extends Command {
     Logger.recordOutput("Shooter/AutoAim/DistanceClampedMeters", clampedDistance);
     Logger.recordOutput("Shooter/AutoAim/PivotSetpoint", pivotSetpoint);
     Logger.recordOutput("Shooter/AutoAim/PivotEncoderPosition", shooter.getPivotPosition());
-   // Logger.recordOutput("Shooter/AutoAim/RecommendedShooterPercentOutput", shooterOutput);
     Logger.recordOutput("Shooter/AutoAim/RecommendedShooterTargetRpm", shooterTargetRpm);
   }
 
-  // public Command shootAutoAimAtRPM(){
-  //   return Commands.parallel(
-  //               shooter.shootFuelAtRPM(shooterTargetRpm),
-  //               Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel()));
-  // }
   @Override
   public void end(boolean interrupted) {
     shooter.holdPivotPosition();
+    shooter.stopShooter();
   }
 
   @Override
   public boolean isFinished() {
     return false;
   }
+
+  // public Command shootertuned(double shooterTargetRpm) {
+  //   return Commands.parallel(
+  //       shooter.setShooterSpeedWithTargetRpm(ShooterConstants.Top.kOutSpeed, shooterTargetRpm),
+  //       Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel()));
+  // }
 }

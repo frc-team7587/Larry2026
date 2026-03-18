@@ -18,6 +18,8 @@ public interface ShooterIO {
    */
   public double getShooterVelocityRpm();
 
+  public void setShooterRPM(double rpm);
+
   /**
    * Sets the speed of the pivot motor.
    *

@@ -136,13 +136,13 @@ public class Vision extends SubsystemBase {
           "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
           tagPoses.toArray(new Pose3d[tagPoses.size()]));
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
+          "Vision/Camera" + Integer.toString(cameraIndex) + "/PoseObservations",
           robotPoses.toArray(new Pose3d[robotPoses.size()]));
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesAccepted",
+          "Vision/Camera" + Integer.toString(cameraIndex) + "/PoseObservationsAccepted",
           robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
+          "Vision/Camera" + Integer.toString(cameraIndex) + "/PoseObservationsRejected",
           robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
       allTagPoses.addAll(tagPoses);
       allRobotPoses.addAll(robotPoses);
@@ -153,12 +153,12 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         "Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
     Logger.recordOutput(
-        "Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
+        "Vision/Summary/PoseObservations", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
     Logger.recordOutput(
-        "Vision/Summary/RobotPosesAccepted",
+        "Vision/Summary/PoseObservationsAccepted",
         allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
     Logger.recordOutput(
-        "Vision/Summary/RobotPosesRejected",
+        "Vision/Summary/PoseObservationsRejected",
         allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
     Logger.recordOutput(
         "Vision/Summary/HubDistanceMeters", getLatestHubDistanceMeters().orElse(-1.0));

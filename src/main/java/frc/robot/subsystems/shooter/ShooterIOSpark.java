@@ -87,4 +87,9 @@ public class ShooterIOSpark implements ShooterIO {
   public double getPivotPosition() {
     return pivotEncoder.getPosition();
   }
+
+  @Override
+  public void setShooterRPM(double rpm) {
+    topMotor.set(rpm);
+  }
 }

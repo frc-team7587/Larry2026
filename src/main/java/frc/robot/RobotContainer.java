@@ -14,18 +14,22 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.climber.Climber;
@@ -205,7 +209,8 @@ public class RobotContainer {
       MarqueeSubsystem.usbConnection(kMessagesToDisplay, 20);
 
   // Input devices
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandXboxController operator = new CommandXboxController(1);
   private final Joystick keyboard = new Joystick(1);
   double speed = keyboard.getRawAxis(1); // Mapped to W/S
   double turn = keyboard.getRawAxis(4); // Mapped to A/D
@@ -214,9 +219,30 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private static final String shooterDashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
   private static final String shooterDashboardOutputKey = "Shooter/DashboardMappedOutput";
+  private static final double driverSlowModeScale = 0.35;
 
   private static final PathConstraints hubPathfindConstraints =
       new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+  private static Vision createVision(Drive drive) {
+    if (!Constants.enableVision) {
+      return new Vision(drive::addVisionMeasurement, new VisionIO() {});
+    }
+
+    switch (Constants.currentMode) {
+      case REAL:
+        return new Vision(
+            drive::addVisionMeasurement,
+            new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+      case SIM:
+        return new Vision(
+            drive::addVisionMeasurement,
+            new VisionIOPhotonVisionSim(
+                VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+      default:
+        return new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+    }
+  }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -230,10 +256,7 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+        vision = createVision(drive);
         break;
 
       case SIM:
@@ -245,11 +268,7 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+        vision = createVision(drive);
         break;
 
       default:
@@ -262,10 +281,22 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision = createVision(drive);
         break;
     }
 
+    NamedCommands.registerCommand(
+        "shoot preload",
+        Commands.parallel(
+            new AutoAimShooter(drive, vision, shooter, feeder),
+            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+
+    NamedCommands.registerCommand("active floor", conveyor.transportBalls());
+    NamedCommands.registerCommand("intake down", intake.setPivotPosition(0));
+    NamedCommands.registerCommand("shooter down", shooter.setPivotPositionCom(0));
+    NamedCommands.registerCommand("intake fuel", intake.intakeFuel());
+    NamedCommands.registerCommand("intake up", intake.turntoUp());
+    ;
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     SmartDashboard.putNumber(
@@ -280,7 +311,7 @@ public class RobotContainer {
     //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     // autoChooser.addOption(
     //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    // autoChooser.addOption(
+    // autoChooser.addOption(b
     //     "Drive SysId (Quasistatic Forward)",
     //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     // autoChooser.addOption(
@@ -385,23 +416,100 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+
+    /*
+     * Driver Binds
+     */
+
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> controller.getLeftY(),
-            () -> controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () ->
+                -MathUtil.applyDeadband(
+                    (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftY(), 0.05),
+            () ->
+                -MathUtil.applyDeadband(
+                    (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftX(), 0.05),
+            () -> -MathUtil.applyDeadband(0.5 * driver.getRightX(), 0.05)));
+
+    driver.povUp().whileTrue(climber.climbUp());
+    driver.povDown().whileTrue(climber.climbDown());
+
+    driver
+        .y()
+        .whileTrue(
+            DriveCommands.joystickDriveAlignToHub(
+                drive, this::getDriverScaledLeftY, this::getDriverScaledLeftX));
+
+    // driver
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         DriveCommands.joystickDrive(
+    //             drive,
+    //             () -> -driver.getLeftY() * 0.5,
+    //             () -> -driver.getLeftX() * 0.5,
+    //             () -> -driver.getRightX() * 0.5));
+
+    /*
+     * Operator Binds
+     */
+
+    operator
+        .leftTrigger()
+        .toggleOnTrue(
+            Commands.parallel(
+                intake.intakeFuel(),
+                Commands.startEnd(
+                    () -> operator.setRumble(RumbleType.kLeftRumble, 1.0),
+                    () -> operator.setRumble(RumbleType.kLeftRumble, 0.0))));
+
+    operator.start().whileTrue(intake.outtakeFuel());
+
+    operator.rightBumper().whileTrue(shooter.pivotShooterUp());
+    operator.leftBumper().whileTrue(shooter.pivotShooterDown());
+
+    operator
+        .a()
+        .toggleOnTrue(
+            Commands.parallel(
+                conveyor.transportBallsReverse(),
+                Commands.startEnd(
+                    () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
+                    () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
+
+    operator
+        .b()
+        .toggleOnTrue(
+            Commands.parallel(
+                conveyor.transportBalls(),
+                Commands.startEnd(
+                    () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
+                    () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
+
+    operator.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
+
+    Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
+    Trigger autoAimShotTrigger = operator.rightTrigger().and(operator.x().negate());
+
+    manualHubShotTrigger.whileTrue(Commands.parallel(shooter.shootFuel(), feeder.feedFuel()));
+    autoAimShotTrigger.whileTrue(
+        Commands.parallel(
+            new AutoAimShooter(drive, vision, shooter, feeder),
+            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+
+    operator.povUp().whileTrue(intake.turntoUp());
+    operator.povDown().whileTrue(intake.turntoDown());
 
     // Hold X for temporary robot-relative drive.
-    controller
-        .x()
-        .whileTrue(
-            DriveCommands.joystickDriveRobotRelative(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> -controller.getRightX()));
+    // controller
+    //     .x()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveRobotRelative(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> -controller.getRightX()));
 
     // TESTING BINDS
     // controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
@@ -433,29 +541,7 @@ public class RobotContainer {
     //             shooter.shootFuel(),
     //             Commands.waitUntil(shooter::atRPM).andThen(feeder.feedFuel())));
 
-    controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
-
-    controller.start().whileTrue(intake.outtakeFuel());
-
-    controller.rightBumper().whileTrue(shooter.pivotShooterUp());
-    controller.leftBumper().whileTrue(shooter.pivotShooterDown());
-
-    controller.a().toggleOnTrue(conveyor.transportBallsReverse());
-    controller.b().toggleOnTrue(conveyor.transportBalls());
-    controller.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
-    controller
-        .rightTrigger()
-        .whileTrue(
-            Commands.parallel(
-                shooter.shootFuel(),
-                Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
-
-    controller.povUp().whileTrue(intake.turntoUp());
-    controller.povDown().whileTrue(intake.turntoDown());
-    controller.povRight().whileTrue(climber.climbUp());
-    controller.povLeft().whileTrue(climber.climbDown());
-
-    // // Lock to 0° when A button is held
+    // // Lock to 0 degrees when A button is held
     // controller
     //     .a()
     //     .whileTrue(d
@@ -468,7 +554,14 @@ public class RobotContainer {
     // // Switch to X pattern when X button is pressed
     // controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // // Reset gyro to 0° when B button is pressed
+    // controller
+    //     .rightTrigger()
+    //     .whileTrue(
+    //         Commands.parallel(
+    //             shooter.dashboardShootTune(),
+    //             Commands.sequence(Commands.waitSeconds(1.0), feeder.feedFuel())));
+
+    // // Reset gyro to 0 degrees when B button is pressed
     // controller
     //     .start()
     //     .onTrue(
@@ -535,5 +628,21 @@ public class RobotContainer {
             AutoBuilder.pathfindToPose(
                 drive.getClosestAprilTagOnHub(leftSide), hubPathfindConstraints, 0.0),
         Set.of(drive));
+  }
+
+  private double getDriverScaledLeftY() {
+    return -driver.getLeftY() * getDriverSlowModeScale();
+  }
+
+  private double getDriverScaledLeftX() {
+    return -driver.getLeftX() * getDriverSlowModeScale();
+  }
+
+  private double getDriverScaledRightX() {
+    return -driver.getRightX() * getDriverSlowModeScale();
+  }
+
+  private double getDriverSlowModeScale() {
+    return driver.rightTrigger().getAsBoolean() ? driverSlowModeScale : 1.0;
   }
 }

@@ -25,7 +25,6 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -44,7 +43,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.FieldConstants;
-import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
@@ -218,62 +216,16 @@ public class Drive extends SubsystemBase {
     // // Update gyro alert
     // gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
 
+    Logger.recordOutput("Drive/Odometry/GyroConnected", gyroInputs.connected);
+    Logger.recordOutput("Drive/Odometry/GyroYawDeg", gyroInputs.yawPosition.getDegrees());
+    Logger.recordOutput("Drive/Odometry/PoseRotationDeg", getRotation().getDegrees());
+    Logger.recordOutput("Drive/Odometry/PoseX", getPose().getX());
+    Logger.recordOutput("Drive/Odometry/PoseY", getPose().getY());
   }
 
   /** Updates the field relative position of the robot. */
   public void updateOdometry() {
     poseEstimator.update(gyroInputs.yawPosition, getModulePositions());
-
-    boolean useMegaTag2 = true; // set to false to use MegaTag1
-    boolean doRejectUpdate = false;
-    if (useMegaTag2 == false) {
-      LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-
-      if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
-        if (mt1.rawFiducials[0].ambiguity > .7) {
-          doRejectUpdate = true;
-        }
-        if (mt1.rawFiducials[0].distToCamera > 3) {
-          doRejectUpdate = true;
-        }
-      }
-      if (mt1.tagCount == 0) {
-        doRejectUpdate = true;
-      }
-
-      if (!doRejectUpdate) {
-        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));
-        poseEstimator.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
-      }
-    } else if (useMegaTag2 == true) {
-      LimelightHelpers.SetRobotOrientation(
-          "limelight",
-          poseEstimator.getEstimatedPosition().getRotation().getDegrees(),
-          0,
-          0,
-          0,
-          0,
-          0);
-      LimelightHelpers.PoseEstimate mt2 =
-          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-      if (Math.abs(getAngularSpeed())
-          > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision
-      // updates
-      {
-        doRejectUpdate = true;
-      }
-      if (mt2.tagCount == 0) {
-        doRejectUpdate = true;
-      }
-      if (!doRejectUpdate) {
-        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-        poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
-      }
-    }
-  }
-  // rotational speed
-  public double getAngularSpeed() {
-    return getChassisSpeeds().omegaRadiansPerSecond;
   }
 
   /**
@@ -399,7 +351,10 @@ public class Drive extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
-    poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    Rotation2d gyroRotation = gyroInputs.yawPosition;
+    Logger.recordOutput("Drive/Odometry/SetPoseTarget", pose);
+    Logger.recordOutput("Drive/Odometry/SetPoseGyroDeg", gyroRotation.getDegrees());
+    poseEstimator.resetPosition(gyroRotation, getModulePositions(), pose);
   }
 
   /** Adds a new timestamped vision measurement. */
@@ -499,5 +454,13 @@ public class Drive extends SubsystemBase {
     }
 
     return AllianceFlipUtil.apply(hubPoses[closestPose]);
+  }
+
+  public void applySlowMode() {
+    speedIndex = kslowModeConstant;
+  }
+
+  public void resetSpeedIndex() {
+    speedIndex = 1;
   }
 }

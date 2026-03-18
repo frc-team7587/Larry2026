@@ -48,6 +48,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setShooterSpeedWithTargetRpm(double speed, double targetRpm) {
+
     targetShooterVelocityRpm = targetRpm;
     rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
     shooter.setShooterSpeed(speed);
@@ -75,7 +76,11 @@ public class Shooter extends SubsystemBase {
     return runEnd(this::runShooterAtDashboardRpm, this::stopShooter);
   }
 
-  public void setPivotPosition(double position) {
+  public Command setPivotPositionCom(double position) {
+    return runOnce(() -> shooter.setPivotPosition(position));
+  }
+
+  public void setPivotPositionVoid(double position) {
     shooter.setPivotPosition(position);
   }
 
@@ -102,8 +107,7 @@ public class Shooter extends SubsystemBase {
   public Command shootFuelAtRPM(double targetRpm) {
     return startEnd(
         () -> {
-          setShooterSpeedWithTargetRpm(
-              ShooterConstants.Top.kOutSpeed, targetRpm);
+          setShooterSpeedWithTargetRpm(ShooterConstants.Top.kOutSpeed, targetRpm);
         },
         this::stopShooter);
   }
