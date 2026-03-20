@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.RunOnTimeout;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.conveyor.Conveyor;
@@ -54,6 +55,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.watchdogtimer.WatchdogTimerSubsystem;
 import java.util.Set;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -73,6 +75,7 @@ public class RobotContainer {
   private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
   private final Climber climber = new Climber(new ClimberIOSpark());
+  private final WatchdogTimerSubsystem watchdogTimerSubsystem = new WatchdogTimerSubsystem();
 
   // Input devices
   private final CommandXboxController driver = new CommandXboxController(0);
@@ -150,6 +153,8 @@ public class RobotContainer {
         vision = createVision(drive);
         break;
     }
+
+    RunOnTimeout.setSubsystem(watchdogTimerSubsystem);
 
     NamedCommands.registerCommand(
         "shoot preload",
