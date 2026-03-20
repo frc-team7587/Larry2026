@@ -55,7 +55,7 @@ public class RunOnTimeout extends Command {
    * @param watchdogTimerSubsystem the subsystem, as described
    *                               above. Cannot be {@ocde null}
    */
-  static void setSubsystem(WatchdogTimerSubsystem watchdogTimerSubsystem) {
+  public static void setSubsystem(WatchdogTimerSubsystem watchdogTimerSubsystem) {
     subsystem = watchdogTimerSubsystem;
   }
 
@@ -75,7 +75,7 @@ public class RunOnTimeout extends Command {
    *                              command runs.
    * @return the newly created {@link RunOnTimeout} command.
    */
-  static RunOnTimeout of(
+  public static RunOnTimeout of(
     Runnable action,
     long delayInTicks,
     Consumer<AutoCloseable> commandHandleCallback) {
@@ -100,7 +100,7 @@ public class RunOnTimeout extends Command {
    *                               command runs.
    * @return the newly created {@link RunOnTimeout} command.
    */
-  static RunOnTimeout of(
+  public static RunOnTimeout of(
     Command command,
     long delayInTicks,
     Consumer<AutoCloseable> commandHandlerCallback) {
