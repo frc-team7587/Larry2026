@@ -73,7 +73,7 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter(new ShooterIOSpark());
   private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
-  
+
   // The climber is no longer installed so
   // private final Climber climber = new Climber(new ClimberIOSpark());
 
@@ -295,11 +295,11 @@ public class RobotContainer {
             drive,
             () ->
                 -MathUtil.applyDeadband(
-                    (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftY(), 0.05),
+                    (1 - 0.75 * operator.getRightTriggerAxis()) * operator.getLeftY(), 0.05),
             () ->
                 -MathUtil.applyDeadband(
-                    (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftX(), 0.05),
-            () -> -MathUtil.applyDeadband(0.5 * driver.getRightX(), 0.05)));
+                    (1 - 0.75 * operator.getRightTriggerAxis()) * operator.getLeftX(), 0.05),
+            () -> -MathUtil.applyDeadband(0.5 * operator.getRightX(), 0.05)));
 
     /*
      * Climber is now uninstalled.
@@ -361,9 +361,10 @@ public class RobotContainer {
     operator.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
 
     Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
-    Trigger autoAimShotTrigger = operator.rightTrigger().and(operator.x().negate());
+    Trigger autoAimShotTrigger = operator.rightTrigger();
 
-    manualHubShotTrigger.whileTrue(shooter.setVelocityCommand(4000));
+    // manualHubShotTrigger.whileTrue(shooter.setVelocityCommand(4000));
+
     autoAimShotTrigger.whileTrue(
         Commands.parallel(
             new AutoAimShooter(drive, vision, shooter, feeder),
