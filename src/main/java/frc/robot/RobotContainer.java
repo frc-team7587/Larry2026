@@ -32,8 +32,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIOSpark;
+import frc.robot.subsystems.IntakePivot.IntakePivot;
+import frc.robot.subsystems.IntakePivot.IntakePivotIOSpark;
 import frc.robot.subsystems.conveyor.Conveyor;
 import frc.robot.subsystems.conveyor.ConveyorIOSpark;
 import frc.robot.subsystems.drive.Drive;
@@ -69,10 +69,13 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
   private final Intake intake = new Intake(new IntakeIOSpark());
+  private final IntakePivot intakePivot = new IntakePivot(new IntakePivotIOSpark());
   private final Shooter shooter = new Shooter(new ShooterIOSpark());
   private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
-  private final Climber climber = new Climber(new ClimberIOSpark());
+  
+  // The climber is no longer installed so
+  // private final Climber climber = new Climber(new ClimberIOSpark());
 
   // Input devices
   private final CommandXboxController driver = new CommandXboxController(0);
@@ -158,11 +161,10 @@ public class RobotContainer {
             Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     NamedCommands.registerCommand("active floor", conveyor.transportBalls());
-    NamedCommands.registerCommand("intake down", intake.setPivotPosition(0));
+    NamedCommands.registerCommand("intake down", intakePivot.setPivotPosition(0));
     NamedCommands.registerCommand("shooter down", shooter.setPivotPositionCom(0));
     NamedCommands.registerCommand("intake fuel", intake.intakeFuel());
-    NamedCommands.registerCommand("intake up", intake.turntoUp());
-    ;
+    NamedCommands.registerCommand("intake up", intakePivot.turntoUp());
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     SmartDashboard.putNumber(
@@ -235,16 +237,16 @@ public class RobotContainer {
     //     intake.rollerSysIdDynamic(SysIdRoutine.Direction.kReverse));
     // autoChooser.addOption(
     //     "Intake Pivot SysId (Quasistatic Forward)",
-    //     intake.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    //     intakePivot.pivotSysIdQuasistatic(SysIdRoutine.Direction.kForward));
     // autoChooser.addOption(
     //     "Intake Pivot SysId (Quasistatic Reverse)",
-    //     intake.pivotSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    //     intakePivot.pivotSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     // autoChooser.addOption(
     //     "Intake Pivot SysId (Dynamic Forward)",
-    //     intake.pivotSysIdDynamic(SysIdRoutine.Direction.kForward));
+    //     intakePivot.pivotSysIdDynamic(SysIdRoutine.Direction.kForward));
     // autoChooser.addOption(
     //     "Intake Pivot SysId (Dynamic Reverse)",
-    //     intake.pivotSysIdDynamic(SysIdRoutine.Direction.kReverse));
+    //     intakePivot.pivotSysIdDynamic(SysIdRoutine.Direction.kReverse));
     // autoChooser.addOption(
     //     "Conveyor SysId (Quasistatic Forward)",
     //     conveyor.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -299,8 +301,11 @@ public class RobotContainer {
                     (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftX(), 0.05),
             () -> -MathUtil.applyDeadband(0.5 * driver.getRightX(), 0.05)));
 
-    driver.povUp().whileTrue(climber.climbUp());
-    driver.povDown().whileTrue(climber.climbDown());
+    /*
+     * Climber is now uninstalled.
+     * driver.povUp().whileTrue(climber.climbUp());
+     * driver.povDown().whileTrue(climber.climbDown());
+     */
 
     driver
         .y()
@@ -358,14 +363,14 @@ public class RobotContainer {
     Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
     Trigger autoAimShotTrigger = operator.rightTrigger().and(operator.x().negate());
 
-    manualHubShotTrigger.whileTrue(Commands.parallel(shooter.shootFuel(), feeder.feedFuel()));
+    manualHubShotTrigger.whileTrue(shooter.setVelocityCommand(4000));
     autoAimShotTrigger.whileTrue(
         Commands.parallel(
             new AutoAimShooter(drive, vision, shooter, feeder),
             Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
-    operator.povUp().whileTrue(intake.turntoUp());
-    operator.povDown().whileTrue(intake.turntoDown());
+    operator.povUp().whileTrue(intakePivot.turntoUp());
+    operator.povDown().whileTrue(intakePivot.turntoDown());
 
     // Hold X for temporary robot-relative drive.
     // controller
@@ -380,8 +385,8 @@ public class RobotContainer {
     // TESTING BINDS
     // controller.leftTrigger().toggleOnTrue(intake.intakeFuel());
     // controller.rightTrigger().toggleOnTrue(intake.outtakeFuel());
-    // controller.leftBumper().whileTrue(intake.turntoDown());
-    // controller.rightBumper().whileTrue(intake.turntoUp());
+    // controller.leftBumper().whileTrue(intakePivot.turntoDown());
+    // controller.rightBumper().whileTrue(intakePivot.turntoUp());
 
     // controller
     //     .povUp()

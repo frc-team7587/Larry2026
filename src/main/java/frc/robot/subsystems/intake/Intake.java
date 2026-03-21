@@ -10,7 +10,6 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase {
   private final IntakeIO intake;
   private final SysIdRoutine intakeSysId;
-  private final SysIdRoutine pivotSysId;
 
   public Intake(IntakeIO intake) {
     this.intake = intake;
@@ -23,15 +22,6 @@ public class Intake extends SubsystemBase {
                 (state) -> Logger.recordOutput("Intake/RollerSysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> intake.setIntakeVoltage(voltage.in(Volts)), null, this));
-    pivotSysId =
-        new SysIdRoutine(
-            new SysIdRoutine.Config(
-                null,
-                null,
-                null,
-                (state) -> Logger.recordOutput("Intake/PivotSysIdState", state.toString())),
-            new SysIdRoutine.Mechanism(
-                (voltage) -> intake.setPivotVoltage(voltage.in(Volts)), null, this));
   }
 
   public void setIntakeSpeed(double speed) {
@@ -54,35 +44,11 @@ public class Intake extends SubsystemBase {
     return run(() -> intake.setIntakeSpeed(0));
   }
 
-  public Command setPivotPosition(double position) {
-    return run(() -> intake.setPivotPosition(position));
-  }
-
-  public Command turntoUp() {
-    return startEnd(
-        () -> intake.setPivotSpeed(IntakeConstants.Pivot.kPivotSpeedUp),
-        () -> intake.setPivotPosition(intake.getPivotPosition()));
-  }
-
-  public Command turntoDown() {
-    return startEnd(
-        () -> intake.setPivotSpeed(IntakeConstants.Pivot.kPivotSpeedDown),
-        () -> intake.setPivotPosition(intake.getPivotPosition()));
-  }
-
   public Command rollerSysIdQuasistatic(SysIdRoutine.Direction direction) {
     return intakeSysId.quasistatic(direction);
   }
 
   public Command rollerSysIdDynamic(SysIdRoutine.Direction direction) {
     return intakeSysId.dynamic(direction);
-  }
-
-  public Command pivotSysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return pivotSysId.quasistatic(direction);
-  }
-
-  public Command pivotSysIdDynamic(SysIdRoutine.Direction direction) {
-    return pivotSysId.dynamic(direction);
   }
 }

@@ -86,6 +86,7 @@ public class AutoAimShooter extends Command {
     double mappedOutput = clampedRpm / ShooterConstants.Control.kDashboardMaxTargetRpm;
 
     shooter.setShooterSpeedWithTargetRpm(mappedOutput, shooterTargetRpm);
+    // shooter.setVelocity(shooterTargetRpm);
 
     Logger.recordOutput("Shooter/AutoAim/UsingVisionDistance", usingVisionDistance);
     Logger.recordOutput("Shooter/AutoAim/RawVisionDistanceMeters", rawVisionDistanceMeters);

@@ -54,6 +54,14 @@ public class Shooter extends SubsystemBase {
     shooter.setShooterSpeed(speed);
   }
 
+  public void setVelocityRobot(double rpm) {
+    shooter.setVelocity(rpm);
+  }
+
+  public Command setVelocityCommand(double rpm) {
+    return startEnd(() -> setVelocityRobot(rpm), () -> setVelocityRobot(0));
+  }
+
   public void runShooterAtDashboardRpm() {
     double requestedRpm =
         SmartDashboard.getNumber(
