@@ -206,11 +206,11 @@ public class RobotContainer {
   private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
 
-   // private final Climber climber = new Climber(new ClimberIOSpark());
+  // The climber is no longer installed so
+  // private final Climber climber = new Climber(new ClimberIOSpark());
   private final MarqueeSubsystem marquee =
       MarqueeSubsystem.usbConnection(kMessagesToDisplay, 20);
 
-  // The climber is no longer installed so
   // Input devices
   private final CommandXboxController driver = new CommandXboxController(0);
   private final CommandXboxController operator = new CommandXboxController(1);
