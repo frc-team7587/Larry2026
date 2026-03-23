@@ -4,6 +4,7 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SoftLimitConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import frc.robot.subsystems.IntakePivot.IntakePivotConstants;
 import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.ShooterConstants;
@@ -26,14 +27,14 @@ public class Configs {
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           .pidf(
-              IntakeConstants.Pivot.kP,
-              IntakeConstants.Pivot.kI,
-              IntakeConstants.Pivot.kD,
-              IntakeConstants.Pivot.kFF)
-          .outputRange(IntakeConstants.Pivot.kMinOutput, IntakeConstants.Pivot.kMaxOutput);
+              IntakePivotConstants.kP,
+              IntakePivotConstants.kI,
+              IntakePivotConstants.kD,
+              IntakePivotConstants.kFF)
+          .outputRange(IntakePivotConstants.kMinOutput, IntakePivotConstants.kMaxOutput);
       pivotMotorFollowerConfig
           .apply(pivotMotorLeaderConfig)
-          .follow(IntakeConstants.Pivot.kLeaderID, true);
+          .follow(IntakePivotConstants.kLeaderID, true);
       intakeMotorLeaderConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)

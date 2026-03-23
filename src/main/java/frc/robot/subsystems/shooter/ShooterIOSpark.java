@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import frc.robot.Configs.ShooterConfig;
 
 public class ShooterIOSpark implements ShooterIO {
@@ -19,11 +20,14 @@ public class ShooterIOSpark implements ShooterIO {
   private final RelativeEncoder topEncoder;
   private final RelativeEncoder pivotEncoder;
   private final SparkClosedLoopController pivotController;
+  private final SimpleMotorFeedforward feedforward;
 
   public ShooterIOSpark() {
     topMotor = new SparkMax(ShooterConstants.Top.kTopMotorID, MotorType.kBrushless);
     bottomMotor = new SparkMax(ShooterConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
     pivotMotor = new SparkMax(ShooterConstants.Pivot.kPivotMotorID, MotorType.kBrushless);
+    feedforward =
+        new SimpleMotorFeedforward(ShooterConstants.Top.ff_kS, ShooterConstants.Top.ff_kV);
 
     topEncoder = topMotor.getEncoder();
     pivotEncoder = pivotMotor.getEncoder();
@@ -91,5 +95,13 @@ public class ShooterIOSpark implements ShooterIO {
   @Override
   public void setShooterRPM(double rpm) {
     topMotor.set(rpm);
+  }
+
+  @Override
+  public void setVelocity(double rpm) {
+    double feedforwardVolts = feedforward.calculate(rpm);
+    topMotor
+        .getClosedLoopController()
+        .setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedforwardVolts);
   }
 }
