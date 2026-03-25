@@ -86,7 +86,7 @@ public class RobotContainer {
    * Populates the message list.
    */
 
-   static final int kMessageDisplayTimeMS = 5000;
+   static final int kMessageDisplayTimeMS = 10000;
   static {
     kMessagesToDisplay = new ArrayList<>();
     kMessagesToDisplay.add(
