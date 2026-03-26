@@ -16,9 +16,7 @@ import frc.robot.subsystems.watchdogtimer.CommandRunner;
 import frc.robot.subsystems.watchdogtimer.WatchdogTimerSubsystem;
 import java.util.function.Consumer;
 
-/**
- * Schedules a {@link Runnable} to run after a delay
- */
+/** Schedules a {@link Runnable} to run after a delay */
 public class RunOnTimeout extends Command {
   private final Runnable action;
   private final long delayInTicks;
@@ -29,90 +27,64 @@ public class RunOnTimeout extends Command {
    * Constructor
    *
    * @param action action to run when the timeout expires
-   * @param delayInTicks delay in arbitrary ticks. THe default tick
-   *                     length is 20 milliseconds. This can be
-   *                     changed.
-   * @param commandHandleCallback invoked on execution so that
-   *                              the caller may receive the
-   *                              command handle.
+   * @param delayInTicks delay in arbitrary ticks. THe default tick length is 20 milliseconds. This
+   *     can be changed.
+   * @param commandHandleCallback invoked on execution so that the caller may receive the command
+   *     handle.
    */
   private RunOnTimeout(
-    Runnable action,
-    long delayInTicks,
-    Consumer<AutoCloseable> commandHandleCallback) {
-      this.action = action;
-      this.delayInTicks = delayInTicks;
-      this.commandHandleCallback = commandHandleCallback;
-      addRequirements(subsystem);
-    }
-
+      Runnable action, long delayInTicks, Consumer<AutoCloseable> commandHandleCallback) {
+    this.action = action;
+    this.delayInTicks = delayInTicks;
+    this.commandHandleCallback = commandHandleCallback;
+    addRequirements(subsystem);
+  }
 
   /**
-   * Sets the {@link WatchtodTimerSubsystem} that runs the commands
-   * on timeout. The RobotContainer <em>MUST</em> invoke this
-   * method immediatel upon construction.
+   * Sets the {@link WatchtodTimerSubsystem} that runs the commands on timeout. The RobotContainer
+   * <em>MUST</em> invoke this method immediatel upon construction.
    *
-   * @param watchdogTimerSubsystem the subsystem, as described
-   *                               above. Cannot be {@ocde null}
+   * @param watchdogTimerSubsystem the subsystem, as described above. Cannot be {@ocde null}
    */
   public static void setSubsystem(WatchdogTimerSubsystem watchdogTimerSubsystem) {
     subsystem = watchdogTimerSubsystem;
   }
 
   /**
-   * Creates a {@link RunOnTimeout} command that schedules a
-   * {@link Runnable} action to run when a specified timeout
-   * expires.
+   * Creates a {@link RunOnTimeout} command that schedules a {@link Runnable} action to run when a
+   * specified timeout expires.
    *
    * @param action action to run with the timeout expires
-   * @param delayInTicks timeout in ticks. If the delay is less than
-   *                     or equal to 0, the action will run on the
-   *                     first tick after it is scheduled.
-   * @param commandHandleCallback invoked to pass the command
-   *                              handle to the caller. Ignored
-   *                              if {@code null}, otherwise
-   *                              invoked when the returned
-   *                              command runs.
+   * @param delayInTicks timeout in ticks. If the delay is less than or equal to 0, the action will
+   *     run on the first tick after it is scheduled.
+   * @param commandHandleCallback invoked to pass the command handle to the caller. Ignored if
+   *     {@code null}, otherwise invoked when the returned command runs.
    * @return the newly created {@link RunOnTimeout} command.
    */
   public static RunOnTimeout of(
-    Runnable action,
-    long delayInTicks,
-    Consumer<AutoCloseable> commandHandleCallback) {
-      return new RunOnTimeout(
-        action, delayInTicks, commandHandleCallback);
-    }
-
-  /**
-   * Creates a {@link RunOnTimeout} that schedules a
-   * {@link Command} to be performed when a specified timeout
-   * expires.
-   *
-   * @param command the {@link Command} to be performed when the
-   *                specified timeout expires
-   * @param delayInTicks timeout in ticks. If the delay is less than
-   *                     or equal to 0, the action will run on the
-   *                     first tick after it is scheduled.
-   * @param commandHandlerCallback invoked to pass the command
-   *                               handle to the caller. Ignored
-   *                               if {@code null}, otherwise
-   *                               invoked when the returned
-   *                               command runs.
-   * @return the newly created {@link RunOnTimeout} command.
-   */
-  public static RunOnTimeout of(
-    Command command,
-    long delayInTicks,
-    Consumer<AutoCloseable> commandHandlerCallback) {
-      return new RunOnTimeout(
-        new CommandRunner(command),
-        delayInTicks,
-        commandHandlerCallback);
+      Runnable action, long delayInTicks, Consumer<AutoCloseable> commandHandleCallback) {
+    return new RunOnTimeout(action, delayInTicks, commandHandleCallback);
   }
 
   /**
-   * Command payload, which schedules this instance's {@link #action}
-   * to run when the timeout expires.
+   * Creates a {@link RunOnTimeout} that schedules a {@link Command} to be performed when a
+   * specified timeout expires.
+   *
+   * @param command the {@link Command} to be performed when the specified timeout expires
+   * @param delayInTicks timeout in ticks. If the delay is less than or equal to 0, the action will
+   *     run on the first tick after it is scheduled.
+   * @param commandHandlerCallback invoked to pass the command handle to the caller. Ignored if
+   *     {@code null}, otherwise invoked when the returned command runs.
+   * @return the newly created {@link RunOnTimeout} command.
+   */
+  public static RunOnTimeout of(
+      Command command, long delayInTicks, Consumer<AutoCloseable> commandHandlerCallback) {
+    return new RunOnTimeout(new CommandRunner(command), delayInTicks, commandHandlerCallback);
+  }
+
+  /**
+   * Command payload, which schedules this instance's {@link #action} to run when the timeout
+   * expires.
    */
   @Override
   public void execute() {

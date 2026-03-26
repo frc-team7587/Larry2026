@@ -46,4 +46,6 @@ public interface ShooterIO {
    * @return The encoder value of the pivot motor.
    */
   public double getPivotPosition();
+
+  public void setVelocity(double rpm);
 }

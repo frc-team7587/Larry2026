@@ -15,10 +15,7 @@ package frc.robot.subsystems.watchdogtimer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.InternalButton;
 
-
-/**
- * A runnable that enqueues a {@link Command} for execution
- */
+/** A runnable that enqueues a {@link Command} for execution */
 public class CommandRunner implements Runnable {
 
   private final Command command;
@@ -32,9 +29,7 @@ public class CommandRunner implements Runnable {
     this.command = command;
   }
 
-  /**
-   * Runs the {@link Command} that is bound to this instance.
-   */
+  /** Runs the {@link Command} that is bound to this instance. */
   @Override
   public void run() {
     InternalButton button = new InternalButton();
