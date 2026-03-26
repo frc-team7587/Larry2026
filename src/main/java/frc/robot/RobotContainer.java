@@ -74,7 +74,9 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter(new ShooterIOSpark());
   private final Feeder feeder = new Feeder(new FeederIOSpark());
   private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
-  private final Climber climber = new Climber(new ClimberIOSpark());
+
+  // The climber is no longer installed so
+  // private final Climber climber = new Climber(new ClimberIOSpark());
   private final WatchdogTimerSubsystem watchdogTimerSubsystem = new WatchdogTimerSubsystem();
 
   // Input devices
