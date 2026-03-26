@@ -46,6 +46,9 @@ import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.feeder.FeederIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSpark;
+import frc.robot.subsystems.marquee.MarqueeMessage;
+import frc.robot.subsystems.marquee.MarqueeMessageBuilder;
+import frc.robot.subsystems.marquee.MarqueeSubsystem;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIOSpark;
@@ -54,6 +57,8 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -64,6 +69,84 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  /** Messages to display on the marquee */
+  private static final List<MarqueeMessage> kMessagesToDisplay;
+
+  private static MarqueeMessageBuilder messageBuilder(String message, int displayTimeMs) {
+    return new MarqueeMessageBuilder(message, displayTimeMs).setDelay1(40);
+  }
+
+  /** Populates the message list. TODO: add all sponsors. */
+  static {
+    kMessagesToDisplay = new ArrayList<>();
+    kMessagesToDisplay.add(
+        messageBuilder("Thank you, Sponsors!", 3000)
+            .setForegroundGreen(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("The Cook Family", 3000).setForegroundBlue(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("Metuchen Elks Lodge", 3000)
+            .setForegroundBlue(31)
+            .setForegroundGreen(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("ADP", 3000).setForegroundRed(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("The Cottell Family", 3000)
+            .setForegroundGreen(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Picatinny Stem", 3000).setForegroundRed(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("Whole Foods", 3000).setForegroundBlue(31).setForegroundRed(31).build());
+    kMessagesToDisplay.add(messageBuilder("The Mintz Family", 3000).setForegroundBlue(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("Geico", 3000).setForegroundBlue(31).setForegroundGreen(31).build());
+
+    kMessagesToDisplay.add(
+        messageBuilder("Chipotle", 3000)
+            .setForegroundBlue(21)
+            .setForegroundGreen(21)
+            .setForegroundRed(21)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Bagel Pantry", 3000).setForegroundGreen(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("The McGrory Family", 3000)
+            .setForegroundGreen(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Metuchen Diner", 3000).setForegroundRed(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("Latin Port", 3000).setForegroundBlue(31).setForegroundRed(31).build());
+    kMessagesToDisplay.add(messageBuilder("The Vohra Family", 3000).setForegroundBlue(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("L&L Pizza and Pasta", 3000)
+            .setForegroundBlue(31)
+            .setForegroundGreen(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Nagy Automotive", 3000).setForegroundGreen(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("Small Quantities New Jersey", 4000)
+            .setForegroundGreen(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Bonny's BBQ", 3000).setForegroundRed(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("The Sinclair Family", 3000)
+            .setForegroundBlue(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(
+        messageBuilder("Antonio's Brick Oven Pizza", 3000).setForegroundBlue(63).build());
+    kMessagesToDisplay.add(
+        messageBuilder("Manasquan Bank", 3000)
+            .setForegroundBlue(31)
+            .setForegroundGreen(31)
+            .build());
+    kMessagesToDisplay.add(
+        messageBuilder("Jersey Mike's", 0).setForegroundGreen(31).setForegroundRed(31).build());
+  }
+
   // Subsystems
   // private final Vision vision;
   private final Drive drive;
@@ -76,6 +159,7 @@ public class RobotContainer {
 
   // The climber is no longer installed so
   // private final Climber climber = new Climber(new ClimberIOSpark());
+  private final MarqueeSubsystem marquee = MarqueeSubsystem.usbConnection(kMessagesToDisplay, 20);
 
   // Input devices
   private final CommandXboxController driver = new CommandXboxController(0);
@@ -102,7 +186,8 @@ public class RobotContainer {
       case REAL:
         return new Vision(
             drive::addVisionMeasurement,
-            new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+            new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+            new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
       case SIM:
         return new Vision(
             drive::addVisionMeasurement,
@@ -363,12 +448,12 @@ public class RobotContainer {
     Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
     Trigger autoAimShotTrigger = operator.rightTrigger();
 
-    // manualHubShotTrigger.whileTrue(shooter.setVelocityCommand(4000));
+    autoAimShotTrigger.whileTrue(shooter.setVelocityCommand(4000));
 
-    autoAimShotTrigger.whileTrue(
-        Commands.parallel(
-            new AutoAimShooter(drive, vision, shooter, feeder),
-            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+    // autoAimShotTrigger.whileTrue(
+    //     Commands.parallel(
+    //         new AutoAimShooter(drive, vision, shooter, feeder),
+    //         Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     operator.povUp().whileTrue(intakePivot.turntoUp());
     operator.povDown().whileTrue(intakePivot.turntoDown());

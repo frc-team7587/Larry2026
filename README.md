@@ -24,6 +24,8 @@ Larry can be set to `REAL`, `SIM`, and replay modes! Infinitely simulated Larrie
   - Supports shoot/feed forward and reverse.
 - `Vision` (`src/main/java/frc/robot/subsystems/vision`)
   - Vision interfaces with Drive & Shooter (We use Limelight! PhotonVision is unmodified and based off template).
+- `Marquee` (`src/main/java/frc/robot/subsystems/marquee`)
+  - Display marquee where we thank our sponsors
 
 ## Driver controls (from `RobotContainer`)
 
