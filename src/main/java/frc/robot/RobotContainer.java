@@ -186,7 +186,8 @@ public class RobotContainer {
       case REAL:
         return new Vision(
             drive::addVisionMeasurement,
-            new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+            new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+            new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
       case SIM:
         return new Vision(
             drive::addVisionMeasurement,
@@ -447,12 +448,12 @@ public class RobotContainer {
     Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
     Trigger autoAimShotTrigger = operator.rightTrigger();
 
-    // manualHubShotTrigger.whileTrue(shooter.setVelocityCommand(4000));
+    autoAimShotTrigger.whileTrue(shooter.setVelocityCommand(4000));
 
-    autoAimShotTrigger.whileTrue(
-        Commands.parallel(
-            new AutoAimShooter(drive, vision, shooter, feeder),
-            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+    // autoAimShotTrigger.whileTrue(
+    //     Commands.parallel(
+    //         new AutoAimShooter(drive, vision, shooter, feeder),
+    //         Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     operator.povUp().whileTrue(intakePivot.turntoUp());
     operator.povDown().whileTrue(intakePivot.turntoDown());

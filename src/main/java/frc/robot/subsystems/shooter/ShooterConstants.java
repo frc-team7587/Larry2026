@@ -41,8 +41,8 @@ public class ShooterConstants {
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;
 
-    public static final double ff_kS = 0.45; // Volts
-    public static final double ff_kV = 0.01947; // Volts per (radian per second)
+    public static final double ff_kS = 0.9; // Volts
+    public static final double ff_kV = 0.01; // Volts per (radian per second)
   }
 
   public class Bottom {

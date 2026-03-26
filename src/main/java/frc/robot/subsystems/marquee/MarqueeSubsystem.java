@@ -32,7 +32,7 @@ public final class MarqueeSubsystem extends SubsystemBase {
   static {
     POWER_ON_MESSAGES = new ArrayList<>();
     POWER_ON_MESSAGES.add(
-        new MarqueeMessageBuilder("Starting...", 2000)
+        new MarqueeMessageBuilder("Starting...", 10000)
             .setDisplayCommand(DisplayCommand.SCROLLING_TEXT)
             .setForegroundRed(21)
             .setForegroundGreen(21)
