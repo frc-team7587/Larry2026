@@ -16,7 +16,21 @@ import frc.robot.subsystems.watchdogtimer.CommandRunner;
 import frc.robot.subsystems.watchdogtimer.WatchdogTimerSubsystem;
 import java.util.function.Consumer;
 
-/** Schedules a {@link Runnable} to run after a delay */
+/**
+ * Schedules a {@link Runnable} to run after a delay
+ *
+ * <p>Note: while the {@code RunOnTimeout|} command uses the {@link WatchdogTimerSubsystem}, oit
+ * <em>DOES NOT</em> require exclusive access to it. The {@link WatchdogTimerSubsystem} is designed
+ * to manage an arbitrary number of pending {@code RunOnTimeout} instances, so a resource conflich
+ * simply cannot occur. In fact, they are encouraged. Therefore, the {@code RunOnTimeout} command
+ * deliberately <em>DOES NOT</em> incorporate the {@link WatchdogTimerSubsystem} in its requirements
+ * list.
+ *
+ * <p>The enqueued command <em>MAY</em> have requirements that will apply <em>when it runs</em>.
+ * Since its requirements take effect <em>if the command runs</em> (which it may not), they are
+ * irrelvant while it is pending. Hence, we do not incorporate then into its conbtaining {@cide
+ * RunOnTimeout}.
+ */
 public class RunOnTimeout extends Command {
   private final Runnable action;
   private final long delayInTicks;
@@ -37,7 +51,6 @@ public class RunOnTimeout extends Command {
     this.action = action;
     this.delayInTicks = delayInTicks;
     this.commandHandleCallback = commandHandleCallback;
-    addRequirements(subsystem);
   }
 
   /**
@@ -70,7 +83,9 @@ public class RunOnTimeout extends Command {
    * Creates a {@link RunOnTimeout} that schedules a {@link Command} to be performed when a
    * specified timeout expires.
    *
-   * @param command the {@link Command} to be performed when the specified timeout expires
+   * @param command the {@link Command} to be performed when the specified timeout expires. Note
+   *     that the returned {@link RunOnTimeout} command in corporates {@code command}'s
+   *     requirements.'
    * @param delayInTicks timeout in ticks. If the delay is less than or equal to 0, the action will
    *     run on the first tick after it is scheduled.
    * @param commandHandlerCallback invoked to pass the command handle to the caller. Ignored if
