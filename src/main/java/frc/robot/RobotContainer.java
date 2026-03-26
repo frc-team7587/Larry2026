@@ -57,7 +57,6 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -70,130 +69,82 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  /**
-   * Messages to display on the marquee
-   */
+  /** Messages to display on the marquee */
   private static final List<MarqueeMessage> kMessagesToDisplay;
 
-  private static MarqueeMessageBuilder messageBuilder(
-    String message,
-    int displayTimeMs) {
-      return new MarqueeMessageBuilder(message, displayTimeMs)
-          .setDelay1(40);
-    }
+  private static MarqueeMessageBuilder messageBuilder(String message, int displayTimeMs) {
+    return new MarqueeMessageBuilder(message, displayTimeMs).setDelay1(40);
+  }
 
-  /**
-   * Populates the message list. TODO: add all sponsors.
-   */
+  /** Populates the message list. TODO: add all sponsors. */
   static {
     kMessagesToDisplay = new ArrayList<>();
     kMessagesToDisplay.add(
-      messageBuilder("Thank you, Sponsors!",3000)
-      .setForegroundGreen(31)
-      .setForegroundRed(31)
-      .build());
+        messageBuilder("Thank you, Sponsors!", 3000)
+            .setForegroundGreen(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("The Cook Family", 3000).setForegroundBlue(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("The Cook Family", 3000)
-      .setForegroundBlue(63)
-      .build());
+        messageBuilder("Metuchen Elks Lodge", 3000)
+            .setForegroundBlue(31)
+            .setForegroundGreen(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("ADP", 3000).setForegroundRed(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("Metuchen Elks Lodge", 3000)
-      .setForegroundBlue(31)
-      .setForegroundGreen(31)
-      .build());
+        messageBuilder("The Cottell Family", 3000)
+            .setForegroundGreen(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Picatinny Stem", 3000).setForegroundRed(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("ADP", 3000)
-        .setForegroundRed(63)
-        .build());
+        messageBuilder("Whole Foods", 3000).setForegroundBlue(31).setForegroundRed(31).build());
+    kMessagesToDisplay.add(messageBuilder("The Mintz Family", 3000).setForegroundBlue(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("The Cottell Family", 3000)
-        .setForegroundGreen(31)
-        .setForegroundRed(31)
-        .build());
-    kMessagesToDisplay.add(
-      messageBuilder("Picatinny Stem", 3000)
-      .setForegroundRed(63)
-      .build());
-    kMessagesToDisplay.add(
-      messageBuilder("Whole Foods", 3000)
-      .setForegroundBlue(31)
-      .setForegroundRed(31)
-      .build());
-    kMessagesToDisplay.add(
-      messageBuilder("The Mintz Family", 3000)
-      .setForegroundBlue(63)
-      .build());
-    kMessagesToDisplay.add(
-      messageBuilder("Geico", 3000)
-      .setForegroundBlue(31)
-      .setForegroundGreen(31)
-      .build());
+        messageBuilder("Geico", 3000).setForegroundBlue(31).setForegroundGreen(31).build());
 
     kMessagesToDisplay.add(
-      messageBuilder("Chipotle", 3000)
-      .setForegroundBlue(21)
-      .setForegroundGreen(21)
-      .setForegroundRed(21)
-      .build());
+        messageBuilder("Chipotle", 3000)
+            .setForegroundBlue(21)
+            .setForegroundGreen(21)
+            .setForegroundRed(21)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Bagel Pantry", 3000).setForegroundGreen(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("Bagel Pantry", 3000)
-      .setForegroundGreen(63)
-      .build());
+        messageBuilder("The McGrory Family", 3000)
+            .setForegroundGreen(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Metuchen Diner", 3000).setForegroundRed(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("The McGrory Family", 3000)
-      .setForegroundGreen(31)
-      .setForegroundRed(31)
-      .build());
+        messageBuilder("Latin Port", 3000).setForegroundBlue(31).setForegroundRed(31).build());
+    kMessagesToDisplay.add(messageBuilder("The Vohra Family", 3000).setForegroundBlue(63).build());
     kMessagesToDisplay.add(
-        messageBuilder("Metuchen Diner", 3000)
-        .setForegroundRed(63)
-        .build());
+        messageBuilder("L&L Pizza and Pasta", 3000)
+            .setForegroundBlue(31)
+            .setForegroundGreen(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Nagy Automotive", 3000).setForegroundGreen(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("Latin Port", 3000)
-      .setForegroundBlue(31)
-      .setForegroundRed(31)
-      .build());
+        messageBuilder("Small Quantities New Jersey", 4000)
+            .setForegroundGreen(31)
+            .setForegroundRed(31)
+            .build());
+    kMessagesToDisplay.add(messageBuilder("Bonny's BBQ", 3000).setForegroundRed(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("The Vohra Family", 3000)
-      .setForegroundBlue(63)
-      .build());
+        messageBuilder("The Sinclair Family", 3000)
+            .setForegroundBlue(31)
+            .setForegroundRed(31)
+            .build());
     kMessagesToDisplay.add(
-      messageBuilder("L&L Pizza and Pasta", 3000)
-      .setForegroundBlue(31)
-      .setForegroundGreen(31)
-      .build());
+        messageBuilder("Antonio's Brick Oven Pizza", 3000).setForegroundBlue(63).build());
     kMessagesToDisplay.add(
-      messageBuilder("Nagy Automotive", 3000)
-      .setForegroundGreen(63)
-      .build());
+        messageBuilder("Manasquan Bank", 3000)
+            .setForegroundBlue(31)
+            .setForegroundGreen(31)
+            .build());
     kMessagesToDisplay.add(
-      messageBuilder("Small Quantities New Jersey", 4000)
-      .setForegroundGreen(31)
-      .setForegroundRed(31)
-      .build());
-    kMessagesToDisplay.add(
-      messageBuilder("Bonny's BBQ", 3000)
-      .setForegroundRed(63)
-      .build());
-    kMessagesToDisplay.add(
-      messageBuilder("The Sinclair Family", 3000)
-      .setForegroundBlue(31)
-      .setForegroundRed(31)
-      .build());
-    kMessagesToDisplay.add(
-      messageBuilder("Antonio's Brick Oven Pizza", 3000)
-      .setForegroundBlue(63)
-      .build());
-    kMessagesToDisplay.add(
-      messageBuilder("Manasquan Bank", 3000)
-      .setForegroundBlue(31)
-      .setForegroundGreen(31)
-      .build());
-      kMessagesToDisplay.add(
-        messageBuilder("Jersey Mike's", 0)
-        .setForegroundGreen(31)
-        .setForegroundRed(31)
-        .build());
+        messageBuilder("Jersey Mike's", 0).setForegroundGreen(31).setForegroundRed(31).build());
   }
 
   // Subsystems
@@ -208,8 +159,7 @@ public class RobotContainer {
 
   // The climber is no longer installed so
   // private final Climber climber = new Climber(new ClimberIOSpark());
-  private final MarqueeSubsystem marquee =
-      MarqueeSubsystem.usbConnection(kMessagesToDisplay, 20);
+  private final MarqueeSubsystem marquee = MarqueeSubsystem.usbConnection(kMessagesToDisplay, 20);
 
   // Input devices
   private final CommandXboxController driver = new CommandXboxController(0);

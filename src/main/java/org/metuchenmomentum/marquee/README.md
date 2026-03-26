@@ -161,7 +161,7 @@ controlling a marquee.
 The `UsbSerialPortBuilder` builds `SerialPort` instances that connect to
 USB serial devices, which are file
 paths of the form `/dev/ttyUSBn`, where `n` is 0, 1, or 2. Note that
-the `SerialPort` class is provided by the WPI library. 
+the `SerialPort` class is provided by the WPI library.
 
 ### `VacuousDisplayConnection`
 
@@ -210,7 +210,7 @@ command.
 ### Single Color Fill
 
 The color fill command sets every pixel on the panel to a
-specified color. 
+specified color.
 
 Parameters:
 
@@ -230,7 +230,7 @@ This command has not been implemented.
 ### Rippling Rainbow
 
 Displays a rainbow pattern that ripples from left to right. New
-colors enter from the left and disappear from the right. 
+colors enter from the left and disappear from the right.
 
 Parameters:
 
@@ -255,7 +255,7 @@ so it looks like an aray. At the very lowest level, pixels are
 addressed linearly, indexed from 0 to 255.
 
 The pattern cycles through a sequence of standard colors, changing
-colors between traversals. 
+colors between traversals.
 
 Parameters:
 
@@ -305,7 +305,7 @@ Parameters:
 | Delay 1    | N/A                                         |
 | Delay 2    | N/A                                         |
 
-For example, to display "7587" in red on a black background, 
+For example, to display "7587" in red on a black background,
 set the display text to `"7587"` and foreground red to 63.
 
 ### Text Scroll
@@ -341,5 +341,3 @@ Parameters:
 | Background | Non-Text (background) color                 |
 | Delay 1    | Time between column shifts                  |
 | Delay 2    | N/A                                         |
-
-
