@@ -62,6 +62,10 @@ public class Configs {
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           .pid(ShooterConstants.Top.kP, ShooterConstants.Top.kI, ShooterConstants.Top.kD);
+      topMotorConfig
+          .encoder
+          .positionConversionFactor(1.0 / ShooterConstants.Top.kGearRatio)
+          .velocityConversionFactor(1.0 / ShooterConstants.Top.kGearRatio);
 
       // 24 & 8
       // topMotorConfig.encoder.uvwMeasurementPeriod(8).uvwAverageDepth(4);
