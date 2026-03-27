@@ -179,20 +179,22 @@ public class RobotContainer {
 
   private static Vision createVision(Drive drive) {
     if (!Constants.enableVision) {
-      return new Vision(drive::addVisionMeasurement, new VisionIO() {});
+      return new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
     }
 
     switch (Constants.currentMode) {
       case REAL:
         return new Vision(
             drive::addVisionMeasurement,
-            new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-            new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
+            new VisionIOLimelight(VisionConstants.cameraNames[0], drive::getRotation),
+            new VisionIOLimelight(VisionConstants.cameraNames[1], drive::getRotation));
       case SIM:
         return new Vision(
             drive::addVisionMeasurement,
             new VisionIOPhotonVisionSim(
-                VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+                VisionConstants.cameraNames[0], VisionConstants.robotToCameras[0], drive::getPose),
+            new VisionIOPhotonVisionSim(
+                VisionConstants.cameraNames[1], VisionConstants.robotToCameras[1], drive::getPose));
       default:
         return new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
     }

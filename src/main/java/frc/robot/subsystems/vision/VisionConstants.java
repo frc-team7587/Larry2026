@@ -22,9 +22,15 @@ public class VisionConstants {
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout = FieldConstants.aprilTags;
 
-  // Camera names, must match names configured on coprocessor
+  // Camera names, must match names configured on each vision coprocessor
   public static String camera0Name = "limelight";
   public static String camera1Name = "limelight-back";
+  public static String[] cameraNames = new String[] {camera0Name, camera1Name};
+
+  public static boolean useCamera0 = true;
+  public static boolean useCamera1 = true;
+
+  public static boolean[] cameraEnabled = new boolean[] {useCamera0, useCamera1};
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
@@ -32,6 +38,7 @@ public class VisionConstants {
       new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
   public static Transform3d robotToCamera1 =
       new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
+  public static Transform3d[] robotToCameras = new Transform3d[] {robotToCamera0, robotToCamera1};
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;
@@ -47,6 +54,7 @@ public class VisionConstants {
   public static double[] cameraStdDevFactors =
       new double[] {
         1.0, // Camera 0
+        1.0, // Camera 1
       };
 
   // Multipliers to apply for MegaTag 2 observations

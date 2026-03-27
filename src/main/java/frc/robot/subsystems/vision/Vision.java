@@ -61,6 +61,9 @@ public class Vision extends SubsystemBase {
   /** Returns the latest camera-derived distance to a hub AprilTag, if available. */
   public OptionalDouble getLatestHubDistanceMeters() {
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+      if (!isCameraEnabled(cameraIndex)) {
+        continue;
+      }
       var targetObservation = inputs[cameraIndex].latestTargetObservation;
       if (!targetObservation.hasTarget() || !isHubTag(targetObservation.tagId())) {
         continue;
@@ -86,6 +89,7 @@ public class Vision extends SubsystemBase {
 
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
+      boolean cameraEnabled = isCameraEnabled(cameraIndex);
 
       List<Pose3d> tagPoses = new LinkedList<>();
       List<Pose3d> robotPoses = new LinkedList<>();
@@ -100,7 +104,7 @@ public class Vision extends SubsystemBase {
       }
 
       for (var observation : inputs[cameraIndex].poseObservations) {
-        boolean rejectPose = shouldRejectPose(observation);
+        boolean rejectPose = !cameraEnabled || shouldRejectPose(observation);
 
         robotPoses.add(observation.pose());
         if (rejectPose) {
@@ -144,6 +148,8 @@ public class Vision extends SubsystemBase {
       Logger.recordOutput(
           "Vision/Camera" + Integer.toString(cameraIndex) + "/PoseObservationsRejected",
           robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
+      Logger.recordOutput(
+          "Vision/Camera" + Integer.toString(cameraIndex) + "/Enabled", cameraEnabled);
       allTagPoses.addAll(tagPoses);
       allRobotPoses.addAll(robotPoses);
       allRobotPosesAccepted.addAll(robotPosesAccepted);
@@ -176,6 +182,10 @@ public class Vision extends SubsystemBase {
 
   private static boolean isHubTag(int tagId) {
     return (tagId >= 2 && tagId <= 11) || (tagId >= 18 && tagId <= 27);
+  }
+
+  private static boolean isCameraEnabled(int cameraIndex) {
+    return cameraIndex >= cameraEnabled.length || cameraEnabled[cameraIndex];
   }
 
   @FunctionalInterface
