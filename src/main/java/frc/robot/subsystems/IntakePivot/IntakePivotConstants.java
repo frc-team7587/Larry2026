@@ -5,7 +5,7 @@ public class IntakePivotConstants {
   public static final int kFollowerID = 10;
 
   public static final double kPivotSpeedDown = 0.12;
-  public static final double kPivotSpeedUp = -0.12;
+  public static final double kPivotSpeedUp = -0.18;
 
   public static final double kP = 0.07;
   public static final double kI = 0.0;

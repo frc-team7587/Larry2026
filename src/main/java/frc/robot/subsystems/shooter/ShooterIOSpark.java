@@ -99,7 +99,8 @@ public class ShooterIOSpark implements ShooterIO {
 
   @Override
   public void setVelocity(double rpm) {
-    double feedforwardVolts = feedforward.calculate(rpm);
+    double angularVelocityRadPerSec = rpm * 2.0 * Math.PI / 60.0;
+    double feedforwardVolts = feedforward.calculate(angularVelocityRadPerSec);
     topMotor
         .getClosedLoopController()
         .setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedforwardVolts);

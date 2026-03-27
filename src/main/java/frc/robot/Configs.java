@@ -58,7 +58,16 @@ public class Configs {
           .voltageCompensation(12.0)
           .smartCurrentLimit(60)
           .inverted(false);
+      topMotorConfig
+          .closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          .pid(ShooterConstants.Top.kP, ShooterConstants.Top.kI, ShooterConstants.Top.kD);
+
+      topMotorConfig.encoder.uvwMeasurementPeriod(24).uvwAverageDepth(8);
+
+      // bottomMotorConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
       bottomMotorConfig.apply(topMotorConfig).follow(ShooterConstants.Top.kTopMotorID, true);
+
       pivotMotorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)

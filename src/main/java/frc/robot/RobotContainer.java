@@ -447,8 +447,10 @@ public class RobotContainer {
 
     Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
     Trigger autoAimShotTrigger = operator.rightTrigger();
-
-    autoAimShotTrigger.whileTrue(shooter.setVelocityCommand(4000));
+    // turns rpm to radians per second then sends to setVelocityRobot
+    autoAimShotTrigger.whileTrue(
+        Commands.parallel(
+            shooter.dashboardShootTune(), Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     // autoAimShotTrigger.whileTrue(
     //     Commands.parallel(

@@ -2,7 +2,6 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -48,36 +47,36 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setShooterSpeedWithTargetRpm(double speed, double targetRpm) {
-
-    targetShooterVelocityRpm = targetRpm;
-    rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
+    setTargetShooterVelocityRpm(targetRpm);
     shooter.setShooterSpeed(speed);
   }
 
-  public void setVelocityRobot(double rpm) {
+  private void setTargetShooterVelocityRpm(double targetRpm) {
+    if (Math.abs(targetShooterVelocityRpm - targetRpm)
+        > ShooterConstants.Control.kTargetEpsilonRpm) {
+      rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
+    }
+    targetShooterVelocityRpm = targetRpm;
+  }
+
+  public void setVelocityRpm(double rpm) {
+    setTargetShooterVelocityRpm(rpm);
     shooter.setVelocity(rpm);
   }
 
   public Command setVelocityCommand(double rpm) {
-    return startEnd(() -> setVelocityRobot(rpm), () -> setVelocityRobot(0));
+    return startEnd(() -> setVelocityRpm(rpm), this::stopShooter);
   }
 
   public void runShooterAtDashboardRpm() {
     double requestedRpm =
         SmartDashboard.getNumber(
             dashboardTargetRpmKey, ShooterConstants.Control.kDashboardDefaultTargetRpm);
-    double clampedRpm =
-        MathUtil.clamp(
-            requestedRpm,
-            -ShooterConstants.Control.kDashboardMaxTargetRpm,
-            ShooterConstants.Control.kDashboardMaxTargetRpm);
-    double mappedOutput = clampedRpm / ShooterConstants.Control.kDashboardMaxTargetRpm;
 
-    setShooterSpeedWithTargetRpm(mappedOutput, clampedRpm);
-    SmartDashboard.putNumber(dashboardOutputKey, mappedOutput);
+    setVelocityRpm(requestedRpm);
     Logger.recordOutput("Shooter/DashboardRequestedTargetRpm", requestedRpm);
-    Logger.recordOutput("Shooter/DashboardClampedTargetRpm", clampedRpm);
-    Logger.recordOutput("Shooter/DashboardMappedOutput", mappedOutput);
+    Logger.recordOutput(
+        "Shooter/DashboardRequestedTargetRpmRadPerSec", requestedRpm * 2 * Math.PI / 60.0);
   }
 
   public Command dashboardShootTune() {
@@ -174,7 +173,6 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/RpmReadyForFeed", rpmReadyForFeed);
     Logger.recordOutput("Shooter/RpmWithinTolerance", speedWithinTolerance);
     Logger.recordOutput("Shooter/AtRPM", atRpm);
-    Logger.recordOutput("Shooter/atRPM", atRpm);
     SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", velocityRpm);
     SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", targetShooterVelocityRpm);
     SmartDashboard.putNumber("Shooter/PivotEncoderPosition", pivotPosition);
