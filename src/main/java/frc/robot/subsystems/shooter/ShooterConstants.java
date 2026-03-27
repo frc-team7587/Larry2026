@@ -7,14 +7,14 @@ public class ShooterConstants {
     public static final double kNoStableTimestamp = -1.0;
     public static final double kTargetEpsilonRpm = 1e-6;
     // formerly 3500 default target rpm on dash
-    public static final double kDashboardDefaultTargetRpm = 1500.0;
+    public static final double kDashboardDefaultTargetRpm = 3500.0;
     public static final double kDashboardMaxTargetRpm = 5500.0;
   }
 
   public class Pivot {
     public static final int kPivotMotorID = 13;
 
-    public static final double kPivotSpeedUp = 0.05;
+    public static final double kPivotSpeedUp = 0.08;
     public static final double kPivotSpeedDown = -0.05;
 
     public static final double kP = 0.26;
@@ -43,12 +43,31 @@ public class ShooterConstants {
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;
 
-    public static final double kP = 0.0001;
+    // 1:1 Gear Ratio Values
+    // public static final double kP = 0.00008;
+    // public static final double kI = 0.0;
+    // public static final double kD = 0.0;
+
+    // public static final double ff_kS = 0.9; // Volts
+    // public static final double ff_kV = 0.018715; // Volts per (radian per second)
+    // 0.01868 (low by 5)
+    // 0.0188 (high by 10)
+    // 0.0185 (low by 12)
+    // 0.0195 (high by 55)
+    // 0.0160 (low by 120)
+    // 0.0202 (high by 94)
+    // 0.020387
+
+    public static final double kP = 0.00008;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
 
     public static final double ff_kS = 0.9; // Volts
-    public static final double ff_kV = 0.002135; // Volts per (radian per second)
+    public static final double ff_kV = 0.01852; // Volts per (radian per second)
+    // low by 26 (0.0185)
+    // high by 63 (0.0192)
+    // high by 11 (0.01875)
+    // high by 11 (0.018725)
   }
 
   public class Bottom {
@@ -66,14 +85,12 @@ public class ShooterConstants {
     public static final double kVisionDistanceScale = 1.0;
     public static final double kVisionDistanceBiasMeters = 0.0;
 
-    public static final double[] kDistanceMeters = {
-      1.7,
-    };
-    public static final double[] kPivotPosition = {1};
+    public static final double[] kDistanceMeters = {1.69, 1.96, 2.25, 2.45, 2.52, 3.27};
+    public static final double[] kPivotPosition = {1.57, 2.07, 2.49, 2.4, 2.452, 3.190};
     // public static final double[] kShooterPercentOutput = {
     //   0.58, 0.62, 0.66, 0.70, 0.74, 0.79, 0.84, 0.89, 0.94
     // };
-    public static final double[] kShooterTargetRpm = {1300};
+    public static final double[] kShooterTargetRpm = {3950, 4200, 4350, 4500, 4550, 4350};
     // public static final double[] kIntakePercentOutput = {
     //   0.10, 0.11, 0.12, 0.13, 0.145, 0.16, 0.175, 0.19, 0.20
     // };

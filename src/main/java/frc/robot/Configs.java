@@ -63,7 +63,8 @@ public class Configs {
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           .pid(ShooterConstants.Top.kP, ShooterConstants.Top.kI, ShooterConstants.Top.kD);
 
-      topMotorConfig.encoder.uvwMeasurementPeriod(24).uvwAverageDepth(8);
+      // 24 & 8
+      // topMotorConfig.encoder.uvwMeasurementPeriod(8).uvwAverageDepth(4);
 
       // bottomMotorConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
       bottomMotorConfig.apply(topMotorConfig).follow(ShooterConstants.Top.kTopMotorID, true);

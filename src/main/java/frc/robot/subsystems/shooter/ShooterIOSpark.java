@@ -103,6 +103,11 @@ public class ShooterIOSpark implements ShooterIO {
     double feedforwardVolts = feedforward.calculate(angularVelocityRadPerSec);
     topMotor
         .getClosedLoopController()
-        .setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedforwardVolts);
+        .setSetpoint(
+            rpm,
+            ControlType.kVelocity,
+            ClosedLoopSlot.kSlot0,
+            feedforwardVolts,
+            ArbFFUnits.kVoltage);
   }
 }
