@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -183,9 +182,6 @@ public class RobotContainer {
   // Input devices
   private final CommandXboxController driver = new CommandXboxController(0);
   private final CommandXboxController operator = new CommandXboxController(1);
-  private final Joystick keyboard = new Joystick(1);
-  double speed = keyboard.getRawAxis(1); // Mapped to W/S
-  double turn = keyboard.getRawAxis(4); // Mapped to A/D
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -401,11 +397,11 @@ public class RobotContainer {
             drive,
             () ->
                 -MathUtil.applyDeadband(
-                    (1 - 0.75 * operator.getRightTriggerAxis()) * operator.getLeftY(), 0.05),
+                    (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftY(), 0.05),
             () ->
                 -MathUtil.applyDeadband(
-                    (1 - 0.75 * operator.getRightTriggerAxis()) * operator.getLeftX(), 0.05),
-            () -> -MathUtil.applyDeadband(0.5 * operator.getRightX(), 0.05)));
+                    (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftX(), 0.05),
+            () -> -MathUtil.applyDeadband(0.5 * driver.getRightX(), 0.05)));
 
     /*
      * Climber is now uninstalled.
@@ -512,7 +508,7 @@ public class RobotContainer {
     // controller.y().whileTrue(feeder.feedFuelReverse());
     // controller.a().toggleOnTrue(conveyor.transportBalls());
     // controller.b().toggleOnTrue(conveyor.transportBallsReverse());
-    // controller.back().whileTrue(new AutoAimShooter(drive, vision, shooter));
+    // contro ller.back().whileTrue(new AutoAimShooter(drive, vision, shooter));
 
     // controller
     //     .rightTrigger()

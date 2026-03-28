@@ -98,12 +98,14 @@ public class ShooterConstants {
     // // };
 
     // 3:1 Gear Ratio Values (w/ conversion factors)
-    public static final double[] kDistanceMeters = {1.67, 1.78, 2.22, 2.4, 2.59, 2.85, 3.05, 3.39};
+    public static final double[] kDistanceMeters = {
+      1.67, 1.78, 2.22, 2.4, 2.59, 2.85, 3.05, 3.39, 3.5
+    };
     public static final double[] kPivotPosition = {
-      2.19, 1.52, 2.904, 3.328, 3.40, 3.64, 3.571, 3.442
+      2.19, 1.52, 2.904, 3.328, 3.40, 3.5, 3.51, 3.515, 3.58
     };
     public static final double[] kShooterTargetRpm = {
-      2950, 3150, 3250, 3250, 3250, 3250, 3525, 3575
+      2950, 3150, 3250, 3250, 3250, 3500, 3750, 4075, 4200
     };
   }
 }

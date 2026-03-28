@@ -5,6 +5,8 @@ public class IntakeConstants {
     public static final int kLeaderMotorID = 12;
     public static final int kFollowerMotorID = 19;
 
+    // public static final double kIntakeOutSpeed = -0.31;
+    // public static final double kIntakeInSpeed = 0.31;
     public static final double kIntakeOutSpeed = -0.31;
     public static final double kIntakeInSpeed = 0.31;
 

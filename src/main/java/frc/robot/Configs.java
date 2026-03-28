@@ -76,7 +76,7 @@ public class Configs {
       pivotMotorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(60)
+          .smartCurrentLimit(40)
           .inverted(false);
       pivotMotorConfig
           .closedLoop
@@ -109,7 +109,7 @@ public class Configs {
       conveyorMotorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(60)
+          .smartCurrentLimit(30)
           .inverted(false);
     }
   }
