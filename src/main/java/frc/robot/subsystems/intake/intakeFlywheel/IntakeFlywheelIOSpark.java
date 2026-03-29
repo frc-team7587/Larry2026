@@ -11,7 +11,8 @@ public class IntakeFlywheelIOSpark implements IntakeFlywheelIO {
   private final SparkFlex intakeFollowerMotor;
 
   public IntakeFlywheelIOSpark() {
-    intakeLeaderMotor = new SparkFlex(IntakeFlywheelConstants.Intake.kLeaderMotorID, MotorType.kBrushless);
+    intakeLeaderMotor =
+        new SparkFlex(IntakeFlywheelConstants.Intake.kLeaderMotorID, MotorType.kBrushless);
     intakeFollowerMotor =
         new SparkFlex(IntakeFlywheelConstants.Intake.kFollowerMotorID, MotorType.kBrushless);
     intakeLeaderMotor.configure(

@@ -464,7 +464,7 @@ public class RobotContainer {
         .leftTrigger()
         .toggleOnTrue(
             Commands.parallel(
-                intake.intakeFuel(),
+                intake.intakeFuel(() -> operator.getHID().getXButton()),
                 Commands.startEnd(
                     () -> operator.setRumble(RumbleType.kLeftRumble, 1.0),
                     () -> operator.setRumble(RumbleType.kLeftRumble, 0.0))));
@@ -492,7 +492,9 @@ public class RobotContainer {
                     () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
                     () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
 
-    operator.y().whileTrue(new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder));
+    operator
+        .y()
+        .whileTrue(new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder));
 
     Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
     Trigger autoAimShotTrigger = operator.rightTrigger();

@@ -4,7 +4,6 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SoftLimitConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.subsystems.intake.IntakePivot.IntakePivotConstants;
 import frc.robot.subsystems.intake.intakeFlywheel.IntakeFlywheelConstants;
@@ -63,7 +62,10 @@ public class Configs {
       topMotorConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-          .pid(ShooterFlywheelConstants.Top.kP, ShooterFlywheelConstants.Top.kI, ShooterFlywheelConstants.Top.kD);
+          .pid(
+              ShooterFlywheelConstants.Top.kP,
+              ShooterFlywheelConstants.Top.kI,
+              ShooterFlywheelConstants.Top.kD);
       topMotorConfig
           .encoder
           .positionConversionFactor(1.0 / ShooterFlywheelConstants.Top.kGearRatio)
@@ -73,7 +75,9 @@ public class Configs {
       // topMotorConfig.encoder.uvwMeasurementPeriod(8).uvwAverageDepth(4);
 
       // bottomMotorConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
-      bottomMotorConfig.apply(topMotorConfig).follow(ShooterFlywheelConstants.Top.kTopMotorID, true);
+      bottomMotorConfig
+          .apply(topMotorConfig)
+          .follow(ShooterFlywheelConstants.Top.kTopMotorID, true);
 
       pivotMotorConfig
           .idleMode(IdleMode.kBrake)

@@ -13,4 +13,9 @@ public class IntakeFlywheelConstants {
     public static final double kMinOutput = -1.0;
     public static final double kMaxOutput = 1.0;
   }
+
+  public class Control {
+    // boost on intake speed mmultiplier (1.25 is 25% boost  for ex.)
+    public static final double kIntakeBoostMultiplier = 1.6;
+  }
 }

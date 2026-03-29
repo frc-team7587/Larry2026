@@ -17,5 +17,4 @@ public class FeederIOSim implements FeederIO {
   public double getFeederSpeed() {
     return feederSpeed;
   }
-    
 }

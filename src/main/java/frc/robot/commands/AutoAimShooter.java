@@ -32,7 +32,12 @@ public class AutoAimShooter extends Command {
   private final double minDistanceMeters;
   private final double maxDistanceMeters;
 
-  public AutoAimShooter(Drive drive, Vision vision, ShooterFlywheel shooterFlywheel, ShooterPivot shooterPivot, Feeder feeder) {
+  public AutoAimShooter(
+      Drive drive,
+      Vision vision,
+      ShooterFlywheel shooterFlywheel,
+      ShooterPivot shooterPivot,
+      Feeder feeder) {
     this.drive = drive;
     this.vision = vision;
     this.shooterFlywheel = shooterFlywheel;

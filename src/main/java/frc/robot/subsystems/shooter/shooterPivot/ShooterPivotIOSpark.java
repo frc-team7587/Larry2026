@@ -9,9 +9,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-
 import frc.robot.Configs.ShooterConfig;
-import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelConstants;
 
 public class ShooterPivotIOSpark implements ShooterPivotIO {
   private final SparkMax pivotMotor;

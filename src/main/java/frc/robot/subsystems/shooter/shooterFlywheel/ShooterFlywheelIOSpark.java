@@ -5,7 +5,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -21,9 +20,11 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
 
   public ShooterFlywheelIOSpark() {
     topMotor = new SparkMax(ShooterFlywheelConstants.Top.kTopMotorID, MotorType.kBrushless);
-    bottomMotor = new SparkMax(ShooterFlywheelConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
+    bottomMotor =
+        new SparkMax(ShooterFlywheelConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
     feedforward =
-        new SimpleMotorFeedforward(ShooterFlywheelConstants.Top.ff_kS, ShooterFlywheelConstants.Top.ff_kV);
+        new SimpleMotorFeedforward(
+            ShooterFlywheelConstants.Top.ff_kS, ShooterFlywheelConstants.Top.ff_kV);
 
     topEncoder = topMotor.getEncoder();
 

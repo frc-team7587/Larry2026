@@ -110,7 +110,8 @@ public class ShooterFlywheel extends SubsystemBase {
         || rpmReadyStartTime <= ShooterFlywheelConstants.Control.kNoStableTimestamp) {
       return false;
     }
-    return Timer.getFPGATimestamp() - rpmReadyStartTime >= ShooterFlywheelConstants.Top.kSpeedStableTimeSec;
+    return Timer.getFPGATimestamp() - rpmReadyStartTime
+        >= ShooterFlywheelConstants.Top.kSpeedStableTimeSec;
   }
 
   public double getShooterVelocityRpm() {
@@ -146,8 +147,6 @@ public class ShooterFlywheel extends SubsystemBase {
     SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", velocityRpm);
     SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", targetShooterVelocityRpm);
   }
-
-  
 
   public Command wheelSysIdQuasistatic(SysIdRoutine.Direction direction) {
     return wheelSysId.quasistatic(direction);

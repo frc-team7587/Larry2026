@@ -1,16 +1,14 @@
 package frc.robot.subsystems.shooter.shooterPivot;
 
-import org.littletonrobotics.junction.Logger;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelConstants;
+import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.Units.Volts;
-
-public class ShooterPivot extends SubsystemBase{
+public class ShooterPivot extends SubsystemBase {
   private final ShooterPivotIO shooter;
   private final SysIdRoutine pivotSysId;
 
@@ -26,7 +24,7 @@ public class ShooterPivot extends SubsystemBase{
             new SysIdRoutine.Mechanism(
                 (voltage) -> shooter.setPivotVoltage(voltage.in(Volts)), null, this));
 
-    //shooter.setPivotEncoderPosition(ShooterPivotConstants.kBottomPosition);
+    // shooter.setPivotEncoderPosition(ShooterPivotConstants.kBottomPosition);
   }
 
   public Command setPivotPositionCom(double position) {
@@ -72,6 +70,4 @@ public class ShooterPivot extends SubsystemBase{
   public Command pivotSysIdDynamic(SysIdRoutine.Direction direction) {
     return pivotSysId.dynamic(direction);
   }
-
-
-}  
+}

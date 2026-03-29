@@ -17,5 +17,4 @@ public class ShooterFlywheelIOSim implements ShooterFlywheelIO {
   public double getShooterSpeed() {
     return shooterSpeed;
   }
-    
 }

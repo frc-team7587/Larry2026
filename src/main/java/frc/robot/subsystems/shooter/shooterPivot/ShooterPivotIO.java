@@ -1,7 +1,7 @@
 package frc.robot.subsystems.shooter.shooterPivot;
 
 public interface ShooterPivotIO {
-    /**
+  /**
    * Sets the speed of the pivot motor.
    *
    * @param speed The speed to set the intake motor to.
