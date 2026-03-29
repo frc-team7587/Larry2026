@@ -1,0 +1,513 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 5 /Kids [ 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R ] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 2440 >>
+stream
+BT
+/F1 10 Tf
+50 742 Td
+(LARRY2026 ROBOT CODE DOCUMENTATION) Tj
+0 -12 Td
+0 -12 Td
+(PURPOSE) Tj
+0 -12 Td
+(This document organizes the robot code into subsystems and highlights key top-level robot files) Tj
+0 -12 Td
+(\(`RobotContainer`, `Configs`, `BuildConstants`, `FieldConstants`, and related files\) so new) Tj
+0 -12 Td
+(developers can navigate the project quickly.) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(1\) PROJECT ENTRY AND RUNTIME FLOW) Tj
+0 -12 Td
+0 -12 Td
+(`MAIN.JAVA`) Tj
+0 -12 Td
+(* JVM entrypoint; starts WPILib robot runtime.) Tj
+0 -12 Td
+0 -12 Td
+(`ROBOT.JAVA`) Tj
+0 -12 Td
+(* Owns high-level robot lifecycle \(`robotInit`, periodic methods, autonomous/teleop) Tj
+0 -12 Td
+(transitions\).) Tj
+0 -12 Td
+(* Delegates subsystem wiring and command bindings to `RobotContainer`.) Tj
+0 -12 Td
+0 -12 Td
+(`ROBOTCONTAINER.JAVA`) Tj
+0 -12 Td
+(* Central composition root for the command-based architecture.) Tj
+0 -12 Td
+(* Instantiates all subsystems for REAL/SIM/REPLAY modes.) Tj
+0 -12 Td
+(* Chooses proper hardware/sim IO implementations.) Tj
+0 -12 Td
+(* Registers PathPlanner named commands.) Tj
+0 -12 Td
+(* Defines controller mappings and default commands.) Tj
+0 -12 Td
+(* Provides autonomous command chooser.) Tj
+0 -12 Td
+0 -12 Td
+(`CONSTANTS.JAVA`) Tj
+0 -12 Td
+(* Global runtime mode selection \(`REAL`, `SIM`, `REPLAY`\).) Tj
+0 -12 Td
+(* Global feature flags like `enableVision`.) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(2\) CONFIGURATION AND CONSTANT FILES) Tj
+0 -12 Td
+0 -12 Td
+(`CONFIGS.JAVA`) Tj
+0 -12 Td
+(Holds REV Spark MAX configuration objects, grouped by mechanism:) Tj
+0 -12 Td
+(* `IntakeConfig`) Tj
+0 -12 Td
+(* `ShooterConfig`) Tj
+0 -12 Td
+(* `FeederConfig`) Tj
+0 -12 Td
+(* `ConveyorConfig`) Tj
+0 -12 Td
+(* `ClimberConfig`) Tj
+0 -12 Td
+0 -12 Td
+(Each group defines:) Tj
+0 -12 Td
+(* motor idle mode) Tj
+0 -12 Td
+(* voltage compensation) Tj
+0 -12 Td
+(* current limits) Tj
+0 -12 Td
+(* inversion/follower behavior) Tj
+0 -12 Td
+(* encoder conversion factors \(where needed\)) Tj
+0 -12 Td
+(* closed-loop PID/PIDF and output limits) Tj
+0 -12 Td
+0 -12 Td
+(`BUILDCONSTANTS.JAVA`) Tj
+0 -12 Td
+(* **Auto-generated** class \(configured in `build.gradle` via the `gversion` plugin\).) Tj
+0 -12 Td
+(* Captures build metadata such as git revision, build date/time, branch, and dirty state.) Tj
+0 -12 Td
+(* Useful for dashboards, logs, and post-match traceability.) Tj
+0 -12 Td
+0 -12 Td
+(`FIELDCONSTANTS.JAVA`) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 2920 >>
+stream
+BT
+/F1 10 Tf
+50 742 Td
+(* Canonical geometric model of the 2026 REBUILT field.) Tj
+0 -12 Td
+(* Stores dimensions, element positions, AprilTag layout, and predefined poses.) Tj
+0 -12 Td
+(* Includes nested groupings such as Hub/Trench/Outpost/Tower/Depot/Bump/StartingPoses.) Tj
+0 -12 Td
+(* Used by autonomous pathing, pose targeting, and alliance-aware logic.) Tj
+0 -12 Td
+0 -12 Td
+(SUBSYSTEM-SPECIFIC CONSTANTS FILES) Tj
+0 -12 Td
+(Each mechanism folder generally contains a dedicated constants file:) Tj
+0 -12 Td
+(* `DriveConstants.java`) Tj
+0 -12 Td
+(* `VisionConstants.java`) Tj
+0 -12 Td
+(* `IntakePivotConstants.java`) Tj
+0 -12 Td
+(* `IntakeFlywheelConstants.java`) Tj
+0 -12 Td
+(* `ShooterFlywheelConstants.java`) Tj
+0 -12 Td
+(* `ShooterPivotConstants.java`) Tj
+0 -12 Td
+(* `FeederConstants.java`) Tj
+0 -12 Td
+(* `ConveyorConstants.java`) Tj
+0 -12 Td
+(* `ClimberConstants.java`) Tj
+0 -12 Td
+0 -12 Td
+(These isolate tunable values from behavior code.) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(3\) SUBSYSTEM ARCHITECTURE PATTERN) Tj
+0 -12 Td
+0 -12 Td
+(Most subsystems follow this layered pattern:) Tj
+0 -12 Td
+(1. **Subsystem class**: high-level behavior, commands, periodic logic.) Tj
+0 -12 Td
+(2. **IO interface**: hardware abstraction contract.) Tj
+0 -12 Td
+(3. **Hardware implementation** \(`...IOSpark`, `...IOLimelight`, etc.\): real robot devices.) Tj
+0 -12 Td
+(4. **Simulation implementation** \(`...IOSim`\): physics/sim behavior.) Tj
+0 -12 Td
+(5. **Constants/config**: tuning and IDs.) Tj
+0 -12 Td
+0 -12 Td
+(This pattern enables clean switching between REAL and SIM while preserving command logic.) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(4\) SUBSYSTEMS BY FOLDER) Tj
+0 -12 Td
+0 -12 Td
+(`SUBSYSTEMS/DRIVE`) Tj
+0 -12 Td
+(Core files:) Tj
+0 -12 Td
+(* `Drive.java`: swerve subsystem orchestration, odometry/pose estimation integration.) Tj
+0 -12 Td
+(* `Module.java`: per-wheel module behavior.) Tj
+0 -12 Td
+(* `ModuleIO.java`: drive module hardware contract.) Tj
+0 -12 Td
+(* `ModuleIOSpark.java`: real module motor implementation.) Tj
+0 -12 Td
+(* `ModuleIOSim.java`: simulated module implementation.) Tj
+0 -12 Td
+(* `GyroIO.java`, `GyroIONavX.java`, `GyroIOPigeon2.java`: gyro abstraction + implementations.) Tj
+0 -12 Td
+(* `DriveConstants.java`: module geometry, feedforward/PID values, and kinematics constants.) Tj
+0 -12 Td
+(* `SparkOdometryThread.java`: Spark odometry handling support.) Tj
+0 -12 Td
+0 -12 Td
+(Related commands:) Tj
+0 -12 Td
+(* `commands/DriveCommands.java`) Tj
+0 -12 Td
+(* `commands/AlignToPose.java`) Tj
+0 -12 Td
+0 -12 Td
+(`SUBSYSTEMS/VISION`) Tj
+0 -12 Td
+(Core files:) Tj
+0 -12 Td
+(* `Vision.java`: fuses vision measurements into drivetrain pose estimation.) Tj
+0 -12 Td
+(* `VisionIO.java`: vision device abstraction.) Tj
+0 -12 Td
+(* `VisionIOLimelight.java`: Limelight-backed implementation.) Tj
+0 -12 Td
+(* `VisionIOPhotonVision.java`: PhotonVision implementation.) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 2038 >>
+stream
+BT
+/F1 10 Tf
+50 742 Td
+(* `VisionIOPhotonVisionSim.java`: PhotonVision simulation implementation.) Tj
+0 -12 Td
+(* `VisionConstants.java`: camera names/transforms/filtering thresholds.) Tj
+0 -12 Td
+(* `LimelightHelpers.java`: Limelight utility wrappers.) Tj
+0 -12 Td
+0 -12 Td
+(`SUBSYSTEMS/INTAKE`) Tj
+0 -12 Td
+(Two mechanism groups:) Tj
+0 -12 Td
+0 -12 Td
+(`INTAKE/INTAKEFLYWHEEL`) Tj
+0 -12 Td
+(* `IntakeFlywheel.java`) Tj
+0 -12 Td
+(* `IntakeFlywheelIO.java`) Tj
+0 -12 Td
+(* `IntakeFlywheelIOSpark.java`) Tj
+0 -12 Td
+(* `IntakeFlywheelIOSim.java`) Tj
+0 -12 Td
+(* `IntakeFlywheelConstants.java`) Tj
+0 -12 Td
+0 -12 Td
+(`INTAKE/INTAKEPIVOT`) Tj
+0 -12 Td
+(* `IntakePivot.java`) Tj
+0 -12 Td
+(* `IntakePivotIO.java`) Tj
+0 -12 Td
+(* `IntakePivotIOSpark.java`) Tj
+0 -12 Td
+(* `IntakePivotIOSim.java`) Tj
+0 -12 Td
+(* `IntakePivotConstants.java`) Tj
+0 -12 Td
+0 -12 Td
+(`SUBSYSTEMS/SHOOTER`) Tj
+0 -12 Td
+(Two mechanism groups:) Tj
+0 -12 Td
+0 -12 Td
+(`SHOOTER/SHOOTERFLYWHEEL`) Tj
+0 -12 Td
+(* `ShooterFlywheel.java`) Tj
+0 -12 Td
+(* `ShooterFlywheelIO.java`) Tj
+0 -12 Td
+(* `ShooterFlywheelIOSpark.java`) Tj
+0 -12 Td
+(* `ShooterFlywheelIOSim.java`) Tj
+0 -12 Td
+(* `ShooterFlywheelConstants.java`) Tj
+0 -12 Td
+0 -12 Td
+(`SHOOTER/SHOOTERPIVOT`) Tj
+0 -12 Td
+(* `ShooterPivot.java`) Tj
+0 -12 Td
+(* `ShooterPivotIO.java`) Tj
+0 -12 Td
+(* `ShooterPivotIOSpark.java`) Tj
+0 -12 Td
+(* `ShooterPivotIOSim.java`) Tj
+0 -12 Td
+(* `ShooterPivotConstants.java`) Tj
+0 -12 Td
+0 -12 Td
+(Related command:) Tj
+0 -12 Td
+(* `commands/AutoAimShooter.java`) Tj
+0 -12 Td
+0 -12 Td
+(`SUBSYSTEMS/FEEDER`) Tj
+0 -12 Td
+(* `Feeder.java`) Tj
+0 -12 Td
+(* `FeederIO.java`) Tj
+0 -12 Td
+(* `FeederIOSpark.java`) Tj
+0 -12 Td
+(* `FeederIOSim.java`) Tj
+0 -12 Td
+(* `FeederConstants.java`) Tj
+0 -12 Td
+0 -12 Td
+(`SUBSYSTEMS/CONVEYOR`) Tj
+0 -12 Td
+(* `Conveyor.java`) Tj
+0 -12 Td
+(* `ConveyorIO.java`) Tj
+0 -12 Td
+(* `ConveyorIOSpark.java`) Tj
+0 -12 Td
+(* `ConveyorConstants.java`) Tj
+0 -12 Td
+0 -12 Td
+(`SUBSYSTEMS/CLIMBER`) Tj
+0 -12 Td
+(* `Climber.java`) Tj
+0 -12 Td
+(* `ClimberIO.java`) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 2226 >>
+stream
+BT
+/F1 10 Tf
+50 742 Td
+(* `ClimberIOSpark.java`) Tj
+0 -12 Td
+(* `ClimberConstants.java`) Tj
+0 -12 Td
+0 -12 Td
+(Note: `RobotContainer` indicates climber hardware is currently not installed.) Tj
+0 -12 Td
+0 -12 Td
+(`SUBSYSTEMS/MARQUEE`) Tj
+0 -12 Td
+(* `MarqueeSubsystem.java`) Tj
+0 -12 Td
+(* `MarqueeMessage.java`) Tj
+0 -12 Td
+(* `MarqueeMessageBuilder.java`) Tj
+0 -12 Td
+0 -12 Td
+(Handles sponsor and status text output to external display hardware.) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(5\) COMMANDS LAYER \(`SRC/MAIN/JAVA/FRC/ROBOT/COMMANDS`\)) Tj
+0 -12 Td
+0 -12 Td
+(* `DriveCommands.java`: teleop/manual drive command factories.) Tj
+0 -12 Td
+(* `AlignToPose.java`: pose alignment helper command.) Tj
+0 -12 Td
+(* `AutoAimShooter.java`: shooter auto-aim behavior.) Tj
+0 -12 Td
+0 -12 Td
+(Commands express operator intent while subsystems expose mechanism primitives.) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(6\) UTILITIES AND SUPPORT) Tj
+0 -12 Td
+0 -12 Td
+(`UTIL/`) Tj
+0 -12 Td
+(* `AllianceFlipUtil.java`: coordinate flipping by alliance.) Tj
+0 -12 Td
+(* `LocalADStarAK.java`: pathfinding utility integration.) Tj
+0 -12 Td
+(* `SparkUtil.java`: helper utilities for Spark devices.) Tj
+0 -12 Td
+0 -12 Td
+(`ENERGY/`) Tj
+0 -12 Td
+(* `BatteryLogger.java`: battery/system logging helpers.) Tj
+0 -12 Td
+0 -12 Td
+(`ORG/METUCHENMOMENTUM/MARQUEE/`) Tj
+0 -12 Td
+(* Hardware communications library for marquee display connections and message transport.) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(7\) DEPLOYMENT/AUTONOMOUS ASSETS) Tj
+0 -12 Td
+0 -12 Td
+(`SRC/MAIN/DEPLOY/PATHPLANNER/`) Tj
+0 -12 Td
+(* `autos/*.auto`: autonomous routines.) Tj
+0 -12 Td
+(* `paths/*.path`: reusable trajectories.) Tj
+0 -12 Td
+(* `navgrid.json`, `settings.json`: planner environment and settings.) Tj
+0 -12 Td
+0 -12 Td
+(These assets are deployed to the roboRIO by the Gradle deploy task.) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(8\) SUGGESTED NEW-DEVELOPER READING ORDER) Tj
+0 -12 Td
+0 -12 Td
+(1. `Constants.java`) Tj
+0 -12 Td
+(2. `Robot.java`) Tj
+0 -12 Td
+(3. `RobotContainer.java`) Tj
+0 -12 Td
+(4. `subsystems/drive/Drive.java`) Tj
+0 -12 Td
+(5. One representative mechanism stack \(example: `shooterFlywheel` folder\)) Tj
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 630 >>
+stream
+BT
+/F1 10 Tf
+50 742 Td
+(6. `Configs.java`) Tj
+0 -12 Td
+(7. `FieldConstants.java`) Tj
+0 -12 Td
+(8. `commands/` package) Tj
+0 -12 Td
+0 -12 Td
+(---) Tj
+0 -12 Td
+0 -12 Td
+(9\) QUICK RESPONSIBILITY SUMMARY FOR REQUESTED FILES) Tj
+0 -12 Td
+0 -12 Td
+(* **RobotContainer**: wiring hub for subsystems, commands, controls, and autos.) Tj
+0 -12 Td
+(* **Configs**: low-level motor/controller configuration bundles.) Tj
+0 -12 Td
+(* **BuildConstants**: generated build/git metadata.) Tj
+0 -12 Td
+(* **FieldConstants**: field geometry and AprilTag references.) Tj
+0 -12 Td
+(* **Constants**: runtime mode and global feature flags.) Tj
+0 -12 Td
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000143 00000 n 
+0000000213 00000 n 
+0000002705 00000 n 
+0000002831 00000 n 
+0000005803 00000 n 
+0000005929 00000 n 
+0000008019 00000 n 
+0000008145 00000 n 
+0000010424 00000 n 
+0000010552 00000 n 
+0000011234 00000 n 
+trailer
+<< /Size 14 /Root 1 0 R >>
+startxref
+11362
+%%EOF
