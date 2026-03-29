@@ -13,11 +13,12 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.energy.BatteryLogger;
-import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -34,9 +35,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-
-  public static final BatteryLogger batteryLogger = new BatteryLogger();
-  private final BatteryIOInputsAutoLogged batteryInputs = new BatteryIOInputsAutoLogged();
 
   public Robot() {
     // Record metadata
@@ -94,12 +92,6 @@ public class Robot extends LoggedRobot {
     // timing (see the template project documentation for details)
     // Threads.setCurrentThreadPriority(true, 99);
 
-    batteryInputs.batteryVoltage = RobotController.getBatteryVoltage();
-    batteryInputs.rioCurrent = RobotController.getInputCurrent();
-    Logger.processInputs("BatteryLogger", batteryInputs);
-    batteryLogger.setBatteryVoltage(batteryInputs.batteryVoltage);
-    batteryLogger.setRioCurrent(batteryInputs.rioCurrent);
-
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
     // finished or interrupted commands, and running subsystem periodic() methods.
@@ -109,7 +101,14 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
-    batteryLogger.periodicAfterScheduler();
+
+    Logger.recordOutput("RobotPose", new Pose2d());
+    Logger.recordOutput("ZeroedComponentPoses", new Pose3d[] {new Pose3d()});
+    Logger.recordOutput(
+        "FinalComponentPoses",
+        new Pose3d[] {
+          new Pose3d(0, 0, 0, new Rotation3d(0.0, Math.sin(Timer.getTimestamp()) - 1.0, 0.0))
+        });
   }
 
   /** This function is called once when the robot is disabled. */
@@ -169,10 +168,4 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
-
-  @AutoLog
-  public static class BatteryIOInputs {
-    public double batteryVoltage = 12.0;
-    public double rioCurrent = 0.0;
-  }
 }

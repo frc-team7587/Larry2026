@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.intake.intakeFlywheel;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -7,11 +7,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 
-public class Intake extends SubsystemBase {
-  private final IntakeIO intake;
+public class IntakeFlywheel extends SubsystemBase {
+  private final IntakeFlywheelIO intake;
   private final SysIdRoutine intakeSysId;
 
-  public Intake(IntakeIO intake) {
+  public IntakeFlywheel(IntakeFlywheelIO intake) {
     this.intake = intake;
     intakeSysId =
         new SysIdRoutine(
@@ -30,13 +30,13 @@ public class Intake extends SubsystemBase {
 
   public Command intakeFuel() {
     return startEnd(
-        () -> intake.setIntakeSpeed(IntakeConstants.Intake.kIntakeInSpeed),
+        () -> intake.setIntakeSpeed(IntakeFlywheelConstants.Intake.kIntakeInSpeed),
         () -> intake.setIntakeSpeed(0));
   }
 
   public Command outtakeFuel() {
     return startEnd(
-        () -> intake.setIntakeSpeed(IntakeConstants.Intake.kIntakeOutSpeed),
+        () -> intake.setIntakeSpeed(IntakeFlywheelConstants.Intake.kIntakeOutSpeed),
         () -> intake.setIntakeSpeed(0));
   }
 

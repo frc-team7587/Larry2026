@@ -6,8 +6,8 @@ public interface ConveyorIO {
    *
    * @param speed The speed to set the conveyor motor to.
    */
-  public void setConveyorSpeed(double speed);
+  default void setConveyorSpeed(double speed) {}
 
   /** Sets conveyor motor with direct voltage for characterization. */
-  public void setConveyorVoltage(double volts);
+  default void setConveyorVoltage(double volts) {}
 }

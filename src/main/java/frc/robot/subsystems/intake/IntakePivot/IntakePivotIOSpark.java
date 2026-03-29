@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakePivot;
+package frc.robot.subsystems.intake.IntakePivot;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;

@@ -1,13 +1,13 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.intake.intakeFlywheel;
 
-public interface IntakeIO {
+public interface IntakeFlywheelIO {
   /**
    * Sets the speed of the intake motor.
    *
    * @param speed The speed to set the intake motor to.
    */
-  public void setIntakeSpeed(double speed);
+  default void setIntakeSpeed(double speed) {}
 
   /** Sets intake motor with direct voltage for characterization. */
-  public void setIntakeVoltage(double volts);
+  default void setIntakeVoltage(double volts) {}
 }

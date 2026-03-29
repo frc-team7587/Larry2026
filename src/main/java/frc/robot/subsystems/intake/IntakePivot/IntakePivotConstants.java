@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakePivot;
+package frc.robot.subsystems.intake.IntakePivot;
 
 public class IntakePivotConstants {
   public static final int kLeaderID = 11;

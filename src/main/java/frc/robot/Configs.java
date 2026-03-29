@@ -4,10 +4,12 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SoftLimitConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.subsystems.IntakePivot.IntakePivotConstants;
+
 import frc.robot.subsystems.climber.ClimberConstants;
-import frc.robot.subsystems.intake.IntakeConstants;
-import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.intake.IntakePivot.IntakePivotConstants;
+import frc.robot.subsystems.intake.intakeFlywheel.IntakeFlywheelConstants;
+import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelConstants;
+import frc.robot.subsystems.shooter.shooterPivot.ShooterPivotConstants;
 
 public class Configs {
   public static final class IntakeConfig {
@@ -42,7 +44,7 @@ public class Configs {
           .inverted(false);
       intakeMotorFollowerConfig
           .apply(intakeMotorLeaderConfig)
-          .follow(IntakeConstants.Intake.kLeaderMotorID, true);
+          .follow(IntakeFlywheelConstants.Intake.kLeaderMotorID, true);
     }
   }
 
@@ -61,17 +63,17 @@ public class Configs {
       topMotorConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-          .pid(ShooterConstants.Top.kP, ShooterConstants.Top.kI, ShooterConstants.Top.kD);
+          .pid(ShooterFlywheelConstants.Top.kP, ShooterFlywheelConstants.Top.kI, ShooterFlywheelConstants.Top.kD);
       topMotorConfig
           .encoder
-          .positionConversionFactor(1.0 / ShooterConstants.Top.kGearRatio)
-          .velocityConversionFactor(1.0 / ShooterConstants.Top.kGearRatio);
+          .positionConversionFactor(1.0 / ShooterFlywheelConstants.Top.kGearRatio)
+          .velocityConversionFactor(1.0 / ShooterFlywheelConstants.Top.kGearRatio);
 
       // 24 & 8
       // topMotorConfig.encoder.uvwMeasurementPeriod(8).uvwAverageDepth(4);
 
       // bottomMotorConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
-      bottomMotorConfig.apply(topMotorConfig).follow(ShooterConstants.Top.kTopMotorID, true);
+      bottomMotorConfig.apply(topMotorConfig).follow(ShooterFlywheelConstants.Top.kTopMotorID, true);
 
       pivotMotorConfig
           .idleMode(IdleMode.kBrake)
@@ -82,11 +84,11 @@ public class Configs {
           .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           .pidf(
-              ShooterConstants.Pivot.kP,
-              ShooterConstants.Pivot.kI,
-              ShooterConstants.Pivot.kD,
-              ShooterConstants.Pivot.kFF)
-          .outputRange(ShooterConstants.Pivot.kMinOutput, ShooterConstants.Pivot.kMaxOutput);
+              ShooterPivotConstants.kP,
+              ShooterPivotConstants.kI,
+              ShooterPivotConstants.kD,
+              ShooterPivotConstants.kFF)
+          .outputRange(ShooterPivotConstants.kMinOutput, ShooterPivotConstants.kMaxOutput);
     }
   }
 

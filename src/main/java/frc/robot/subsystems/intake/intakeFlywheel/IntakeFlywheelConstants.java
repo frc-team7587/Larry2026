@@ -1,6 +1,6 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.intake.intakeFlywheel;
 
-public class IntakeConstants {
+public class IntakeFlywheelConstants {
   public class Intake {
     public static final int kLeaderMotorID = 12;
     public static final int kFollowerMotorID = 19;

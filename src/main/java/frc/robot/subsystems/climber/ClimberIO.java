@@ -6,22 +6,24 @@ public interface ClimberIO {
    *
    * @param speed The speed to set the climber motor to.
    */
-  public void setClimberSpeed(double speed);
+  default void setClimberSpeed(double speed) {}
 
   /** Sets climber motor with direct voltage for characterization. */
-  public void setClimberVoltage(double volts);
+  default void setClimberVoltage(double volts) {}
 
   /**
    * Sets target climber position in output rotations.
    *
    * @param outputRotations Target output rotations.
    */
-  public void setClimberPosition(double outputRotations);
+  default void setClimberPosition(double outputRotations) {}
 
   /**
    * Gets climber position in output rotations.
    *
    * @return Current output rotations.
    */
-  public double getClimberPosition();
+  default double getClimberPosition() {
+    return 0.0;
+  }
 }

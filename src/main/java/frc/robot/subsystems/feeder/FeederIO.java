@@ -6,8 +6,8 @@ public interface FeederIO {
    *
    * @param speed The speed to set the feeder motor to.
    */
-  public void setFeederSpeed(double speed);
+  default void setFeederSpeed(double speed) {}
 
   /** Sets feeder motor with direct voltage for characterization. */
-  public void setFeederVoltage(double volts);
+  default void setFeederVoltage(double volts) {}
 }

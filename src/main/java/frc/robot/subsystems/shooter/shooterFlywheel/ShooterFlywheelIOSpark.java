@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.shooterFlywheel;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -12,26 +12,20 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import frc.robot.Configs.ShooterConfig;
 
-public class ShooterIOSpark implements ShooterIO {
+public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
   private final SparkMax topMotor;
   private final SparkMax bottomMotor;
-  private final SparkMax pivotMotor;
 
   private final RelativeEncoder topEncoder;
-  private final RelativeEncoder pivotEncoder;
-  private final SparkClosedLoopController pivotController;
   private final SimpleMotorFeedforward feedforward;
 
-  public ShooterIOSpark() {
-    topMotor = new SparkMax(ShooterConstants.Top.kTopMotorID, MotorType.kBrushless);
-    bottomMotor = new SparkMax(ShooterConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
-    pivotMotor = new SparkMax(ShooterConstants.Pivot.kPivotMotorID, MotorType.kBrushless);
+  public ShooterFlywheelIOSpark() {
+    topMotor = new SparkMax(ShooterFlywheelConstants.Top.kTopMotorID, MotorType.kBrushless);
+    bottomMotor = new SparkMax(ShooterFlywheelConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
     feedforward =
-        new SimpleMotorFeedforward(ShooterConstants.Top.ff_kS, ShooterConstants.Top.ff_kV);
+        new SimpleMotorFeedforward(ShooterFlywheelConstants.Top.ff_kS, ShooterFlywheelConstants.Top.ff_kV);
 
     topEncoder = topMotor.getEncoder();
-    pivotEncoder = pivotMotor.getEncoder();
-    pivotController = pivotMotor.getClosedLoopController();
 
     topMotor.configure(
         ShooterConfig.topMotorConfig,
@@ -39,10 +33,6 @@ public class ShooterIOSpark implements ShooterIO {
         PersistMode.kPersistParameters);
     bottomMotor.configure(
         ShooterConfig.bottomMotorConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
-    pivotMotor.configure(
-        ShooterConfig.pivotMotorConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
   }
@@ -60,36 +50,6 @@ public class ShooterIOSpark implements ShooterIO {
   @Override
   public double getShooterVelocityRpm() {
     return topEncoder.getVelocity();
-  }
-
-  @Override
-  public void setPivotSpeed(double speed) {
-    pivotMotor.set(speed);
-  }
-
-  @Override
-  public void setPivotVoltage(double volts) {
-    pivotMotor.setVoltage(volts);
-  }
-
-  @Override
-  public void setPivotPosition(double position) {
-    pivotController.setSetpoint(
-        position,
-        ControlType.kPosition,
-        ClosedLoopSlot.kSlot0,
-        ShooterConstants.Pivot.kGravityFFVolts,
-        ArbFFUnits.kVoltage);
-  }
-
-  @Override
-  public void setPivotEncoderPosition(double position) {
-    pivotEncoder.setPosition(position);
-  }
-
-  @Override
-  public double getPivotPosition() {
-    return pivotEncoder.getPosition();
   }
 
   @Override

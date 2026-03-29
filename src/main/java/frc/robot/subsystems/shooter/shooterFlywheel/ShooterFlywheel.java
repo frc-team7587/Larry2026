@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.shooterFlywheel;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -9,17 +9,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 
-public class Shooter extends SubsystemBase {
+public class ShooterFlywheel extends SubsystemBase {
   private static final String dashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
   private static final String dashboardOutputKey = "Shooter/DashboardMappedOutput";
 
-  private final ShooterIO shooter;
+  private final ShooterFlywheelIO shooter;
   private final SysIdRoutine wheelSysId;
-  private final SysIdRoutine pivotSysId;
-  private double targetShooterVelocityRpm = ShooterConstants.Control.kNoTargetRpm;
-  private double rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
+  private double targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+  private double rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
 
-  public Shooter(ShooterIO shooter) {
+  public ShooterFlywheel(ShooterFlywheelIO shooter) {
     this.shooter = shooter;
     wheelSysId =
         new SysIdRoutine(
@@ -30,19 +29,9 @@ public class Shooter extends SubsystemBase {
                 (state) -> Logger.recordOutput("Shooter/WheelSysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> shooter.setShooterVoltage(voltage.in(Volts)), null, this));
-    pivotSysId =
-        new SysIdRoutine(
-            new SysIdRoutine.Config(
-                null,
-                null,
-                null,
-                (state) -> Logger.recordOutput("Shooter/PivotSysIdState", state.toString())),
-            new SysIdRoutine.Mechanism(
-                (voltage) -> shooter.setPivotVoltage(voltage.in(Volts)), null, this));
 
-    shooter.setPivotEncoderPosition(ShooterConstants.Pivot.kBottomPosition);
     SmartDashboard.putNumber(
-        dashboardTargetRpmKey, ShooterConstants.Control.kDashboardDefaultTargetRpm);
+        dashboardTargetRpmKey, ShooterFlywheelConstants.Control.kDashboardDefaultTargetRpm);
     SmartDashboard.putNumber(dashboardOutputKey, 0.0);
   }
 
@@ -53,8 +42,8 @@ public class Shooter extends SubsystemBase {
 
   private void setTargetShooterVelocityRpm(double targetRpm) {
     if (Math.abs(targetShooterVelocityRpm - targetRpm)
-        > ShooterConstants.Control.kTargetEpsilonRpm) {
-      rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
+        > ShooterFlywheelConstants.Control.kTargetEpsilonRpm) {
+      rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
     }
     targetShooterVelocityRpm = targetRpm;
   }
@@ -71,7 +60,7 @@ public class Shooter extends SubsystemBase {
   public void runShooterAtDashboardRpm() {
     double requestedRpm =
         SmartDashboard.getNumber(
-            dashboardTargetRpmKey, ShooterConstants.Control.kDashboardDefaultTargetRpm);
+            dashboardTargetRpmKey, ShooterFlywheelConstants.Control.kDashboardDefaultTargetRpm);
 
     setVelocityRpm(requestedRpm);
     Logger.recordOutput("Shooter/DashboardRequestedTargetRpm", requestedRpm);
@@ -83,22 +72,10 @@ public class Shooter extends SubsystemBase {
     return runEnd(this::runShooterAtDashboardRpm, this::stopShooter);
   }
 
-  public Command setPivotPositionCom(double position) {
-    return runOnce(() -> shooter.setPivotPosition(position));
-  }
-
-  public void setPivotPositionVoid(double position) {
-    shooter.setPivotPosition(position);
-  }
-
-  public void holdPivotPosition() {
-    shooter.setPivotPosition(shooter.getPivotPosition());
-  }
-
   public void stopShooter() {
-    shooter.setShooterSpeed(ShooterConstants.Control.kStoppedSpeed);
-    targetShooterVelocityRpm = ShooterConstants.Control.kNoTargetRpm;
-    rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
+    shooter.setShooterSpeed(ShooterFlywheelConstants.Control.kStoppedSpeed);
+    targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+    rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
     SmartDashboard.putNumber(dashboardOutputKey, 0.0);
   }
 
@@ -106,7 +83,7 @@ public class Shooter extends SubsystemBase {
     return startEnd(
         () -> {
           setShooterSpeedWithTargetRpm(
-              ShooterConstants.Top.kOutSpeed, ShooterConstants.Top.kOutTargetRpm);
+              ShooterFlywheelConstants.Top.kOutSpeed, ShooterFlywheelConstants.Top.kOutTargetRpm);
         },
         this::stopShooter);
   }
@@ -114,7 +91,7 @@ public class Shooter extends SubsystemBase {
   public Command shootFuelAtRPM(double targetRpm) {
     return startEnd(
         () -> {
-          setShooterSpeedWithTargetRpm(ShooterConstants.Top.kOutSpeed, targetRpm);
+          setShooterSpeedWithTargetRpm(ShooterFlywheelConstants.Top.kOutSpeed, targetRpm);
         },
         this::stopShooter);
   }
@@ -123,49 +100,42 @@ public class Shooter extends SubsystemBase {
     return startEnd(
         () -> {
           setShooterSpeedWithTargetRpm(
-              ShooterConstants.Top.kInSpeed, ShooterConstants.Top.kInTargetRpm);
+              ShooterFlywheelConstants.Top.kInSpeed, ShooterFlywheelConstants.Top.kInTargetRpm);
         },
         this::stopShooter);
   }
 
   public boolean atRPM() {
-    if (Math.abs(targetShooterVelocityRpm) <= ShooterConstants.Control.kTargetEpsilonRpm
-        || rpmReadyStartTime <= ShooterConstants.Control.kNoStableTimestamp) {
+    if (Math.abs(targetShooterVelocityRpm) <= ShooterFlywheelConstants.Control.kTargetEpsilonRpm
+        || rpmReadyStartTime <= ShooterFlywheelConstants.Control.kNoStableTimestamp) {
       return false;
     }
-    return Timer.getFPGATimestamp() - rpmReadyStartTime >= ShooterConstants.Top.kSpeedStableTimeSec;
+    return Timer.getFPGATimestamp() - rpmReadyStartTime >= ShooterFlywheelConstants.Top.kSpeedStableTimeSec;
   }
 
   public double getShooterVelocityRpm() {
     return shooter.getShooterVelocityRpm();
   }
 
-  public double getPivotPosition() {
-    return shooter.getPivotPosition();
-  }
-
   @Override
   public void periodic() {
     double velocityRpm = shooter.getShooterVelocityRpm();
-    double pivotPosition = shooter.getPivotPosition();
     double rpmError = targetShooterVelocityRpm - velocityRpm;
     boolean correctDirection = targetShooterVelocityRpm * velocityRpm > 0.0;
     boolean rpmReadyForFeed =
         Math.abs(velocityRpm)
-            >= Math.abs(targetShooterVelocityRpm) - ShooterConstants.Top.kSpeedToleranceRpm;
+            >= Math.abs(targetShooterVelocityRpm) - ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
     boolean speedWithinTolerance = correctDirection && rpmReadyForFeed;
-    if (Math.abs(targetShooterVelocityRpm) > ShooterConstants.Control.kTargetEpsilonRpm
+    if (Math.abs(targetShooterVelocityRpm) > ShooterFlywheelConstants.Control.kTargetEpsilonRpm
         && speedWithinTolerance) {
-      if (rpmReadyStartTime <= ShooterConstants.Control.kNoStableTimestamp) {
+      if (rpmReadyStartTime <= ShooterFlywheelConstants.Control.kNoStableTimestamp) {
         rpmReadyStartTime = Timer.getFPGATimestamp();
       }
     } else {
-      rpmReadyStartTime = ShooterConstants.Control.kNoStableTimestamp;
+      rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
     }
 
     boolean atRpm = atRPM();
-    Logger.recordOutput("Shooter/PivotEncoderPosition", pivotPosition);
-    Logger.recordOutput("Shooter/PivotPosition", pivotPosition);
     Logger.recordOutput("Shooter/VelocityRpm", velocityRpm);
     Logger.recordOutput("Shooter/TargetVelocityRpm", targetShooterVelocityRpm);
     Logger.recordOutput("Shooter/RpmError", rpmError);
@@ -175,20 +145,9 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/AtRPM", atRpm);
     SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", velocityRpm);
     SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", targetShooterVelocityRpm);
-    SmartDashboard.putNumber("Shooter/PivotEncoderPosition", pivotPosition);
   }
 
-  public Command pivotShooterUp() {
-    return startEnd(
-        () -> shooter.setPivotSpeed(ShooterConstants.Pivot.kPivotSpeedUp),
-        () -> shooter.setPivotPosition(shooter.getPivotPosition()));
-  }
-
-  public Command pivotShooterDown() {
-    return startEnd(
-        () -> shooter.setPivotSpeed(ShooterConstants.Pivot.kPivotSpeedDown),
-        () -> shooter.setPivotPosition(shooter.getPivotPosition()));
-  }
+  
 
   public Command wheelSysIdQuasistatic(SysIdRoutine.Direction direction) {
     return wheelSysId.quasistatic(direction);
@@ -196,13 +155,5 @@ public class Shooter extends SubsystemBase {
 
   public Command wheelSysIdDynamic(SysIdRoutine.Direction direction) {
     return wheelSysId.dynamic(direction);
-  }
-
-  public Command pivotSysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return pivotSysId.quasistatic(direction);
-  }
-
-  public Command pivotSysIdDynamic(SysIdRoutine.Direction direction) {
-    return pivotSysId.dynamic(direction);
   }
 }

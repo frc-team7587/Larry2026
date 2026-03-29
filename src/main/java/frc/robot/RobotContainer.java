@@ -31,9 +31,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoAimShooter;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.IntakePivot.IntakePivot;
-import frc.robot.subsystems.IntakePivot.IntakePivotIOSpark;
 import frc.robot.subsystems.conveyor.Conveyor;
+import frc.robot.subsystems.conveyor.ConveyorIO;
 import frc.robot.subsystems.conveyor.ConveyorIOSpark;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -42,15 +41,29 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.feeder.FeederIO;
+import frc.robot.subsystems.feeder.FeederIOSim;
 import frc.robot.subsystems.feeder.FeederIOSpark;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIOSpark;
+import frc.robot.subsystems.intake.IntakePivot.IntakePivot;
+import frc.robot.subsystems.intake.IntakePivot.IntakePivotIO;
+import frc.robot.subsystems.intake.IntakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.intake.IntakePivot.IntakePivotIOSpark;
+import frc.robot.subsystems.intake.intakeFlywheel.IntakeFlywheel;
+import frc.robot.subsystems.intake.intakeFlywheel.IntakeFlywheelIO;
+import frc.robot.subsystems.intake.intakeFlywheel.IntakeFlywheelIOSim;
+import frc.robot.subsystems.intake.intakeFlywheel.IntakeFlywheelIOSpark;
 import frc.robot.subsystems.marquee.MarqueeMessage;
 import frc.robot.subsystems.marquee.MarqueeMessageBuilder;
 import frc.robot.subsystems.marquee.MarqueeSubsystem;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
-import frc.robot.subsystems.shooter.ShooterIOSpark;
+import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheel;
+import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelConstants;
+import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelIO;
+import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelIOSim;
+import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelIOSpark;
+import frc.robot.subsystems.shooter.shooterPivot.ShooterPivot;
+import frc.robot.subsystems.shooter.shooterPivot.ShooterPivotIO;
+import frc.robot.subsystems.shooter.shooterPivot.ShooterPivotIOSim;
+import frc.robot.subsystems.shooter.shooterPivot.ShooterPivotIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
@@ -169,11 +182,12 @@ public class RobotContainer {
   // private final Vision vision;
   private final Drive drive;
   private final Vision vision;
-  private final Intake intake = new Intake(new IntakeIOSpark());
-  private final IntakePivot intakePivot = new IntakePivot(new IntakePivotIOSpark());
-  private final Shooter shooter = new Shooter(new ShooterIOSpark());
-  private final Feeder feeder = new Feeder(new FeederIOSpark());
-  private final Conveyor conveyor = new Conveyor(new ConveyorIOSpark());
+  private final IntakeFlywheel intake;
+  private final IntakePivot intakePivot;
+  private final ShooterFlywheel shooterFlywheel;
+  private final ShooterPivot shooterPivot;
+  private final Feeder feeder;
+  private final Conveyor conveyor;
 
   // The climber is no longer installed so
   // private final Climber climber = new Climber(new ClimberIOSpark());
@@ -228,6 +242,12 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
         vision = createVision(drive);
+        intakePivot = new IntakePivot(new IntakePivotIOSpark());
+        intake = new IntakeFlywheel(new IntakeFlywheelIOSpark());
+        shooterFlywheel = new ShooterFlywheel(new ShooterFlywheelIOSpark());
+        shooterPivot = new ShooterPivot(new ShooterPivotIOSpark());
+        feeder = new Feeder(new FeederIOSpark());
+        conveyor = new Conveyor(new ConveyorIOSpark());
         break;
 
       case SIM:
@@ -240,6 +260,12 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim());
         vision = createVision(drive);
+        intakePivot = new IntakePivot(new IntakePivotIOSim());
+        intake = new IntakeFlywheel(new IntakeFlywheelIOSim());
+        shooterFlywheel = new ShooterFlywheel(new ShooterFlywheelIOSim());
+        shooterPivot = new ShooterPivot(new ShooterPivotIOSim());
+        feeder = new Feeder(new FeederIOSim());
+        conveyor = new Conveyor(new ConveyorIO() {});
         break;
 
       default:
@@ -253,24 +279,30 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         vision = createVision(drive);
+        intakePivot = new IntakePivot(new IntakePivotIO() {});
+        intake = new IntakeFlywheel(new IntakeFlywheelIO() {});
+        shooterFlywheel = new ShooterFlywheel(new ShooterFlywheelIO() {});
+        shooterPivot = new ShooterPivot(new ShooterPivotIO() {});
+        feeder = new Feeder(new FeederIO() {});
+        conveyor = new Conveyor(new ConveyorIO() {});
         break;
     }
 
     NamedCommands.registerCommand(
         "shoot preload",
         Commands.parallel(
-            new AutoAimShooter(drive, vision, shooter, feeder),
+            new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder),
             Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     NamedCommands.registerCommand("active floor", conveyor.transportBalls());
     NamedCommands.registerCommand("intake down", intakePivot.setPivotPosition(0));
-    NamedCommands.registerCommand("shooter down", shooter.setPivotPositionCom(0));
+    NamedCommands.registerCommand("shooter down", shooterPivot.setPivotPositionCom(0));
     NamedCommands.registerCommand("intake fuel", intake.intakeFuel());
     NamedCommands.registerCommand("intake up", intakePivot.turntoUp());
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     SmartDashboard.putNumber(
-        shooterDashboardTargetRpmKey, ShooterConstants.Control.kDashboardDefaultTargetRpm);
+        shooterDashboardTargetRpmKey, ShooterFlywheelConstants.Control.kDashboardDefaultTargetRpm);
     SmartDashboard.putNumber(shooterDashboardOutputKey, 0.0);
     SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", 0.0);
     SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", 0.0);
@@ -439,8 +471,8 @@ public class RobotContainer {
 
     operator.start().whileTrue(intake.outtakeFuel());
 
-    operator.rightBumper().whileTrue(shooter.pivotShooterUp());
-    operator.leftBumper().whileTrue(shooter.pivotShooterDown());
+    operator.rightBumper().whileTrue(shooterPivot.pivotShooterUp());
+    operator.leftBumper().whileTrue(shooterPivot.pivotShooterDown());
 
     operator
         .a()
@@ -460,7 +492,7 @@ public class RobotContainer {
                     () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
                     () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
 
-    operator.y().whileTrue(new AutoAimShooter(drive, vision, shooter, feeder));
+    operator.y().whileTrue(new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder));
 
     Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
     Trigger autoAimShotTrigger = operator.rightTrigger();
@@ -471,7 +503,7 @@ public class RobotContainer {
 
     autoAimShotTrigger.whileTrue(
         Commands.parallel(
-            new AutoAimShooter(drive, vision, shooter, feeder),
+            new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder),
             Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     operator.povUp().whileTrue(intakePivot.turntoUp());
@@ -584,7 +616,7 @@ public class RobotContainer {
     double hubY = hubCenter.getY();
     double holdTimeSec = 0.75;
     Command sweep = Commands.none();
-    for (double distanceMeters : ShooterConstants.AutoAim.kDistanceMeters) {
+    for (double distanceMeters : ShooterFlywheelConstants.AutoAim.kDistanceMeters) {
       double sampleX = hubCenter.getX() + distanceMeters;
       sweep =
           sweep.andThen(
@@ -593,7 +625,7 @@ public class RobotContainer {
                       () -> drive.setPose(new Pose2d(sampleX, hubY, new Rotation2d())), drive),
                   Commands.deadline(
                       Commands.waitSeconds(holdTimeSec),
-                      new AutoAimShooter(drive, vision, shooter, feeder))));
+                      new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder))));
     }
     return sweep.withName("AutoAimInterpolationSweep");
   }

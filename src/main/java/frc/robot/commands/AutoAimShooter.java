@@ -8,8 +8,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.feeder.Feeder;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheel;
+import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelConstants;
+import frc.robot.subsystems.shooter.shooterPivot.ShooterPivot;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.AllianceFlipUtil;
 import java.util.OptionalDouble;
@@ -21,7 +22,8 @@ import org.littletonrobotics.junction.Logger;
 public class AutoAimShooter extends Command {
   private final Drive drive;
   private final Vision vision;
-  private final Shooter shooter;
+  private final ShooterFlywheel shooterFlywheel;
+  private final ShooterPivot shooterPivot;
   private final Feeder feeder;
 
   private final InterpolatingDoubleTreeMap pivotMap = new InterpolatingDoubleTreeMap();
@@ -30,24 +32,26 @@ public class AutoAimShooter extends Command {
   private final double minDistanceMeters;
   private final double maxDistanceMeters;
 
-  public AutoAimShooter(Drive drive, Vision vision, Shooter shooter, Feeder feeder) {
+  public AutoAimShooter(Drive drive, Vision vision, ShooterFlywheel shooterFlywheel, ShooterPivot shooterPivot, Feeder feeder) {
     this.drive = drive;
     this.vision = vision;
-    this.shooter = shooter;
+    this.shooterFlywheel = shooterFlywheel;
+    this.shooterPivot = shooterPivot;
+
     this.feeder = feeder;
 
-    for (int i = 0; i < ShooterConstants.AutoAim.kDistanceMeters.length; i++) {
-      double distance = ShooterConstants.AutoAim.kDistanceMeters[i];
-      pivotMap.put(distance, ShooterConstants.AutoAim.kPivotPosition[i]);
-      shooterRpmMap.put(distance, ShooterConstants.AutoAim.kShooterTargetRpm[i]);
+    for (int i = 0; i < ShooterFlywheelConstants.AutoAim.kDistanceMeters.length; i++) {
+      double distance = ShooterFlywheelConstants.AutoAim.kDistanceMeters[i];
+      pivotMap.put(distance, ShooterFlywheelConstants.AutoAim.kPivotPosition[i]);
+      shooterRpmMap.put(distance, ShooterFlywheelConstants.AutoAim.kShooterTargetRpm[i]);
     }
 
-    minDistanceMeters = ShooterConstants.AutoAim.kDistanceMeters[0];
+    minDistanceMeters = ShooterFlywheelConstants.AutoAim.kDistanceMeters[0];
     maxDistanceMeters =
-        ShooterConstants.AutoAim.kDistanceMeters[
-            ShooterConstants.AutoAim.kDistanceMeters.length - 1];
+        ShooterFlywheelConstants.AutoAim.kDistanceMeters[
+            ShooterFlywheelConstants.AutoAim.kDistanceMeters.length - 1];
 
-    addRequirements(shooter);
+    addRequirements(shooterFlywheel, shooterPivot);
   }
 
   @Override
@@ -63,8 +67,8 @@ public class AutoAimShooter extends Command {
     double rawVisionDistanceMeters = visionDistanceMeters.orElse(Double.NaN);
     double adjustedVisionDistanceMeters =
         usingVisionDistance
-            ? rawVisionDistanceMeters * ShooterConstants.AutoAim.kVisionDistanceScale
-                + ShooterConstants.AutoAim.kVisionDistanceBiasMeters
+            ? rawVisionDistanceMeters * ShooterFlywheelConstants.AutoAim.kVisionDistanceScale
+                + ShooterFlywheelConstants.AutoAim.kVisionDistanceBiasMeters
             : Double.NaN;
 
     double distanceMeters =
@@ -75,8 +79,8 @@ public class AutoAimShooter extends Command {
 
     double shooterTargetRpm = shooterRpmMap.get(clampedDistance);
 
-    shooter.setPivotPositionVoid(pivotSetpoint);
-    shooter.setVelocityRpm(shooterTargetRpm);
+    shooterPivot.setPivotPositionVoid(pivotSetpoint);
+    shooterFlywheel.setVelocityRpm(shooterTargetRpm);
 
     Logger.recordOutput("Shooter/AutoAim/UsingVisionDistance", usingVisionDistance);
     Logger.recordOutput("Shooter/AutoAim/RawVisionDistanceMeters", rawVisionDistanceMeters);
@@ -86,14 +90,14 @@ public class AutoAimShooter extends Command {
     Logger.recordOutput("Shooter/AutoAim/DistanceMeters", distanceMeters);
     Logger.recordOutput("Shooter/AutoAim/DistanceClampedMeters", clampedDistance);
     Logger.recordOutput("Shooter/AutoAim/PivotSetpoint", pivotSetpoint);
-    Logger.recordOutput("Shooter/AutoAim/PivotEncoderPosition", shooter.getPivotPosition());
+    Logger.recordOutput("Shooter/AutoAim/PivotEncoderPosition", shooterPivot.getPivotPosition());
     Logger.recordOutput("Shooter/AutoAim/RecommendedShooterTargetRpm", shooterTargetRpm);
   }
 
   @Override
   public void end(boolean interrupted) {
-    shooter.holdPivotPosition();
-    shooter.stopShooter();
+    shooterPivot.holdPivotPosition();
+    shooterFlywheel.stopShooter();
   }
 
   @Override
