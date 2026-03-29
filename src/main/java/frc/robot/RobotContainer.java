@@ -299,6 +299,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("shooter down", shooterPivot.setPivotPositionCom(0));
     NamedCommands.registerCommand("intake fuel", intake.intakeFuel());
     NamedCommands.registerCommand("intake up", intakePivot.turntoUp());
+    NamedCommands.registerCommand("intake to position", intakePivot.setPivotPosition(-4.31));
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     SmartDashboard.putNumber(

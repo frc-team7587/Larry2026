@@ -80,6 +80,7 @@ public class IntakePivot extends SubsystemBase {
   @Override
   public void periodic() {
     Logger.recordOutput("intakeMech", mechPanel);
+    Logger.recordOutput("Intake/PivotPosition", pivot.getPivotPosition());
     // turns encoder position to degrees
     mechIntake.setAngle(new Rotation2d(pivot.getPivotPosition() - 90.0));
   }
