@@ -91,7 +91,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "intake up"
+                  "name": "intake to position"
                 }
               }
             ]
