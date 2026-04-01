@@ -8,10 +8,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ShooterFlywheel extends SubsystemBase {
   private static final String dashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
   private static final String dashboardOutputKey = "Shooter/DashboardMappedOutput";
+  private final LoggedNetworkNumber Ks = new LoggedNetworkNumber("ks", 0);
 
   private final ShooterFlywheelIO shooter;
   private final SysIdRoutine wheelSysId;
@@ -66,6 +68,10 @@ public class ShooterFlywheel extends SubsystemBase {
     Logger.recordOutput("Shooter/DashboardRequestedTargetRpm", requestedRpm);
     Logger.recordOutput(
         "Shooter/DashboardRequestedTargetRpmRadPerSec", requestedRpm * 2 * Math.PI / 60.0);
+  }
+
+  public Command runStatic() {
+    return runEnd(() -> shooter.setShooterVoltage(Ks.get()), this::stopShooter);
   }
 
   public Command dashboardShootTune() {

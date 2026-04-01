@@ -19,6 +19,7 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
   private final SimpleMotorFeedforward feedforward;
 
   public ShooterFlywheelIOSpark() {
+
     topMotor = new SparkMax(ShooterFlywheelConstants.Top.kTopMotorID, MotorType.kBrushless);
     bottomMotor =
         new SparkMax(ShooterFlywheelConstants.Bottom.kBottomMotorID, MotorType.kBrushless);

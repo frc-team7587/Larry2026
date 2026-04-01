@@ -504,10 +504,12 @@ public class RobotContainer {
     //     Commands.parallel(
     //         shooter.dashboardShootTune(), Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
-    autoAimShotTrigger.whileTrue(
-        Commands.parallel(
-            new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder),
-            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+    // autoAimShotTrigger.whileTrue(
+    //     Commands.parallel(
+    //         new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder),
+    //         Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+
+    autoAimShotTrigger.whileTrue(shooterFlywheel.runStatic());
 
     operator.povUp().whileTrue(intakePivot.turntoUp());
     operator.povDown().whileTrue(intakePivot.turntoDown());

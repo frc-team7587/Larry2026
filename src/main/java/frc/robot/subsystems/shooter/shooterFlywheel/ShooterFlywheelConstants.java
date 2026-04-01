@@ -45,12 +45,8 @@ public class ShooterFlywheelConstants {
     public static final double kI = 0.0;
     public static final double kD = 0.0;
 
-    public static final double ff_kS = 0.9; // Volts
-    public static final double ff_kV = 0.01852; // Volts per (radian per second)
-    // low by 26 (0.0185)
-    // high by 63 (0.0192)
-    // high by 11 (0.01875)
-    // high by 11 (0.018725)
+    public static final double ff_kS = 0.0; // Volts
+    public static final double ff_kV = 0.0; // Volts per (radian per second)
   }
 
   public class Bottom {
