@@ -19,6 +19,10 @@ public class ShooterFlywheel extends SubsystemBase {
   private final SysIdRoutine wheelSysId;
   private double targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
   private double rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+  private int speedDipCounterLoops = 0;
+  private boolean speedDipActive = false;
+  private double lastSpeedDipTimestampSec = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+  private double lastSpeedDipMagnitudeRpm = 0.0;
 
   public ShooterFlywheel(ShooterFlywheelIO shooter) {
     this.shooter = shooter;
@@ -82,6 +86,8 @@ public class ShooterFlywheel extends SubsystemBase {
     shooter.setShooterSpeed(ShooterFlywheelConstants.Control.kStoppedSpeed);
     targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
     rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+    speedDipCounterLoops = 0;
+    speedDipActive = false;
     SmartDashboard.putNumber(dashboardOutputKey, 0.0);
   }
 
@@ -127,11 +133,12 @@ public class ShooterFlywheel extends SubsystemBase {
   @Override
   public void periodic() {
     double velocityRpm = shooter.getShooterVelocityRpm();
+    double absVelocityRpm = Math.abs(velocityRpm);
+    double absTargetRpm = Math.abs(targetShooterVelocityRpm);
     double rpmError = targetShooterVelocityRpm - velocityRpm;
     boolean correctDirection = targetShooterVelocityRpm * velocityRpm > 0.0;
     boolean rpmReadyForFeed =
-        Math.abs(velocityRpm)
-            >= Math.abs(targetShooterVelocityRpm) - ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
+        absVelocityRpm >= absTargetRpm - ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
     boolean speedWithinTolerance = correctDirection && rpmReadyForFeed;
     if (Math.abs(targetShooterVelocityRpm) > ShooterFlywheelConstants.Control.kTargetEpsilonRpm
         && speedWithinTolerance) {
@@ -142,6 +149,30 @@ public class ShooterFlywheel extends SubsystemBase {
       rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
     }
 
+    double dipThresholdRpm =
+        Math.max(
+            ShooterFlywheelConstants.Control.kDipToleranceRpm,
+            absTargetRpm * ShooterFlywheelConstants.Control.kDipToleranceFraction);
+    double speedDeficitRpm = absTargetRpm - absVelocityRpm;
+    boolean dipSample =
+        absTargetRpm >= ShooterFlywheelConstants.Control.kDipMinTargetRpm
+            && correctDirection
+            && speedDeficitRpm >= dipThresholdRpm;
+    if (dipSample) {
+      speedDipCounterLoops++;
+    } else {
+      speedDipCounterLoops = 0;
+    }
+
+    boolean speedDipNow =
+        speedDipCounterLoops >= ShooterFlywheelConstants.Control.kDipDebounceLoops;
+    boolean speedDipRisingEdge = speedDipNow && !speedDipActive;
+    if (speedDipRisingEdge) {
+      lastSpeedDipTimestampSec = Timer.getFPGATimestamp();
+      lastSpeedDipMagnitudeRpm = speedDeficitRpm;
+    }
+    speedDipActive = speedDipNow;
+
     boolean atRpm = atRPM();
     Logger.recordOutput("Shooter/VelocityRpm", velocityRpm);
     Logger.recordOutput("Shooter/TargetVelocityRpm", targetShooterVelocityRpm);
@@ -150,8 +181,20 @@ public class ShooterFlywheel extends SubsystemBase {
     Logger.recordOutput("Shooter/RpmReadyForFeed", rpmReadyForFeed);
     Logger.recordOutput("Shooter/RpmWithinTolerance", speedWithinTolerance);
     Logger.recordOutput("Shooter/AtRPM", atRpm);
+    Logger.recordOutput("Shooter/SpeedDipThresholdRpm", dipThresholdRpm);
+    Logger.recordOutput("Shooter/SpeedDeficitRpm", speedDeficitRpm);
+    Logger.recordOutput("Shooter/SpeedDipCounterLoops", speedDipCounterLoops);
+    Logger.recordOutput("Shooter/SpeedDipSample", dipSample);
+    Logger.recordOutput("Shooter/SpeedDipActive", speedDipActive);
+    Logger.recordOutput("Shooter/SpeedDipRisingEdge", speedDipRisingEdge);
+    Logger.recordOutput("Shooter/SpeedDipLastTimestampSec", lastSpeedDipTimestampSec);
+    Logger.recordOutput("Shooter/SpeedDipLastMagnitudeRpm", lastSpeedDipMagnitudeRpm);
     SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", velocityRpm);
     SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", targetShooterVelocityRpm);
+    SmartDashboard.putNumber("Shooter/SpeedDeficitRpm", speedDeficitRpm);
+    SmartDashboard.putBoolean("Shooter/SpeedDipActive", speedDipActive);
+    SmartDashboard.putNumber("Shooter/SpeedDipLastTimestampSec", lastSpeedDipTimestampSec);
+    SmartDashboard.putNumber("Shooter/SpeedDipLastMagnitudeRpm", lastSpeedDipMagnitudeRpm);
   }
 
   public Command wheelSysIdQuasistatic(SysIdRoutine.Direction direction) {

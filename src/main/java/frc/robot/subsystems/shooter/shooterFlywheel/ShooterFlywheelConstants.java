@@ -6,6 +6,10 @@ public class ShooterFlywheelConstants {
     public static final double kNoTargetRpm = 0.0;
     public static final double kNoStableTimestamp = -1.0;
     public static final double kTargetEpsilonRpm = 1e-6;
+    public static final double kDipMinTargetRpm = 500.0;
+    public static final double kDipToleranceRpm = 400.0;
+    public static final double kDipToleranceFraction = 0.10;
+    public static final int kDipDebounceLoops = 10;
     // formerly 3500 default target rpm on dash
     public static final double kDashboardDefaultTargetRpm = 3500.0;
     public static final double kDashboardMaxTargetRpm = 5500.0;
@@ -41,12 +45,12 @@ public class ShooterFlywheelConstants {
     // 0.0202 (high by 94)
     // 0.020387
 
-    public static final double kP = 0.00008;
+    public static final double kP = 0.001;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
 
-    public static final double ff_kS = 0.0; // Volts
-    public static final double ff_kV = 0.0; // Volts per (radian per second)
+    public static final double ff_kS = 0.45; // Volts
+    public static final double ff_kV = 0.006; // Volts per (radian per second)
   }
 
   public class Bottom {
@@ -80,10 +84,10 @@ public class ShooterFlywheelConstants {
       1.67, 1.78, 2.22, 2.4, 2.59, 2.85, 3.05, 3.39, 3.5
     };
     public static final double[] kPivotPosition = {
-      2.19, 1.52, 2.904, 3.328, 3.40, 3.5, 3.51, 3.515, 3.58
+      2.19, 2.52, 2.904, 3.328, 3.40, 3.5, 3.51, 3.515, 3.58
     };
     public static final double[] kShooterTargetRpm = {
-      2950, 3150, 3250, 3250, 3250, 3500, 3750, 4075, 4200
+      2950, 3350, 3250, 3250, 3250, 3500, 3750, 4075, 4200
     };
   }
 }

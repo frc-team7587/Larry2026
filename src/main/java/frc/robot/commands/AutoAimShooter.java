@@ -82,7 +82,7 @@ public class AutoAimShooter extends Command {
 
     double pivotSetpoint = pivotMap.get(clampedDistance);
 
-    double shooterTargetRpm = shooterRpmMap.get(clampedDistance);
+    double shooterTargetRpm = (shooterRpmMap.get(clampedDistance) + 600) / 3;
 
     shooterPivot.setPivotPositionVoid(pivotSetpoint);
     shooterFlywheel.setVelocityRpm(shooterTargetRpm);

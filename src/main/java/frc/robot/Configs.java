@@ -72,7 +72,7 @@ public class Configs {
           .velocityConversionFactor(1.0 / ShooterFlywheelConstants.Top.kGearRatio);
 
       // 24 & 8
-      // topMotorConfig.encoder.uvwMeasurementPeriod(8).uvwAverageDepth(4);
+      topMotorConfig.encoder.uvwMeasurementPeriod(25).uvwAverageDepth(8);
 
       // bottomMotorConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
       bottomMotorConfig
