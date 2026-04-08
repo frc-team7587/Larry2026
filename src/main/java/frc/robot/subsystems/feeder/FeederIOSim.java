@@ -1,20 +1,25 @@
 package frc.robot.subsystems.feeder;
 
 public class FeederIOSim implements FeederIO {
-  private double feederSpeed = 0.0;
+  private double feederVelocityRpm = 0.0;
 
   @Override
   public void setFeederSpeed(double speed) {
-    feederSpeed = speed;
+    setVelocity(speed * FeederConstants.kFeederFreeSpeedRpm);
   }
 
   @Override
   public void setFeederVoltage(double volts) {
-    // Assuming a simple linear relationship between voltage and speed for simulation purposes
-    feederSpeed = volts / 12.0; // Normalize to a range of -1.0 to 1.0
+    feederVelocityRpm = volts / 12.0 * FeederConstants.kFeederFreeSpeedRpm;
   }
 
-  public double getFeederSpeed() {
-    return feederSpeed;
+  @Override
+  public void setVelocity(double rpm) {
+    feederVelocityRpm = rpm;
+  }
+
+  @Override
+  public double getFeederVelocityRpm() {
+    return feederVelocityRpm;
   }
 }

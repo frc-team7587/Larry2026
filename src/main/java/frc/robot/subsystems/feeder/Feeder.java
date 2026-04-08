@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.Logger;
 public class Feeder extends SubsystemBase {
   private final FeederIO feeder;
   private final SysIdRoutine sysId;
+  private double targetVelocityRpm = 0.0;
 
   public Feeder(FeederIO feeder) {
     this.feeder = feeder;
@@ -26,12 +27,26 @@ public class Feeder extends SubsystemBase {
 
   public Command feedFuel() {
     return startEnd(
-        () -> feeder.setFeederSpeed(FeederConstants.kOutSpeed), () -> feeder.setFeederSpeed(0));
+        () -> setVelocityRpm(FeederConstants.kOutTargetRpm), this::stop);
   }
 
   public Command feedFuelReverse() {
-    return startEnd(
-        () -> feeder.setFeederSpeed(FeederConstants.kInSpeed), () -> feeder.setFeederSpeed(0));
+    return startEnd(() -> setVelocityRpm(FeederConstants.kInTargetRpm), this::stop);
+  }
+
+  public void setVelocityRpm(double rpm) {
+    targetVelocityRpm = rpm;
+    feeder.setVelocity(rpm);
+  }
+
+  public void stop() {
+    setVelocityRpm(0.0);
+  }
+
+  @Override
+  public void periodic() {
+    Logger.recordOutput("Feeder/TargetVelocityRpm", targetVelocityRpm);
+    Logger.recordOutput("Feeder/VelocityRpm", feeder.getFeederVelocityRpm());
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
