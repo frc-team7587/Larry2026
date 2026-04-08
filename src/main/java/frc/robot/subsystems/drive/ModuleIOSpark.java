@@ -35,6 +35,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import java.util.List;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
@@ -64,7 +65,7 @@ public class ModuleIOSpark implements ModuleIO {
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
-  public ModuleIOSpark(int module) {
+  public ModuleIOSpark(int module, List<SparkBase> motors) {
     zeroRotation =
         switch (module) {
           case 0 -> frontLeftZeroRotation;
@@ -83,6 +84,7 @@ public class ModuleIOSpark implements ModuleIO {
               default -> 0;
             },
             MotorType.kBrushless);
+    motors.add(driveSpark);
     turnSpark =
         new SparkMax(
             switch (module) {
@@ -93,6 +95,7 @@ public class ModuleIOSpark implements ModuleIO {
               default -> 0;
             },
             MotorType.kBrushless);
+    motors.add(turnSpark);
     driveEncoder = driveSpark.getEncoder();
     turnEncoder = turnSpark.getAbsoluteEncoder();
     driveController = driveSpark.getClosedLoopController();

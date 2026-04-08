@@ -2,19 +2,23 @@ package frc.robot.subsystems.intake.intakeFlywheel;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.Configs.IntakeConfig;
+import java.util.List;
 
 public class IntakeFlywheelIOSpark implements IntakeFlywheelIO {
   private final SparkFlex intakeLeaderMotor;
   private final SparkFlex intakeFollowerMotor;
 
-  public IntakeFlywheelIOSpark() {
+  public IntakeFlywheelIOSpark(List<SparkBase> motors) {
     intakeLeaderMotor =
         new SparkFlex(IntakeFlywheelConstants.Intake.kLeaderMotorID, MotorType.kBrushless);
+    motors.add(intakeLeaderMotor);
     intakeFollowerMotor =
         new SparkFlex(IntakeFlywheelConstants.Intake.kFollowerMotorID, MotorType.kBrushless);
+    motors.add(intakeFollowerMotor);
     intakeLeaderMotor.configure(
         IntakeConfig.intakeMotorLeaderConfig,
         ResetMode.kResetSafeParameters,

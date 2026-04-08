@@ -16,6 +16,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
+import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -55,6 +56,7 @@ import frc.robot.subsystems.intake.intakeFlywheel.IntakeFlywheelIOSpark;
 import frc.robot.subsystems.marquee.MarqueeMessage;
 import frc.robot.subsystems.marquee.MarqueeMessageBuilder;
 import frc.robot.subsystems.marquee.MarqueeSubsystem;
+import frc.robot.subsystems.motormonitor.MotorMonitor;
 import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheel;
 import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelConstants;
 import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelIO;
@@ -188,6 +190,7 @@ public class RobotContainer {
   private final ShooterPivot shooterPivot;
   private final Feeder feeder;
   private final Conveyor conveyor;
+  private final MotorMonitor motorMonitor;
 
   // The climber is no longer installed so
   // private final Climber climber = new Climber(new ClimberIOSpark());
@@ -231,23 +234,25 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    ArrayList<SparkBase> motors = new ArrayList<>();
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
         drive =
             new Drive(
                 new GyroIONavX(),
-                new ModuleIOSpark(0),
-                new ModuleIOSpark(1),
-                new ModuleIOSpark(2),
-                new ModuleIOSpark(3));
+                new ModuleIOSpark(0, motors),
+                new ModuleIOSpark(1, motors),
+                new ModuleIOSpark(2, motors),
+                new ModuleIOSpark(3, motors));
         vision = createVision(drive);
-        intakePivot = new IntakePivot(new IntakePivotIOSpark());
-        intake = new IntakeFlywheel(new IntakeFlywheelIOSpark());
-        shooterFlywheel = new ShooterFlywheel(new ShooterFlywheelIOSpark());
-        shooterPivot = new ShooterPivot(new ShooterPivotIOSpark());
-        feeder = new Feeder(new FeederIOSpark());
-        conveyor = new Conveyor(new ConveyorIOSpark());
+        intakePivot = new IntakePivot(new IntakePivotIOSpark(motors));
+        intake = new IntakeFlywheel(new IntakeFlywheelIOSpark(motors));
+        shooterFlywheel = new ShooterFlywheel(new ShooterFlywheelIOSpark(motors));
+        shooterPivot = new ShooterPivot(new ShooterPivotIOSpark(motors));
+        feeder = new Feeder(new FeederIOSpark(motors));
+        conveyor = new Conveyor(new ConveyorIOSpark(motors));
+        motorMonitor = new MotorMonitor(Constants.thresholdMotorTemperatureCelsius, motors);
         break;
 
       case SIM:
@@ -266,6 +271,7 @@ public class RobotContainer {
         shooterPivot = new ShooterPivot(new ShooterPivotIOSim());
         feeder = new Feeder(new FeederIOSim());
         conveyor = new Conveyor(new ConveyorIO() {});
+        motorMonitor = new MotorMonitor(Constants.thresholdMotorTemperatureCelsius, motors);
         break;
 
       default:
@@ -285,6 +291,7 @@ public class RobotContainer {
         shooterPivot = new ShooterPivot(new ShooterPivotIO() {});
         feeder = new Feeder(new FeederIO() {});
         conveyor = new Conveyor(new ConveyorIO() {});
+        motorMonitor = new MotorMonitor(Constants.thresholdMotorTemperatureCelsius, motors);
         break;
     }
 

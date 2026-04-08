@@ -3,11 +3,13 @@ package frc.robot.subsystems.intake.IntakePivot;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import frc.robot.Configs.IntakeConfig;
+import java.util.List;
 
 public class IntakePivotIOSpark implements IntakePivotIO {
   private final SparkMax pivotLeaderMotor;
@@ -16,9 +18,11 @@ public class IntakePivotIOSpark implements IntakePivotIO {
   private final RelativeEncoder pivotLeaderEncoder;
   private final SparkClosedLoopController pivotLeaderController;
 
-  public IntakePivotIOSpark() {
+  public IntakePivotIOSpark(List<SparkBase> motors) {
     pivotLeaderMotor = new SparkMax(IntakePivotConstants.kLeaderID, MotorType.kBrushless);
+    motors.add(pivotLeaderMotor);
     pivotFollowerMotor = new SparkMax(IntakePivotConstants.kFollowerID, MotorType.kBrushless);
+    motors.add(pivotFollowerMotor);
 
     pivotLeaderEncoder = pivotLeaderMotor.getEncoder();
     pivotLeaderController = pivotLeaderMotor.getClosedLoopController();

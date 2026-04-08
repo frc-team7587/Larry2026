@@ -4,12 +4,14 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import frc.robot.Configs.ShooterConfig;
+import java.util.List;
 
 public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
   private final SparkMax topMotor;
@@ -18,11 +20,13 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
   private final RelativeEncoder topEncoder;
   private final SimpleMotorFeedforward feedforward;
 
-  public ShooterFlywheelIOSpark() {
+  public ShooterFlywheelIOSpark(List<SparkBase> motors) {
 
     topMotor = new SparkMax(ShooterFlywheelConstants.Top.kTopMotorID, MotorType.kBrushless);
+    motors.add(topMotor);
     bottomMotor =
         new SparkMax(ShooterFlywheelConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
+    motors.add(bottomMotor);
     feedforward =
         new SimpleMotorFeedforward(
             ShooterFlywheelConstants.Top.ff_kS, ShooterFlywheelConstants.Top.ff_kV);

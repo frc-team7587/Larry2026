@@ -68,6 +68,8 @@
     "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
   },
   "[java]": {
-    "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
+    "editor.defaultFormatter": null,
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false
   }
 }

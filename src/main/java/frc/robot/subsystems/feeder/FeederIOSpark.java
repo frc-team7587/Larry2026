@@ -2,15 +2,18 @@ package frc.robot.subsystems.feeder;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import frc.robot.Configs.FeederConfig;
+import java.util.List;
 
 public class FeederIOSpark implements FeederIO {
   private final SparkMax feederMotor;
 
-  public FeederIOSpark() {
+  public FeederIOSpark(List<SparkBase> motors) {
     feederMotor = new SparkMax(FeederConstants.kMotorID, MotorType.kBrushless);
+    motors.add(feederMotor);
 
     feederMotor.configure(
         FeederConfig.motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

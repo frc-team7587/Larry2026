@@ -4,12 +4,14 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import frc.robot.Configs.ShooterConfig;
+import java.util.List;
 
 public class ShooterPivotIOSpark implements ShooterPivotIO {
   private final SparkMax pivotMotor;
@@ -18,8 +20,9 @@ public class ShooterPivotIOSpark implements ShooterPivotIO {
 
   private final SparkClosedLoopController pivotController;
 
-  public ShooterPivotIOSpark() {
+  public ShooterPivotIOSpark(List<SparkBase> motors) {
     pivotMotor = new SparkMax(ShooterPivotConstants.kPivotMotorID, MotorType.kBrushless);
+    motors.add(pivotMotor);
     pivotEncoder = pivotMotor.getEncoder();
     pivotController = pivotMotor.getClosedLoopController();
 
