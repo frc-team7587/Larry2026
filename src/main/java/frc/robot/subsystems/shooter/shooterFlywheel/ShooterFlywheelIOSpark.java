@@ -61,7 +61,6 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
 
   @Override
   public void setVelocity(double rpm) {
-    // double angularVelocityRadPerSec = rpm * 2.0 * Math.PI / 60.0;
     double feedforwardVolts = feedforward.calculate(rpm);
     topMotor
         .getClosedLoopController()

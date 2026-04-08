@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -117,13 +118,10 @@ public class ShooterFlywheel extends SubsystemBase {
         this::stopShooter);
   }
 
+  @AutoLogOutput(key = "Shooter/AtRPM")
   public boolean atRPM() {
-    if (Math.abs(targetShooterVelocityRpm) <= ShooterFlywheelConstants.Control.kTargetEpsilonRpm
-        || rpmReadyStartTime <= ShooterFlywheelConstants.Control.kNoStableTimestamp) {
-      return false;
-    }
-    return Timer.getFPGATimestamp() - rpmReadyStartTime
-        >= ShooterFlywheelConstants.Top.kSpeedStableTimeSec;
+    return Math.abs(targetShooterVelocityRpm - shooter.getShooterVelocityRpm())
+        < ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
   }
 
   public double getShooterVelocityRpm() {
@@ -173,14 +171,12 @@ public class ShooterFlywheel extends SubsystemBase {
     }
     speedDipActive = speedDipNow;
 
-    boolean atRpm = atRPM();
     Logger.recordOutput("Shooter/VelocityRpm", velocityRpm);
     Logger.recordOutput("Shooter/TargetVelocityRpm", targetShooterVelocityRpm);
     Logger.recordOutput("Shooter/RpmError", rpmError);
     Logger.recordOutput("Shooter/CorrectDirection", correctDirection);
     Logger.recordOutput("Shooter/RpmReadyForFeed", rpmReadyForFeed);
     Logger.recordOutput("Shooter/RpmWithinTolerance", speedWithinTolerance);
-    Logger.recordOutput("Shooter/AtRPM", atRpm);
     Logger.recordOutput("Shooter/SpeedDipThresholdRpm", dipThresholdRpm);
     Logger.recordOutput("Shooter/SpeedDeficitRpm", speedDeficitRpm);
     Logger.recordOutput("Shooter/SpeedDipCounterLoops", speedDipCounterLoops);

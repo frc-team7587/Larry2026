@@ -467,6 +467,7 @@ public class Drive extends SubsystemBase {
     speedIndex = kslowModeConstant;
   }
 
+  // TODO: Migrate Pose Access to RobotContainer
   private void logCurrentZone() {
     Pose2d pose = getPose();
     RebuiltZone zone = RebuiltZoneUtil.getZone(pose);
