@@ -3,6 +3,7 @@ package frc.robot.subsystems.motormonitor;
 import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.TransitionTable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,31 +13,85 @@ import java.util.List;
  */
 public class MotorMonitor extends SubsystemBase {
 
-  private final double thresholdInCelsius;
-  private final List<SparkBase> motors;
+  private enum AlertState {
+    ALL_CLEAR, // All is good. There is nothing to do
+    FAULT_DETECTED, // Report a new fault
+    FAULT_REPORTED, // Waiting for reported fault to clear
+    FAULT_CLEARED, // Report that the fault has been cleared
+  }
 
-  public MotorMonitor(double thresholdInCelsius, List<SparkBase> motors) {
+  private enum Event {
+    SAFE_TEMPERATURE, // Motor is at a safe temperature
+    OVERHEATED, // Motor is overheated
+  }
+
+  private static final TransitionTable<AlertState, Event> TRANSITION_TABLE =
+      TransitionTable.builder(AlertState.FAULT_REPORTED, Event.class)
+          .add(AlertState.ALL_CLEAR, Event.SAFE_TEMPERATURE, AlertState.ALL_CLEAR)
+          .add(AlertState.ALL_CLEAR, Event.OVERHEATED, AlertState.FAULT_DETECTED)
+          .add(AlertState.FAULT_DETECTED, Event.SAFE_TEMPERATURE, AlertState.FAULT_CLEARED)
+          .add(AlertState.FAULT_DETECTED, Event.OVERHEATED, AlertState.FAULT_REPORTED)
+          .add(AlertState.FAULT_REPORTED, Event.SAFE_TEMPERATURE, AlertState.FAULT_CLEARED)
+          .add(AlertState.FAULT_REPORTED, Event.OVERHEATED, AlertState.FAULT_REPORTED)
+          .add(AlertState.FAULT_CLEARED, Event.SAFE_TEMPERATURE, AlertState.ALL_CLEAR)
+          .add(AlertState.FAULT_CLEARED, Event.OVERHEATED, AlertState.FAULT_DETECTED)
+          .build();
+
+  private static class Motor {
+    private final SparkBase motorController;
+    private AlertState state;
+
+    private Motor(SparkBase motorController) {
+      this.motorController = motorController;
+      state = AlertState.ALL_CLEAR;
+    }
+
+    private void transition(Event event) {
+      switch (state = TRANSITION_TABLE.onReceipt(state, event)) {
+        case ALL_CLEAR:
+          break;
+        case FAULT_DETECTED:
+          try (Alert alert =
+              new Alert(
+                  "Overheated motor, ID: " + motorController.getDeviceId(),
+                  Alert.AlertType.kError); ) {
+            alert.set(true);
+          }
+          break;
+        case FAULT_REPORTED:
+          break;
+        case FAULT_CLEARED:
+          try (Alert alert =
+              new Alert(
+                  "Motor id: " + motorController.getDeviceId() + " temperature is now normal",
+                  Alert.AlertType.kInfo)) {
+            alert.set(true);
+          }
+          break;
+      }
+    }
+
+    private double temperature() {
+      return motorController.getMotorTemperature();
+    }
+  }
+
+  private final double thresholdInCelsius;
+  private final List<Motor> motors;
+
+  public MotorMonitor(double thresholdInCelsius, List<SparkBase> motorControllers) {
     this.thresholdInCelsius = thresholdInCelsius;
-    this.motors = new ArrayList<>(motors);
+    this.motors = new ArrayList<>();
+    for (var motorContgroller : motorControllers) {
+      motors.add(new Motor(motorContgroller));
+    }
   }
 
   @Override
   public void periodic() {
     for (var motor : motors) {
-      if (thresholdInCelsius <= motor.getMotorTemperature()) {
-        // Note: since we need to include the motor ID in the
-        //       alert message, we need to create the alert
-        //       when we detect the error. Otherwise, we
-        //       because the alert message is set at
-        //       construction, we could not include
-        //       the motor ID.
-        try (Alert alert =
-            new Alert("Overheated motor, ID: " + motor.getDeviceId(), Alert.AlertType.kError); ) {
-          alert.set(true);
-        } finally {
-          // Auto-close the alert.
-        }
-      }
+      motor.transition(
+          thresholdInCelsius < motor.temperature() ? Event.SAFE_TEMPERATURE : Event.OVERHEATED);
     }
   }
 }
