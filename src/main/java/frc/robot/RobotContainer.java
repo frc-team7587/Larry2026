@@ -484,6 +484,9 @@ public class RobotContainer {
                     () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
                     () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
 
+    operator.x().whileTrue(feeder.feedFuelReverse());
+    operator.x().and(operator.start()).whileTrue(feeder.feedFuel());
+
     operator
         .b()
         .toggleOnTrue(
@@ -502,7 +505,8 @@ public class RobotContainer {
     // turns rpm to radians per second then sends to setVelocityRobot
     // autoAimShotTrigger.whileTrue(
     //     Commands.parallel(
-    //         shooter.dashboardShootTune(), Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+    //         shooterFlywheel.dashboardShootTune(),
+    //         Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     autoAimShotTrigger.whileTrue(
         Commands.parallel(

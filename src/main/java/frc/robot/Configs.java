@@ -105,6 +105,8 @@ public class Configs {
           .voltageCompensation(12.0)
           .smartCurrentLimit(60)
           .inverted(false);
+
+      motorConfig.encoder.positionConversionFactor(1.0 / 9.0).velocityConversionFactor(1.0 / 9.0);
     }
   }
 
