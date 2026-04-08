@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter.shooterFlywheel;
+package frc.robot.subsystems.shooter.ShooterFlywheel;
 
 public class ShooterFlywheelConstants {
   public class Control {

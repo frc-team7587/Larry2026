@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter.shooterPivot;
+package frc.robot.subsystems.shooter.ShooterPivot;
 
 import static edu.wpi.first.units.Units.Volts;
 

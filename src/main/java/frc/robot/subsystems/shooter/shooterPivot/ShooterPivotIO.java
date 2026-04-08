@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter.shooterPivot;
+package frc.robot.subsystems.shooter.ShooterPivot;
 
 public interface ShooterPivotIO {
   /**

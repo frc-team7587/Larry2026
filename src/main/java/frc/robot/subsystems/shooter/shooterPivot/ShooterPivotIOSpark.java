@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter.shooterPivot;
+package frc.robot.subsystems.shooter.ShooterPivot;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;

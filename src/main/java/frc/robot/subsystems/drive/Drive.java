@@ -45,6 +45,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.FieldConstants;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.RebuiltZoneUtil;
+import frc.robot.util.RebuiltZoneUtil.RebuiltZone;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -221,6 +223,7 @@ public class Drive extends SubsystemBase {
     Logger.recordOutput("Drive/Odometry/PoseRotationDeg", getRotation().getDegrees());
     Logger.recordOutput("Drive/Odometry/PoseX", getPose().getX());
     Logger.recordOutput("Drive/Odometry/PoseY", getPose().getY());
+    logCurrentZone();
   }
 
   /** Updates the field relative position of the robot. */
@@ -376,6 +379,10 @@ public class Drive extends SubsystemBase {
     return maxSpeedMetersPerSec / driveBaseRadius;
   }
 
+  public RebuiltZone getCurrentZone() {
+    return RebuiltZoneUtil.getZone(getPose());
+  }
+
   /**
    * Drive open loop with percent out.
    *
@@ -458,6 +465,20 @@ public class Drive extends SubsystemBase {
 
   public void applySlowMode() {
     speedIndex = kslowModeConstant;
+  }
+
+  private void logCurrentZone() {
+    Pose2d pose = getPose();
+    RebuiltZone zone = RebuiltZoneUtil.getZone(pose);
+    double[] zoneBoundaries = RebuiltZoneUtil.getZoneBoundariesMeters();
+
+    Logger.recordOutput("Drive/Zone/Name", zone.name());
+    Logger.recordOutput("Drive/Zone/Id", zone.getId());
+    Logger.recordOutput("Drive/Zone/BlueEndXMax", zoneBoundaries[0]);
+    Logger.recordOutput("Drive/Zone/CenterXMax", zoneBoundaries[1]);
+    Logger.recordOutput("Drive/Zone/RedEndXMin", zoneBoundaries[2]);
+    Logger.recordOutput("Drive/Zone/LowerLaneYMax", zoneBoundaries[3]);
+    Logger.recordOutput("Drive/Zone/UpperLaneYMin", zoneBoundaries[4]);
   }
 
   public void resetSpeedIndex() {

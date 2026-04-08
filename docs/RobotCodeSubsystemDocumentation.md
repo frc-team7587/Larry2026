@@ -133,14 +133,14 @@ Two mechanism groups:
 ## `subsystems/shooter`
 Two mechanism groups:
 
-### `shooter/shooterFlywheel`
+### `shooter/ShooterFlywheel`
 - `ShooterFlywheel.java`
 - `ShooterFlywheelIO.java`
 - `ShooterFlywheelIOSpark.java`
 - `ShooterFlywheelIOSim.java`
 - `ShooterFlywheelConstants.java`
 
-### `shooter/shooterPivot`
+### `shooter/ShooterPivot`
 - `ShooterPivot.java`
 - `ShooterPivotIO.java`
 - `ShooterPivotIOSpark.java`
@@ -222,7 +222,7 @@ These assets are deployed to the roboRIO by the Gradle deploy task.
 2. `Robot.java`
 3. `RobotContainer.java`
 4. `subsystems/drive/Drive.java`
-5. One representative mechanism stack (example: `shooterFlywheel` folder)
+5. One representative mechanism stack (example: `ShooterFlywheel` folder)
 6. `Configs.java`
 7. `FieldConstants.java`
 8. `commands/` package
