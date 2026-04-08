@@ -484,8 +484,8 @@ public class RobotContainer {
                     () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
                     () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
 
-    operator.x().whileTrue(feeder.feedFuelReverse());
-    operator.x().and(operator.start()).whileTrue(feeder.feedFuel());
+    operator.x().whileTrue(feeder.runStatic());
+    // operator.x().and(operator.start()).whileTrue(feeder.feedFuel());
 
     operator
         .b()

@@ -6,19 +6,23 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import frc.robot.Configs.FeederConfig;
 
 public class FeederIOSpark implements FeederIO {
   private final SparkMax feederMotor;
   private final RelativeEncoder feederEncoder;
   private final SparkClosedLoopController feederController;
+  private final SimpleMotorFeedforward feedforwardController;
 
   public FeederIOSpark() {
     feederMotor = new SparkMax(FeederConstants.kMotorID, MotorType.kBrushless);
     feederEncoder = feederMotor.getEncoder();
     feederController = feederMotor.getClosedLoopController();
+    feedforwardController = new SimpleMotorFeedforward(FeederConstants.kS, FeederConstants.kV);
 
     feederMotor.configure(
         FeederConfig.motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -36,7 +40,12 @@ public class FeederIOSpark implements FeederIO {
 
   @Override
   public void setVelocity(double rpm) {
-    feederController.setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+    feederController.setSetpoint(
+        rpm,
+        ControlType.kVelocity,
+        ClosedLoopSlot.kSlot0,
+        feedforwardController.calculate(rpm),
+        ArbFFUnits.kVoltage);
   }
 
   @Override

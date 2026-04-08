@@ -6,11 +6,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Feeder extends SubsystemBase {
   private final FeederIO feeder;
   private final SysIdRoutine sysId;
   private double targetVelocityRpm = 0.0;
+
+  public static final LoggedNetworkNumber KS = new LoggedNetworkNumber("Feeder/KS", 0.0);
 
   public Feeder(FeederIO feeder) {
     this.feeder = feeder;
@@ -26,12 +29,15 @@ public class Feeder extends SubsystemBase {
   }
 
   public Command feedFuel() {
-    return startEnd(
-        () -> setVelocityRpm(FeederConstants.kOutTargetRpm), this::stop);
+    return startEnd(() -> setVelocityRpm(FeederConstants.kOutTargetRpm), this::stop);
   }
 
   public Command feedFuelReverse() {
     return startEnd(() -> setVelocityRpm(FeederConstants.kInTargetRpm), this::stop);
+  }
+
+  public Command runStatic() {
+    return runEnd(() -> feeder.setFeederVoltage(KS.get()), this::stop);
   }
 
   public void setVelocityRpm(double rpm) {
