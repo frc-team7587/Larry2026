@@ -5,12 +5,12 @@ public class FeederIOSim implements FeederIO {
 
   @Override
   public void setFeederSpeed(double speed) {
-    setVelocity(speed * FeederConstants.kFeederFreeSpeedRpm);
+    setVelocity(speed);
   }
 
   @Override
   public void setFeederVoltage(double volts) {
-    feederVelocityRpm = volts / 12.0 * FeederConstants.kFeederFreeSpeedRpm;
+    feederVelocityRpm = volts / 12.0;
   }
 
   @Override

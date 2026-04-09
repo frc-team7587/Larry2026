@@ -30,7 +30,7 @@ public class FeederIOSpark implements FeederIO {
 
   @Override
   public void setFeederSpeed(double speed) {
-    setVelocity(speed * FeederConstants.kFeederFreeSpeedRpm);
+    setVelocity(speed);
   }
 
   @Override
