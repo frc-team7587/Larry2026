@@ -39,11 +39,15 @@ public class MotorMonitor extends SubsystemBase {
 
   private static class Motor {
     private final SparkBase motorController;
+    private final Alert alert;
     private AlertState state;
 
     private Motor(SparkBase motorController) {
       this.motorController = motorController;
       state = AlertState.ALL_CLEAR;
+      alert =
+          new Alert(
+              "Overheated motor, ID: " + motorController.getDeviceId(), Alert.AlertType.kError);
     }
 
     private void transition(Event event) {
@@ -51,22 +55,12 @@ public class MotorMonitor extends SubsystemBase {
         case ALL_CLEAR:
           break;
         case FAULT_DETECTED:
-          try (Alert alert =
-              new Alert(
-                  "Overheated motor, ID: " + motorController.getDeviceId(),
-                  Alert.AlertType.kError); ) {
-            alert.set(true);
-          }
+          alert.set(true);
           break;
         case FAULT_REPORTED:
           break;
         case FAULT_CLEARED:
-          try (Alert alert =
-              new Alert(
-                  "Motor id: " + motorController.getDeviceId() + " temperature is now normal",
-                  Alert.AlertType.kInfo)) {
-            alert.set(true);
-          }
+          alert.set(true);
           break;
       }
     }
