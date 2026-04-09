@@ -9,9 +9,12 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Feeder extends SubsystemBase {
+  private static final double kVelocityEpsilonRpm = 1e-3;
+
   private final FeederIO feeder;
   private final SysIdRoutine sysId;
-  private double targetVelocityRpm = 0.0;
+  private double appliedVelocityRpm = 0.0;
+  private boolean idleArmed = false;
 
   public static final LoggedNetworkNumber KS = new LoggedNetworkNumber("Feeder/KS", 0.0);
 
@@ -36,23 +39,43 @@ public class Feeder extends SubsystemBase {
     return startEnd(() -> setVelocityRpm(FeederConstants.kInTargetRpm), this::stop);
   }
 
+  // Tuning only - managed in Elastic
   public Command runStatic() {
-    return runEnd(() -> feeder.setFeederVoltage(KS.get()), this::stop);
+    return runEnd(() -> feeder.setFeederVoltage(KS.get()), this::hardStop);
   }
 
   public void setVelocityRpm(double rpm) {
-    targetVelocityRpm = rpm;
-    feeder.setVelocity(rpm);
+    if (Math.abs(rpm) > kVelocityEpsilonRpm) {
+      idleArmed = true;
+    }
+    applyVelocity(idleSetpointFor(rpm));
   }
 
   public void stop() {
-    setVelocityRpm(0.0);
+    applyVelocity(idleSetpointFor(0.0));
+  }
+
+  public void hardStop() {
+    applyVelocity(0.0);
+  }
+
+  private double idleSetpointFor(double requestedRpm) {
+    if (Math.abs(requestedRpm) > kVelocityEpsilonRpm) {
+      return requestedRpm;
+    }
+    return idleArmed ? FeederConstants.kIdleTargetRpm : 0.0;
+  }
+
+  private void applyVelocity(double rpm) {
+    appliedVelocityRpm = rpm;
+    feeder.setVelocity(rpm);
   }
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Feeder/TargetVelocityRpm", targetVelocityRpm);
+    Logger.recordOutput("Feeder/TargetVelocityRpm", appliedVelocityRpm);
     Logger.recordOutput("Feeder/VelocityRpm", feeder.getFeederVelocityRpm());
+    Logger.recordOutput("Feeder/IdleArmed", idleArmed);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

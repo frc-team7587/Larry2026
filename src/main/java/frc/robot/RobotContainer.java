@@ -388,7 +388,7 @@ public class RobotContainer {
   private Command createAutoAimAndFeedCommand() {
     return Commands.parallel(
         new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder),
-        Commands.waitSeconds(0.8).andThen(feeder.feedFuel()));
+        Commands.waitUntil(shooterFlywheel::atRPM).andThen(feeder.feedFuel()));
   }
 
   private Command createOperatorRumbleCommand(RumbleType rumbleType) {
@@ -398,20 +398,20 @@ public class RobotContainer {
 
   private double getDriverForwardInput() {
     return -MathUtil.applyDeadband(
-        getDriverTranslationScale() * driver.getLeftY(), controllerDeadband);
+        getDriverTranslationScale() * operator.getLeftY(), controllerDeadband);
   }
 
   private double getDriverStrafeInput() {
     return -MathUtil.applyDeadband(
-        getDriverTranslationScale() * driver.getLeftX(), controllerDeadband);
+        getDriverTranslationScale() * operator.getLeftX(), controllerDeadband);
   }
 
   private double getDriverTurnInput() {
-    return -MathUtil.applyDeadband(driverTurnScale * driver.getRightX(), controllerDeadband);
+    return -MathUtil.applyDeadband(driverTurnScale * operator.getRightX(), controllerDeadband);
   }
 
   private double getDriverTranslationScale() {
-    return 1 - driverTranslationTriggerScale * driver.getRightTriggerAxis();
+    return 1 - driverTranslationTriggerScale * operator.getRightTriggerAxis();
   }
 
   /**
@@ -451,14 +451,14 @@ public class RobotContainer {
   }
 
   private double getDriverScaledLeftY() {
-    return -driver.getLeftY() * getDriverSlowModeScale();
+    return -operator.getLeftY() * getDriverSlowModeScale();
   }
 
   private double getDriverScaledLeftX() {
-    return -driver.getLeftX() * getDriverSlowModeScale();
+    return -operator.getLeftX() * getDriverSlowModeScale();
   }
 
   private double getDriverSlowModeScale() {
-    return driver.rightTrigger().getAsBoolean() ? driverSlowModeScale : 1.0;
+    return operator.rightTrigger().getAsBoolean() ? driverSlowModeScale : 1.0;
   }
 }
