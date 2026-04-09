@@ -1,6 +1,21 @@
 package frc.robot.subsystems.shooter.ShooterFlywheel;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ShooterFlywheelIO {
+  @AutoLog
+  public static class ShooterFlywheelIOInputs {
+    public boolean topConnected = false;
+    public boolean bottomConnected = false;
+    public double velocityRpm = 0.0;
+    public double topAppliedVolts = 0.0;
+    public double bottomAppliedVolts = 0.0;
+    public double topCurrentAmps = 0.0;
+    public double bottomCurrentAmps = 0.0;
+  }
+
+  default void updateInputs(ShooterFlywheelIOInputs inputs) {}
+
   /**
    * Sets the speed of the shooter motors.
    *

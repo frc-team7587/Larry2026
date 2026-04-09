@@ -16,6 +16,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 public class IntakePivot extends SubsystemBase {
   private final IntakePivotIO pivot;
+  private final IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
   private final SysIdRoutine pivotSysId;
 
   private final LoggedMechanism2d mechPanel;
@@ -79,9 +80,11 @@ public class IntakePivot extends SubsystemBase {
 
   @Override
   public void periodic() {
+    pivot.updateInputs(inputs);
+    Logger.processInputs("Intake/Pivot", inputs);
     Logger.recordOutput("intakeMech", mechPanel);
-    Logger.recordOutput("Intake/PivotPosition", pivot.getPivotPosition());
+    Logger.recordOutput("Intake/PivotPosition", inputs.position);
     // turns encoder position to degrees
-    mechIntake.setAngle(new Rotation2d(pivot.getPivotPosition() - 90.0));
+    mechIntake.setAngle(new Rotation2d(inputs.position - 90.0));
   }
 }

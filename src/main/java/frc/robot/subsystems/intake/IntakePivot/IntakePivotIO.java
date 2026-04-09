@@ -1,6 +1,18 @@
 package frc.robot.subsystems.intake.IntakePivot;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface IntakePivotIO {
+  @AutoLog
+  public static class IntakePivotIOInputs {
+    public boolean connected = false;
+    public double position = 0.0;
+    public double appliedVolts = 0.0;
+    public double currentAmps = 0.0;
+  }
+
+  default void updateInputs(IntakePivotIOInputs inputs) {}
+
   /**
    * Sets the speed of the pivot motors.
    *

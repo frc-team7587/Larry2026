@@ -37,6 +37,20 @@ public class Vision extends SubsystemBase {
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
+  private static class CameraLogData {
+    final List<Pose3d> tagPoses = new LinkedList<>();
+    final List<Pose3d> robotPoses = new LinkedList<>();
+    final List<Pose3d> acceptedRobotPoses = new LinkedList<>();
+    final List<Pose3d> rejectedRobotPoses = new LinkedList<>();
+  }
+
+  private static class VisionLogSummary {
+    final List<Pose3d> tagPoses = new LinkedList<>();
+    final List<Pose3d> robotPoses = new LinkedList<>();
+    final List<Pose3d> acceptedRobotPoses = new LinkedList<>();
+    final List<Pose3d> rejectedRobotPoses = new LinkedList<>();
+  }
+
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
     this.io = io;
@@ -77,95 +91,119 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    for (int i = 0; i < io.length; i++) {
-      io[i].updateInputs(inputs[i]);
-      Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
-    }
-
-    List<Pose3d> allTagPoses = new LinkedList<>();
-    List<Pose3d> allRobotPoses = new LinkedList<>();
-    List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
-    List<Pose3d> allRobotPosesRejected = new LinkedList<>();
-
+    updateCameraInputs();
+    VisionLogSummary summary = new VisionLogSummary();
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
-      disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
-      boolean cameraEnabled = isCameraEnabled(cameraIndex);
-
-      List<Pose3d> tagPoses = new LinkedList<>();
-      List<Pose3d> robotPoses = new LinkedList<>();
-      List<Pose3d> robotPosesAccepted = new LinkedList<>();
-      List<Pose3d> robotPosesRejected = new LinkedList<>();
-
-      for (int tagId : inputs[cameraIndex].tagIds) {
-        var tagPose = aprilTagLayout.getTagPose(tagId);
-        if (tagPose.isPresent()) {
-          tagPoses.add(tagPose.get());
-        }
-      }
-
-      for (var observation : inputs[cameraIndex].poseObservations) {
-        boolean rejectPose = !cameraEnabled || shouldRejectPose(observation);
-
-        robotPoses.add(observation.pose());
-        if (rejectPose) {
-          robotPosesRejected.add(observation.pose());
-        } else {
-          robotPosesAccepted.add(observation.pose());
-        }
-
-        if (rejectPose) {
-          continue;
-        }
-
-        double stdDevFactor =
-            Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-        double linearStdDev = linearStdDevBaseline * stdDevFactor;
-        double angularStdDev = angularStdDevBaseline * stdDevFactor;
-        if (observation.type() == PoseObservationType.MEGATAG_2) {
-          linearStdDev *= linearStdDevMegatag2Factor;
-          angularStdDev *= angularStdDevMegatag2Factor;
-        }
-        if (cameraIndex < cameraStdDevFactors.length) {
-          linearStdDev *= cameraStdDevFactors[cameraIndex];
-          angularStdDev *= cameraStdDevFactors[cameraIndex];
-        }
-
-        consumer.accept(
-            observation.pose().toPose2d(),
-            observation.timestamp(),
-            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
-      }
-
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
-          tagPoses.toArray(new Pose3d[tagPoses.size()]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/PoseObservations",
-          robotPoses.toArray(new Pose3d[robotPoses.size()]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/PoseObservationsAccepted",
-          robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/PoseObservationsRejected",
-          robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/Enabled", cameraEnabled);
-      allTagPoses.addAll(tagPoses);
-      allRobotPoses.addAll(robotPoses);
-      allRobotPosesAccepted.addAll(robotPosesAccepted);
-      allRobotPosesRejected.addAll(robotPosesRejected);
+      CameraLogData cameraLogData = processCamera(cameraIndex);
+      logCameraData(cameraIndex, cameraLogData);
+      addToSummary(summary, cameraLogData);
     }
 
+    logSummary(summary);
+  }
+
+  private void updateCameraInputs() {
+    for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+      io[cameraIndex].updateInputs(inputs[cameraIndex]);
+      Logger.processInputs("Vision/Camera" + Integer.toString(cameraIndex), inputs[cameraIndex]);
+    }
+  }
+
+  private CameraLogData processCamera(int cameraIndex) {
+    disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
+    boolean cameraEnabled = isCameraEnabled(cameraIndex);
+    CameraLogData cameraLogData = new CameraLogData();
+
+    collectTagPoses(cameraIndex, cameraLogData);
+    processObservations(cameraIndex, cameraEnabled, cameraLogData);
+    return cameraLogData;
+  }
+
+  private void collectTagPoses(int cameraIndex, CameraLogData cameraLogData) {
+    for (int tagId : inputs[cameraIndex].tagIds) {
+      var tagPose = aprilTagLayout.getTagPose(tagId);
+      if (tagPose.isPresent()) {
+        cameraLogData.tagPoses.add(tagPose.get());
+      }
+    }
+  }
+
+  private void processObservations(
+      int cameraIndex, boolean cameraEnabled, CameraLogData cameraLogData) {
+    for (var observation : inputs[cameraIndex].poseObservations) {
+      boolean rejectPose = !cameraEnabled || shouldRejectPose(observation);
+
+      cameraLogData.robotPoses.add(observation.pose());
+      if (rejectPose) {
+        cameraLogData.rejectedRobotPoses.add(observation.pose());
+      } else {
+        cameraLogData.acceptedRobotPoses.add(observation.pose());
+      }
+
+      if (rejectPose) {
+        continue;
+      }
+
+      consumer.accept(
+          observation.pose().toPose2d(),
+          observation.timestamp(),
+          calculateStdDevs(cameraIndex, observation));
+    }
+  }
+
+  private Matrix<N3, N1> calculateStdDevs(int cameraIndex, VisionIO.PoseObservation observation) {
+    double stdDevFactor = Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+    double linearStdDev = linearStdDevBaseline * stdDevFactor;
+    double angularStdDev = angularStdDevBaseline * stdDevFactor;
+    if (observation.type() == PoseObservationType.MEGATAG_2) {
+      linearStdDev *= linearStdDevMegatag2Factor;
+      angularStdDev *= angularStdDevMegatag2Factor;
+    }
+    if (cameraIndex < cameraStdDevFactors.length) {
+      linearStdDev *= cameraStdDevFactors[cameraIndex];
+      angularStdDev *= cameraStdDevFactors[cameraIndex];
+    }
+    return VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev);
+  }
+
+  private void logCameraData(int cameraIndex, CameraLogData cameraLogData) {
+    String cameraPath = "Vision/Camera" + Integer.toString(cameraIndex);
     Logger.recordOutput(
-        "Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+        cameraPath + "/TagPoses",
+        cameraLogData.tagPoses.toArray(new Pose3d[cameraLogData.tagPoses.size()]));
     Logger.recordOutput(
-        "Vision/Summary/PoseObservations", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
+        cameraPath + "/PoseObservations",
+        cameraLogData.robotPoses.toArray(new Pose3d[cameraLogData.robotPoses.size()]));
+    Logger.recordOutput(
+        cameraPath + "/PoseObservationsAccepted",
+        cameraLogData.acceptedRobotPoses.toArray(
+            new Pose3d[cameraLogData.acceptedRobotPoses.size()]));
+    Logger.recordOutput(
+        cameraPath + "/PoseObservationsRejected",
+        cameraLogData.rejectedRobotPoses.toArray(
+            new Pose3d[cameraLogData.rejectedRobotPoses.size()]));
+    Logger.recordOutput(cameraPath + "/Enabled", isCameraEnabled(cameraIndex));
+  }
+
+  private void addToSummary(VisionLogSummary summary, CameraLogData cameraLogData) {
+    summary.tagPoses.addAll(cameraLogData.tagPoses);
+    summary.robotPoses.addAll(cameraLogData.robotPoses);
+    summary.acceptedRobotPoses.addAll(cameraLogData.acceptedRobotPoses);
+    summary.rejectedRobotPoses.addAll(cameraLogData.rejectedRobotPoses);
+  }
+
+  private void logSummary(VisionLogSummary summary) {
+    Logger.recordOutput(
+        "Vision/Summary/TagPoses", summary.tagPoses.toArray(new Pose3d[summary.tagPoses.size()]));
+    Logger.recordOutput(
+        "Vision/Summary/PoseObservations",
+        summary.robotPoses.toArray(new Pose3d[summary.robotPoses.size()]));
     Logger.recordOutput(
         "Vision/Summary/PoseObservationsAccepted",
-        allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
+        summary.acceptedRobotPoses.toArray(new Pose3d[summary.acceptedRobotPoses.size()]));
     Logger.recordOutput(
         "Vision/Summary/PoseObservationsRejected",
-        allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+        summary.rejectedRobotPoses.toArray(new Pose3d[summary.rejectedRobotPoses.size()]));
     Logger.recordOutput(
         "Vision/Summary/HubDistanceMeters", getLatestHubDistanceMeters().orElse(-1.0));
   }

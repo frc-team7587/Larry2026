@@ -1,6 +1,18 @@
 package frc.robot.subsystems.shooter.ShooterPivot;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ShooterPivotIO {
+  @AutoLog
+  public static class ShooterPivotIOInputs {
+    public boolean connected = false;
+    public double position = 0.0;
+    public double appliedVolts = 0.0;
+    public double currentAmps = 0.0;
+  }
+
+  default void updateInputs(ShooterPivotIOInputs inputs) {}
+
   /**
    * Sets the speed of the pivot motor.
    *

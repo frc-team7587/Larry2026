@@ -1,6 +1,18 @@
 package frc.robot.subsystems.climber;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ClimberIO {
+  @AutoLog
+  public static class ClimberIOInputs {
+    public boolean connected = false;
+    public double positionRotations = 0.0;
+    public double appliedVolts = 0.0;
+    public double currentAmps = 0.0;
+  }
+
+  default void updateInputs(ClimberIOInputs inputs) {}
+
   /**
    * Sets the speed of the climber motor.
    *

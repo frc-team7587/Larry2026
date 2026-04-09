@@ -1,6 +1,7 @@
 package frc.robot.subsystems.intake.intakeFlywheel;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -23,6 +24,15 @@ public class IntakeFlywheelIOSpark implements IntakeFlywheelIO {
         IntakeConfig.intakeMotorFollowerConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
+  }
+
+  @Override
+  public void updateInputs(IntakeFlywheelIOInputs inputs) {
+    inputs.connected = intakeLeaderMotor.getLastError() == REVLibError.kOk;
+    inputs.velocityRpm = intakeLeaderMotor.getEncoder().getVelocity();
+    inputs.appliedVolts = intakeLeaderMotor.getAppliedOutput() * intakeLeaderMotor.getBusVoltage();
+    inputs.currentAmps =
+        intakeLeaderMotor.getOutputCurrent() + intakeFollowerMotor.getOutputCurrent();
   }
 
   @Override

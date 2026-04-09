@@ -30,14 +30,30 @@ public class ShooterPivotIOSim implements ShooterPivotIO {
           false,
           0);
 
+  @Override
+  public void updateInputs(ShooterPivotIOInputs inputs) {
+    inputs.connected = true;
+    inputs.position = sim.getAngleRads();
+    inputs.appliedVolts = appliedVolts.in(Volts);
+    inputs.currentAmps = sim.getCurrentDrawAmps();
+  }
+
   public void runAngle(double angle, double velocity) {
-    sim.setInputVoltage(
-        controller.calculate(sim.getAngleRads(), angle) + feedforward.calculate(angle, velocity));
+    double volts =
+        controller.calculate(sim.getAngleRads(), angle) + feedforward.calculate(angle, velocity);
+    appliedVolts = Volts.of(volts);
+    sim.setInputVoltage(volts);
   }
 
   @Override
   public void setPivotPosition(double position) {
     runAngle(position, 1);
+  }
+
+  @Override
+  public void setPivotVoltage(double volts) {
+    appliedVolts = Volts.of(volts);
+    sim.setInputVoltage(volts);
   }
 
   @Override

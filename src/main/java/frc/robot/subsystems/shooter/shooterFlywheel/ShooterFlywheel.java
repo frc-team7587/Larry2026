@@ -23,6 +23,7 @@ public class ShooterFlywheel extends SubsystemBase {
   private final LoggedNetworkNumber Ks = new LoggedNetworkNumber("ks", 0);
 
   private final ShooterFlywheelIO io;
+  private final ShooterFlywheelIOInputsAutoLogged inputs = new ShooterFlywheelIOInputsAutoLogged();
   private final SysIdRoutine wheelSysId;
   private double targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
   private double rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
@@ -129,16 +130,18 @@ public class ShooterFlywheel extends SubsystemBase {
 
   @AutoLogOutput(key = "Shooter/AtRPM")
   public boolean atRPM() {
-    return isVelocityWithinTolerance(targetShooterVelocityRpm, io.getShooterVelocityRpm());
+    return isVelocityWithinTolerance(targetShooterVelocityRpm, inputs.velocityRpm);
   }
 
   public double getShooterVelocityRpm() {
-    return io.getShooterVelocityRpm();
+    return inputs.velocityRpm;
   }
 
   @Override
   public void periodic() {
-    ShooterTelemetry telemetry = updateTelemetry(io.getShooterVelocityRpm());
+    io.updateInputs(inputs);
+    Logger.processInputs("Shooter/Flywheel", inputs);
+    ShooterTelemetry telemetry = updateTelemetry(inputs.velocityRpm);
     logTelemetry(telemetry);
     updateDashboard(telemetry);
   }

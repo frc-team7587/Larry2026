@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 public class IntakeFlywheelIOSim implements IntakeFlywheelIO {
   private final DCMotor m_motor = DCMotor.getNEO(1);
+  private double appliedVolts = 0.0;
 
   private final FlywheelSim sim =
       new FlywheelSim(
@@ -20,7 +21,22 @@ public class IntakeFlywheelIOSim implements IntakeFlywheelIO {
           m_motor);
 
   @Override
+  public void updateInputs(IntakeFlywheelIOInputs inputs) {
+    inputs.connected = true;
+    inputs.velocityRpm = sim.getAngularVelocityRPM();
+    inputs.appliedVolts = appliedVolts;
+    inputs.currentAmps = sim.getCurrentDrawAmps();
+  }
+
+  @Override
+  public void setIntakeSpeed(double speed) {
+    appliedVolts = speed * 12.0;
+    sim.setInputVoltage(appliedVolts);
+  }
+
+  @Override
   public void setIntakeVoltage(double voltage) {
+    appliedVolts = voltage;
     sim.setInputVoltage(voltage);
   }
 }

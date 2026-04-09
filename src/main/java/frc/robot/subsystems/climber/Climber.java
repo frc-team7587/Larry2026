@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
   private final ClimberIO climber;
+  private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
   private final SysIdRoutine sysId;
 
   public Climber(ClimberIO climber) {
@@ -26,7 +27,9 @@ public class Climber extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Climber/PositionRotations", climber.getClimberPosition());
+    climber.updateInputs(inputs);
+    Logger.processInputs("Climber", inputs);
+    Logger.recordOutput("Climber/PositionRotations", inputs.positionRotations);
   }
 
   public Command climbUp() {

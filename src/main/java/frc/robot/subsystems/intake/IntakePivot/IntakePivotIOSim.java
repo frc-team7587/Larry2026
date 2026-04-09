@@ -29,8 +29,23 @@ public class IntakePivotIOSim implements IntakePivotIO {
           0);
 
   @Override
+  public void updateInputs(IntakePivotIOInputs inputs) {
+    inputs.connected = true;
+    inputs.position = pivotSim.getAngleRads();
+    inputs.appliedVolts = appliedVolts.in(Volts);
+    inputs.currentAmps = pivotSim.getCurrentDrawAmps();
+  }
+
+  @Override
   public void setPivotSpeed(double speed) {
+    appliedVolts = Volts.of(speed * 12.0);
     pivotSim.setInput(speed);
+  }
+
+  @Override
+  public void setPivotVoltage(double volts) {
+    appliedVolts = Volts.of(volts);
+    pivotSim.setInputVoltage(volts);
   }
 
   @Override

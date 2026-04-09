@@ -1,6 +1,7 @@
 package frc.robot.subsystems.intake.IntakePivot;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -31,6 +32,15 @@ public class IntakePivotIOSpark implements IntakePivotIO {
         IntakeConfig.pivotMotorFollowerConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
+  }
+
+  @Override
+  public void updateInputs(IntakePivotIOInputs inputs) {
+    inputs.connected = pivotLeaderMotor.getLastError() == REVLibError.kOk;
+    inputs.position = pivotLeaderEncoder.getPosition();
+    inputs.appliedVolts = pivotLeaderMotor.getAppliedOutput() * pivotLeaderMotor.getBusVoltage();
+    inputs.currentAmps =
+        pivotLeaderMotor.getOutputCurrent() + pivotFollowerMotor.getOutputCurrent();
   }
 
   @Override

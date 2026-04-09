@@ -1,6 +1,7 @@
 package frc.robot.subsystems.climber;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -21,6 +22,14 @@ public class ClimberIOSpark implements ClimberIO {
 
     climberMotor.configure(
         ClimberConfig.motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
+  @Override
+  public void updateInputs(ClimberIOInputs inputs) {
+    inputs.connected = climberMotor.getLastError() == REVLibError.kOk;
+    inputs.positionRotations = climberEncoder.getPosition();
+    inputs.appliedVolts = climberMotor.getAppliedOutput() * climberMotor.getBusVoltage();
+    inputs.currentAmps = climberMotor.getOutputCurrent();
   }
 
   @Override

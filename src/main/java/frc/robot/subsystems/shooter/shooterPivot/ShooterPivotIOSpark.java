@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter.ShooterPivot;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -27,6 +28,14 @@ public class ShooterPivotIOSpark implements ShooterPivotIO {
         ShooterConfig.pivotMotorConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
+  }
+
+  @Override
+  public void updateInputs(ShooterPivotIOInputs inputs) {
+    inputs.connected = pivotMotor.getLastError() == REVLibError.kOk;
+    inputs.position = pivotEncoder.getPosition();
+    inputs.appliedVolts = pivotMotor.getAppliedOutput() * pivotMotor.getBusVoltage();
+    inputs.currentAmps = pivotMotor.getOutputCurrent();
   }
 
   @Override

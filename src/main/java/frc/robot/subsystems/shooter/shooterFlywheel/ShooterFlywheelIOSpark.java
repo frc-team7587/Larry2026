@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter.ShooterFlywheel;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -37,6 +38,17 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
         ShooterConfig.bottomMotorConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
+  }
+
+  @Override
+  public void updateInputs(ShooterFlywheelIOInputs inputs) {
+    inputs.topConnected = topMotor.getLastError() == REVLibError.kOk;
+    inputs.bottomConnected = bottomMotor.getLastError() == REVLibError.kOk;
+    inputs.velocityRpm = topEncoder.getVelocity();
+    inputs.topAppliedVolts = topMotor.getAppliedOutput() * topMotor.getBusVoltage();
+    inputs.bottomAppliedVolts = bottomMotor.getAppliedOutput() * bottomMotor.getBusVoltage();
+    inputs.topCurrentAmps = topMotor.getOutputCurrent();
+    inputs.bottomCurrentAmps = bottomMotor.getOutputCurrent();
   }
 
   @Override

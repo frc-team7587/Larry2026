@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class ShooterPivot extends SubsystemBase {
   private final ShooterPivotIO shooter;
+  private final ShooterPivotIOInputsAutoLogged inputs = new ShooterPivotIOInputsAutoLogged();
   private final SysIdRoutine pivotSysId;
 
   public ShooterPivot(ShooterPivotIO shooterPivotIO) {
@@ -57,7 +58,9 @@ public class ShooterPivot extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double pivotPosition = shooter.getPivotPosition();
+    shooter.updateInputs(inputs);
+    Logger.processInputs("Shooter/Pivot", inputs);
+    double pivotPosition = inputs.position;
     Logger.recordOutput("Shooter/PivotEncoderPosition", pivotPosition);
     Logger.recordOutput("Shooter/PivotPosition", pivotPosition);
     SmartDashboard.putNumber("Shooter/PivotEncoderPosition", pivotPosition);

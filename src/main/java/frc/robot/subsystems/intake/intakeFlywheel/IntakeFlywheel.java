@@ -18,6 +18,7 @@ public class IntakeFlywheel extends SubsystemBase {
   }
 
   private final IntakeFlywheelIO intake;
+  private final IntakeFlywheelIOInputsAutoLogged inputs = new IntakeFlywheelIOInputsAutoLogged();
   private final SysIdRoutine intakeSysId;
   private double commandedSpeed = 0.0;
   private boolean boostActive = false; // never start w/ boost active lol
@@ -101,6 +102,8 @@ public class IntakeFlywheel extends SubsystemBase {
   // periodic updates from the enum tree
   @Override
   public void periodic() {
+    intake.updateInputs(inputs);
+    Logger.processInputs("Intake/Flywheel", inputs);
     Logger.recordOutput("Intake/Flywheel/CommandedSpeed", commandedSpeed);
     Logger.recordOutput("Intake/Flywheel/BoostActive", boostActive);
     Logger.recordOutput("Intake/Flywheel/State", intakeState.toString());
