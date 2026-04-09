@@ -20,7 +20,5 @@ public interface ShooterFlywheelIO {
     return 0.0;
   }
 
-  default void setShooterRPM(double rpm) {}
-
   default void setVelocity(double rpm) {}
 }

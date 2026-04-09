@@ -14,9 +14,15 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class ShooterFlywheel extends SubsystemBase {
   private static final String dashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
   private static final String dashboardOutputKey = "Shooter/DashboardMappedOutput";
+  private static final String measuredVelocityRpmKey = "Shooter/MeasuredVelocityRpm";
+  private static final String currentTargetVelocityRpmKey = "Shooter/CurrentTargetVelocityRpm";
+  private static final String speedDeficitRpmKey = "Shooter/SpeedDeficitRpm";
+  private static final String speedDipActiveKey = "Shooter/SpeedDipActive";
+  private static final String speedDipLastTimestampSecKey = "Shooter/SpeedDipLastTimestampSec";
+  private static final String speedDipLastMagnitudeRpmKey = "Shooter/SpeedDipLastMagnitudeRpm";
   private final LoggedNetworkNumber Ks = new LoggedNetworkNumber("ks", 0);
 
-  private final ShooterFlywheelIO shooter;
+  private final ShooterFlywheelIO io;
   private final SysIdRoutine wheelSysId;
   private double targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
   private double rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
@@ -25,8 +31,20 @@ public class ShooterFlywheel extends SubsystemBase {
   private double lastSpeedDipTimestampSec = ShooterFlywheelConstants.Control.kNoStableTimestamp;
   private double lastSpeedDipMagnitudeRpm = 0.0;
 
+  private record ShooterTelemetry(
+      double velocityRpm,
+      double targetVelocityRpm,
+      double rpmError,
+      boolean correctDirection,
+      boolean rpmReadyForFeed,
+      boolean speedWithinTolerance,
+      double dipThresholdRpm,
+      double speedDeficitRpm,
+      boolean dipSample,
+      boolean speedDipRisingEdge) {}
+
   public ShooterFlywheel(ShooterFlywheelIO shooter) {
-    this.shooter = shooter;
+    this.io = shooter;
     wheelSysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
@@ -35,16 +53,16 @@ public class ShooterFlywheel extends SubsystemBase {
                 null,
                 (state) -> Logger.recordOutput("Shooter/WheelSysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
-                (voltage) -> shooter.setShooterVoltage(voltage.in(Volts)), null, this));
+                (voltage) -> io.setShooterVoltage(voltage.in(Volts)), null, this));
 
     SmartDashboard.putNumber(
         dashboardTargetRpmKey, ShooterFlywheelConstants.Control.kDashboardDefaultTargetRpm);
     SmartDashboard.putNumber(dashboardOutputKey, 0.0);
   }
 
-  public void setShooterSpeedWithTargetRpm(double speed, double targetRpm) {
+  private void runPercentOutput(double speed, double targetRpm) {
     setTargetShooterVelocityRpm(targetRpm);
-    shooter.setShooterSpeed(speed);
+    io.setShooterSpeed(speed);
   }
 
   private void setTargetShooterVelocityRpm(double targetRpm) {
@@ -57,18 +75,20 @@ public class ShooterFlywheel extends SubsystemBase {
 
   public void setVelocityRpm(double rpm) {
     setTargetShooterVelocityRpm(rpm);
-    shooter.setVelocity(rpm);
+    io.setVelocity(rpm);
   }
 
   public Command setVelocityCommand(double rpm) {
     return startEnd(() -> setVelocityRpm(rpm), this::stopShooter);
   }
 
-  public void runShooterAtDashboardRpm() {
-    double requestedRpm =
-        SmartDashboard.getNumber(
-            dashboardTargetRpmKey, ShooterFlywheelConstants.Control.kDashboardDefaultTargetRpm);
+  private double getDashboardTargetRpm() {
+    return SmartDashboard.getNumber(
+        dashboardTargetRpmKey, ShooterFlywheelConstants.Control.kDashboardDefaultTargetRpm);
+  }
 
+  public void runShooterAtDashboardRpm() {
+    double requestedRpm = getDashboardTargetRpm();
     setVelocityRpm(requestedRpm);
     Logger.recordOutput("Shooter/DashboardRequestedTargetRpm", requestedRpm);
     Logger.recordOutput(
@@ -76,7 +96,7 @@ public class ShooterFlywheel extends SubsystemBase {
   }
 
   public Command runStatic() {
-    return runEnd(() -> shooter.setShooterVoltage(Ks.get()), this::stopShooter);
+    return runEnd(() -> io.setShooterVoltage(Ks.get()), this::stopShooter);
   }
 
   public Command dashboardShootTune() {
@@ -84,78 +104,102 @@ public class ShooterFlywheel extends SubsystemBase {
   }
 
   public void stopShooter() {
-    shooter.setShooterSpeed(ShooterFlywheelConstants.Control.kStoppedSpeed);
-    targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
-    rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
-    speedDipCounterLoops = 0;
-    speedDipActive = false;
+    io.setShooterSpeed(ShooterFlywheelConstants.Control.kStoppedSpeed);
+    resetControlState();
     SmartDashboard.putNumber(dashboardOutputKey, 0.0);
   }
 
   public Command shootFuel() {
-    return startEnd(
-        () -> {
-          setShooterSpeedWithTargetRpm(
-              ShooterFlywheelConstants.Top.kOutSpeed, ShooterFlywheelConstants.Top.kOutTargetRpm);
-        },
-        this::stopShooter);
+    return createPercentOutputCommand(
+        ShooterFlywheelConstants.Top.kOutSpeed, ShooterFlywheelConstants.Top.kOutTargetRpm);
   }
 
   public Command shootFuelAtRPM(double targetRpm) {
-    return startEnd(
-        () -> {
-          setShooterSpeedWithTargetRpm(ShooterFlywheelConstants.Top.kOutSpeed, targetRpm);
-        },
-        this::stopShooter);
+    return createPercentOutputCommand(ShooterFlywheelConstants.Top.kOutSpeed, targetRpm);
   }
 
   public Command shootFuelReverse() {
-    return startEnd(
-        () -> {
-          setShooterSpeedWithTargetRpm(
-              ShooterFlywheelConstants.Top.kInSpeed, ShooterFlywheelConstants.Top.kInTargetRpm);
-        },
-        this::stopShooter);
+    return createPercentOutputCommand(
+        ShooterFlywheelConstants.Top.kInSpeed, ShooterFlywheelConstants.Top.kInTargetRpm);
+  }
+
+  private Command createPercentOutputCommand(double speed, double targetRpm) {
+    return startEnd(() -> runPercentOutput(speed, targetRpm), this::stopShooter);
   }
 
   @AutoLogOutput(key = "Shooter/AtRPM")
   public boolean atRPM() {
-    return Math.abs(targetShooterVelocityRpm - shooter.getShooterVelocityRpm())
-        < ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
+    return isVelocityWithinTolerance(targetShooterVelocityRpm, io.getShooterVelocityRpm());
   }
 
   public double getShooterVelocityRpm() {
-    return shooter.getShooterVelocityRpm();
+    return io.getShooterVelocityRpm();
   }
 
   @Override
   public void periodic() {
-    double velocityRpm = shooter.getShooterVelocityRpm();
+    ShooterTelemetry telemetry = updateTelemetry(io.getShooterVelocityRpm());
+    logTelemetry(telemetry);
+    updateDashboard(telemetry);
+  }
+
+  private ShooterTelemetry updateTelemetry(double velocityRpm) {
     double absVelocityRpm = Math.abs(velocityRpm);
     double absTargetRpm = Math.abs(targetShooterVelocityRpm);
     double rpmError = targetShooterVelocityRpm - velocityRpm;
     boolean correctDirection = targetShooterVelocityRpm * velocityRpm > 0.0;
-    boolean rpmReadyForFeed =
-        absVelocityRpm >= absTargetRpm - ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
+    boolean rpmReadyForFeed = isAbsoluteVelocityWithinTolerance(absTargetRpm, absVelocityRpm);
     boolean speedWithinTolerance = correctDirection && rpmReadyForFeed;
-    if (Math.abs(targetShooterVelocityRpm) > ShooterFlywheelConstants.Control.kTargetEpsilonRpm
-        && speedWithinTolerance) {
+
+    updateRpmReadyState(absTargetRpm, speedWithinTolerance);
+
+    double dipThresholdRpm = getDipThresholdRpm(absTargetRpm);
+    double speedDeficitRpm = absTargetRpm - absVelocityRpm;
+    boolean dipSample =
+        isDipSample(absTargetRpm, correctDirection, speedDeficitRpm, dipThresholdRpm);
+    boolean speedDipRisingEdge = updateSpeedDipState(dipSample, speedDeficitRpm);
+
+    return new ShooterTelemetry(
+        velocityRpm,
+        targetShooterVelocityRpm,
+        rpmError,
+        correctDirection,
+        rpmReadyForFeed,
+        speedWithinTolerance,
+        dipThresholdRpm,
+        speedDeficitRpm,
+        dipSample,
+        speedDipRisingEdge);
+  }
+
+  private void updateRpmReadyState(double absTargetRpm, boolean speedWithinTolerance) {
+    if (absTargetRpm > ShooterFlywheelConstants.Control.kTargetEpsilonRpm && speedWithinTolerance) {
       if (rpmReadyStartTime <= ShooterFlywheelConstants.Control.kNoStableTimestamp) {
         rpmReadyStartTime = Timer.getFPGATimestamp();
       }
-    } else {
-      rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+      return;
     }
 
-    double dipThresholdRpm =
-        Math.max(
-            ShooterFlywheelConstants.Control.kDipToleranceRpm,
-            absTargetRpm * ShooterFlywheelConstants.Control.kDipToleranceFraction);
-    double speedDeficitRpm = absTargetRpm - absVelocityRpm;
-    boolean dipSample =
-        absTargetRpm >= ShooterFlywheelConstants.Control.kDipMinTargetRpm
-            && correctDirection
-            && speedDeficitRpm >= dipThresholdRpm;
+    rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+  }
+
+  private double getDipThresholdRpm(double absTargetRpm) {
+    return Math.max(
+        ShooterFlywheelConstants.Control.kDipToleranceRpm,
+        absTargetRpm * ShooterFlywheelConstants.Control.kDipToleranceFraction);
+  }
+
+  private boolean isDipSample(
+      double absTargetRpm,
+      boolean correctDirection,
+      double speedDeficitRpm,
+      double dipThresholdRpm) {
+    return absTargetRpm >= ShooterFlywheelConstants.Control.kDipMinTargetRpm
+        && correctDirection
+        && speedDeficitRpm >= dipThresholdRpm;
+  }
+
+  private boolean updateSpeedDipState(boolean dipSample, double speedDeficitRpm) {
     if (dipSample) {
       speedDipCounterLoops++;
     } else {
@@ -170,27 +214,50 @@ public class ShooterFlywheel extends SubsystemBase {
       lastSpeedDipMagnitudeRpm = speedDeficitRpm;
     }
     speedDipActive = speedDipNow;
+    return speedDipRisingEdge;
+  }
 
-    Logger.recordOutput("Shooter/VelocityRpm", velocityRpm);
-    Logger.recordOutput("Shooter/TargetVelocityRpm", targetShooterVelocityRpm);
-    Logger.recordOutput("Shooter/RpmError", rpmError);
-    Logger.recordOutput("Shooter/CorrectDirection", correctDirection);
-    Logger.recordOutput("Shooter/RpmReadyForFeed", rpmReadyForFeed);
-    Logger.recordOutput("Shooter/RpmWithinTolerance", speedWithinTolerance);
-    Logger.recordOutput("Shooter/SpeedDipThresholdRpm", dipThresholdRpm);
-    Logger.recordOutput("Shooter/SpeedDeficitRpm", speedDeficitRpm);
+  private void logTelemetry(ShooterTelemetry telemetry) {
+    Logger.recordOutput("Shooter/VelocityRpm", telemetry.velocityRpm());
+    Logger.recordOutput("Shooter/TargetVelocityRpm", telemetry.targetVelocityRpm());
+    Logger.recordOutput("Shooter/RpmError", telemetry.rpmError());
+    Logger.recordOutput("Shooter/CorrectDirection", telemetry.correctDirection());
+    Logger.recordOutput("Shooter/RpmReadyForFeed", telemetry.rpmReadyForFeed());
+    Logger.recordOutput("Shooter/RpmWithinTolerance", telemetry.speedWithinTolerance());
+    Logger.recordOutput("Shooter/SpeedDipThresholdRpm", telemetry.dipThresholdRpm());
+    Logger.recordOutput("Shooter/SpeedDeficitRpm", telemetry.speedDeficitRpm());
     Logger.recordOutput("Shooter/SpeedDipCounterLoops", speedDipCounterLoops);
-    Logger.recordOutput("Shooter/SpeedDipSample", dipSample);
+    Logger.recordOutput("Shooter/SpeedDipSample", telemetry.dipSample());
     Logger.recordOutput("Shooter/SpeedDipActive", speedDipActive);
-    Logger.recordOutput("Shooter/SpeedDipRisingEdge", speedDipRisingEdge);
+    Logger.recordOutput("Shooter/SpeedDipRisingEdge", telemetry.speedDipRisingEdge());
     Logger.recordOutput("Shooter/SpeedDipLastTimestampSec", lastSpeedDipTimestampSec);
     Logger.recordOutput("Shooter/SpeedDipLastMagnitudeRpm", lastSpeedDipMagnitudeRpm);
-    SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", velocityRpm);
-    SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", targetShooterVelocityRpm);
-    SmartDashboard.putNumber("Shooter/SpeedDeficitRpm", speedDeficitRpm);
-    SmartDashboard.putBoolean("Shooter/SpeedDipActive", speedDipActive);
-    SmartDashboard.putNumber("Shooter/SpeedDipLastTimestampSec", lastSpeedDipTimestampSec);
-    SmartDashboard.putNumber("Shooter/SpeedDipLastMagnitudeRpm", lastSpeedDipMagnitudeRpm);
+  }
+
+  private void updateDashboard(ShooterTelemetry telemetry) {
+    SmartDashboard.putNumber(measuredVelocityRpmKey, telemetry.velocityRpm());
+    SmartDashboard.putNumber(currentTargetVelocityRpmKey, telemetry.targetVelocityRpm());
+    SmartDashboard.putNumber(speedDeficitRpmKey, telemetry.speedDeficitRpm());
+    SmartDashboard.putBoolean(speedDipActiveKey, speedDipActive);
+    SmartDashboard.putNumber(speedDipLastTimestampSecKey, lastSpeedDipTimestampSec);
+    SmartDashboard.putNumber(speedDipLastMagnitudeRpmKey, lastSpeedDipMagnitudeRpm);
+  }
+
+  private void resetControlState() {
+    targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+    rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+    speedDipCounterLoops = 0;
+    speedDipActive = false;
+    lastSpeedDipTimestampSec = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+    lastSpeedDipMagnitudeRpm = 0.0;
+  }
+
+  private boolean isVelocityWithinTolerance(double targetRpm, double velocityRpm) {
+    return Math.abs(targetRpm - velocityRpm) < ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
+  }
+
+  private boolean isAbsoluteVelocityWithinTolerance(double targetRpm, double velocityRpm) {
+    return velocityRpm >= targetRpm - ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
   }
 
   public Command wheelSysIdQuasistatic(SysIdRoutine.Direction direction) {

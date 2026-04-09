@@ -55,11 +55,6 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
   }
 
   @Override
-  public void setShooterRPM(double rpm) {
-    topMotor.set(rpm);
-  }
-
-  @Override
   public void setVelocity(double rpm) {
     double feedforwardVolts = feedforward.calculate(rpm);
     topMotor
