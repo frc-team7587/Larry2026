@@ -1,6 +1,19 @@
 package frc.robot.subsystems.feeder;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface FeederIO {
+  @AutoLog
+  public static class FeederIOInputs {
+    public boolean connected = false;
+    public double velocityRpm = 0.0;
+    public double appliedVolts = 0.0;
+    public double currentAmps = 0.0;
+  }
+
+  /** Updates the set of loggable inputs. */
+  default void updateInputs(FeederIOInputs inputs) {}
+
   /**
    * Sets the feeder target speed as a normalized output.
    *

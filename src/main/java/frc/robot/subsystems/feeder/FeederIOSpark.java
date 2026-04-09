@@ -1,6 +1,7 @@
 package frc.robot.subsystems.feeder;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -26,6 +27,14 @@ public class FeederIOSpark implements FeederIO {
 
     feederMotor.configure(
         FeederConfig.motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
+  @Override
+  public void updateInputs(FeederIOInputs inputs) {
+    inputs.connected = feederMotor.getLastError() == REVLibError.kOk;
+    inputs.velocityRpm = feederEncoder.getVelocity();
+    inputs.appliedVolts = feederMotor.getAppliedOutput() * feederMotor.getBusVoltage();
+    inputs.currentAmps = feederMotor.getOutputCurrent();
   }
 
   @Override

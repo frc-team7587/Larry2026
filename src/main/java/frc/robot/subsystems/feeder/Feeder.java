@@ -12,6 +12,7 @@ public class Feeder extends SubsystemBase {
   private static final double kVelocityEpsilonRpm = 1e-3;
 
   private final FeederIO feeder;
+  private final FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged();
   private final SysIdRoutine sysId;
   private double appliedVelocityRpm = 0.0;
   private boolean idleArmed = false;
@@ -73,8 +74,9 @@ public class Feeder extends SubsystemBase {
 
   @Override
   public void periodic() {
+    feeder.updateInputs(inputs);
+    Logger.processInputs("Feeder", inputs);
     Logger.recordOutput("Feeder/TargetVelocityRpm", appliedVelocityRpm);
-    Logger.recordOutput("Feeder/VelocityRpm", feeder.getFeederVelocityRpm());
     Logger.recordOutput("Feeder/IdleArmed", idleArmed);
   }
 
