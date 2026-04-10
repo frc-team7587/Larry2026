@@ -24,7 +24,7 @@ public class ShooterFlywheelConstants {
     public static final double kOutTargetRpm = 5000.0;
     public static final double kInTargetRpm = -5000.0;
     // og 200
-    public static final double kSpeedToleranceRpm = 200.0;
+    public static final double kSpeedToleranceRpm = 100.0;
     public static final double kSpeedStableTimeSec = 0.1;
 
     public static final double kMinOutput = -1.0;
