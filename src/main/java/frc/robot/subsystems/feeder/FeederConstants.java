@@ -8,7 +8,6 @@ public class FeederConstants {
   public static final double kInSpeed = -0.65;
   public static final double kOutTargetRpm = 1000;
   public static final double kInTargetRpm = 1000;
-  public static final double kIdleTargetRpm = 200;
 
   public static final double kP = 0.001;
   public static final double kI = 0.0;

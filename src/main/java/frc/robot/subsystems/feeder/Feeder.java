@@ -10,13 +10,10 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Feeder extends SubsystemBase {
-  private static final double kVelocityEpsilonRpm = 1e-3;
-
   private final FeederIO feeder;
   private final FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged();
   private final SysIdRoutine sysId;
-  private double appliedVelocityRpm = 0.0;
-  private boolean idleArmed = false;
+  private double targetVelocityRpm = 0.0;
 
   public static final LoggedNetworkNumber KS = new LoggedNetworkNumber("Feeder/KS", 0.0);
 
@@ -43,34 +40,16 @@ public class Feeder extends SubsystemBase {
 
   // Tuning only - managed in Elastic
   public Command runStatic() {
-    return runEnd(() -> feeder.setFeederVoltage(KS.get()), this::hardStop);
+    return runEnd(() -> feeder.setFeederVoltage(KS.get()), this::stop);
   }
 
   public void setVelocityRpm(double rpm) {
-    if (Math.abs(rpm) > kVelocityEpsilonRpm) {
-      idleArmed = true;
-    }
-    applyVelocity(idleSetpointFor(rpm));
+    targetVelocityRpm = rpm;
+    feeder.setVelocity(rpm);
   }
 
   public void stop() {
-    applyVelocity(idleSetpointFor(0.0));
-  }
-
-  public void hardStop() {
-    applyVelocity(0.0);
-  }
-
-  private double idleSetpointFor(double requestedRpm) {
-    if (Math.abs(requestedRpm) > kVelocityEpsilonRpm) {
-      return requestedRpm;
-    }
-    return idleArmed ? FeederConstants.kIdleTargetRpm : 0.0;
-  }
-
-  private void applyVelocity(double rpm) {
-    appliedVelocityRpm = rpm;
-    feeder.setVelocity(rpm);
+    setVelocityRpm(0.0);
   }
 
   @Override
@@ -80,13 +59,8 @@ public class Feeder extends SubsystemBase {
   }
 
   @AutoLogOutput(key = "Feeder/TargetVelocityRpm")
-  public double getAppliedVelocityRpm() {
-    return appliedVelocityRpm;
-  }
-
-  @AutoLogOutput(key = "Feeder/IdleArmed")
-  public boolean isIdleArmed() {
-    return idleArmed;
+  public double getTargetVelocityRpm() {
+    return targetVelocityRpm;
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

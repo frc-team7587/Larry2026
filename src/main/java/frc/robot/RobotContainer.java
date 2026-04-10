@@ -361,8 +361,6 @@ public class RobotContainer {
                 conveyor.transportBallsReverse(),
                 createOperatorRumbleCommand(RumbleType.kRightRumble)));
 
-    operator.x().whileTrue(feeder.feedFuel());
-
     operator
         .b()
         .toggleOnTrue(

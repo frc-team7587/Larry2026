@@ -84,10 +84,10 @@ public class ShooterFlywheelConstants {
       1.67, 1.78, 2.22, 2.4, 2.59, 2.85, 3.05, 3.39, 3.5
     };
     public static final double[] kPivotPosition = {
-      2.19, 2.52, 2.904, 3.328, 3.40, 3.5, 3.51, 3.515, 3.58
+      2.19, 2.58, 2.904, 3.328, 3.40, 3.5, 3.51, 3.515, 3.58
     };
     public static final double[] kShooterTargetRpm = {
-      2950, 3350, 3250, 3250, 3250, 3500, 3750, 4075, 4200
+      2950, 3200, 3250, 3250, 3250, 3500, 3750, 4075, 4200
     };
   }
 }
