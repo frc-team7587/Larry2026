@@ -116,7 +116,7 @@ Core files:
 ## `subsystems/intake`
 Two mechanism groups:
 
-### `intake/intakeFlywheel`
+### `intake/IntakeFlywheel`
 - `IntakeFlywheel.java`
 - `IntakeFlywheelIO.java`
 - `IntakeFlywheelIOSpark.java`

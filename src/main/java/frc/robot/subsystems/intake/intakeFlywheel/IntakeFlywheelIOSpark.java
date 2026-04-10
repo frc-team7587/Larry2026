@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake.intakeFlywheel;
+package frc.robot.subsystems.intake.IntakeFlywheel;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;

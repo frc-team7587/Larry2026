@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake.intakeFlywheel;
+package frc.robot.subsystems.intake.IntakeFlywheel;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;

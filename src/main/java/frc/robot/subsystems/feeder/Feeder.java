@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -76,8 +77,16 @@ public class Feeder extends SubsystemBase {
   public void periodic() {
     feeder.updateInputs(inputs);
     Logger.processInputs("Feeder", inputs);
-    Logger.recordOutput("Feeder/TargetVelocityRpm", appliedVelocityRpm);
-    Logger.recordOutput("Feeder/IdleArmed", idleArmed);
+  }
+
+  @AutoLogOutput(key = "Feeder/TargetVelocityRpm")
+  public double getAppliedVelocityRpm() {
+    return appliedVelocityRpm;
+  }
+
+  @AutoLogOutput(key = "Feeder/IdleArmed")
+  public boolean isIdleArmed() {
+    return idleArmed;
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
