@@ -87,9 +87,4 @@ public class IntakePivot extends SubsystemBase {
     // turns encoder position to degrees
     mechIntake.setAngle(new Rotation2d(inputs.position - 90.0));
   }
-
-  @AutoLogOutput(key = "Intake/PivotPosition")
-  public double getLoggedPivotPosition() {
-    return inputs.position;
-  }
 }
