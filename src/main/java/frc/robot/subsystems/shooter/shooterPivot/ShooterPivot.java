@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterPivot extends SubsystemBase {
@@ -60,10 +61,17 @@ public class ShooterPivot extends SubsystemBase {
   public void periodic() {
     shooter.updateInputs(inputs);
     Logger.processInputs("Shooter/Pivot", inputs);
-    double pivotPosition = inputs.position;
-    Logger.recordOutput("Shooter/PivotEncoderPosition", pivotPosition);
-    Logger.recordOutput("Shooter/PivotPosition", pivotPosition);
-    SmartDashboard.putNumber("Shooter/PivotEncoderPosition", pivotPosition);
+    SmartDashboard.putNumber("Shooter/PivotEncoderPosition", inputs.position);
+  }
+
+  @AutoLogOutput(key = "Shooter/PivotEncoderPosition")
+  public double getLoggedPivotEncoderPosition() {
+    return inputs.position;
+  }
+
+  @AutoLogOutput(key = "Shooter/PivotPosition")
+  public double getLoggedPivotPosition() {
+    return inputs.position;
   }
 
   public Command pivotSysIdQuasistatic(SysIdRoutine.Direction direction) {

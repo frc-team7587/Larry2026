@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -83,8 +84,12 @@ public class IntakePivot extends SubsystemBase {
     pivot.updateInputs(inputs);
     Logger.processInputs("Intake/Pivot", inputs);
     Logger.recordOutput("intakeMech", mechPanel);
-    Logger.recordOutput("Intake/PivotPosition", inputs.position);
     // turns encoder position to degrees
     mechIntake.setAngle(new Rotation2d(inputs.position - 90.0));
+  }
+
+  @AutoLogOutput(key = "Intake/PivotPosition")
+  public double getLoggedPivotPosition() {
+    return inputs.position;
   }
 }

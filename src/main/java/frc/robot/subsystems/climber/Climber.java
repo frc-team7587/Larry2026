@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
@@ -29,7 +30,11 @@ public class Climber extends SubsystemBase {
   public void periodic() {
     climber.updateInputs(inputs);
     Logger.processInputs("Climber", inputs);
-    Logger.recordOutput("Climber/PositionRotations", inputs.positionRotations);
+  }
+
+  @AutoLogOutput(key = "Climber/PositionRotations")
+  public double getLoggedPositionRotations() {
+    return inputs.positionRotations;
   }
 
   public Command climbUp() {

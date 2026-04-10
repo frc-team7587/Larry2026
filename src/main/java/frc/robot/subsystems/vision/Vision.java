@@ -29,6 +29,7 @@ import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.OptionalDouble;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
@@ -204,8 +205,11 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         "Vision/Summary/PoseObservationsRejected",
         summary.rejectedRobotPoses.toArray(new Pose3d[summary.rejectedRobotPoses.size()]));
-    Logger.recordOutput(
-        "Vision/Summary/HubDistanceMeters", getLatestHubDistanceMeters().orElse(-1.0));
+  }
+
+  @AutoLogOutput(key = "Vision/Summary/HubDistanceMeters")
+  public double getLoggedHubDistanceMeters() {
+    return getLatestHubDistanceMeters().orElse(-1.0);
   }
 
   private boolean shouldRejectPose(VisionIO.PoseObservation observation) {

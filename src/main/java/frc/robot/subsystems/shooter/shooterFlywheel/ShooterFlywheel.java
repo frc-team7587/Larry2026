@@ -31,6 +31,8 @@ public class ShooterFlywheel extends SubsystemBase {
   private boolean speedDipActive = false;
   private double lastSpeedDipTimestampSec = ShooterFlywheelConstants.Control.kNoStableTimestamp;
   private double lastSpeedDipMagnitudeRpm = 0.0;
+  private ShooterTelemetry currentTelemetry =
+      new ShooterTelemetry(0.0, 0.0, 0.0, false, false, false, 0.0, 0.0, false, false);
 
   private record ShooterTelemetry(
       double velocityRpm,
@@ -141,9 +143,8 @@ public class ShooterFlywheel extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter/Flywheel", inputs);
-    ShooterTelemetry telemetry = updateTelemetry(inputs.velocityRpm);
-    logTelemetry(telemetry);
-    updateDashboard(telemetry);
+    currentTelemetry = updateTelemetry(inputs.velocityRpm);
+    updateDashboard(currentTelemetry);
   }
 
   private ShooterTelemetry updateTelemetry(double velocityRpm) {
@@ -220,23 +221,6 @@ public class ShooterFlywheel extends SubsystemBase {
     return speedDipRisingEdge;
   }
 
-  private void logTelemetry(ShooterTelemetry telemetry) {
-    Logger.recordOutput("Shooter/VelocityRpm", telemetry.velocityRpm());
-    Logger.recordOutput("Shooter/TargetVelocityRpm", telemetry.targetVelocityRpm());
-    Logger.recordOutput("Shooter/RpmError", telemetry.rpmError());
-    Logger.recordOutput("Shooter/CorrectDirection", telemetry.correctDirection());
-    Logger.recordOutput("Shooter/RpmReadyForFeed", telemetry.rpmReadyForFeed());
-    Logger.recordOutput("Shooter/RpmWithinTolerance", telemetry.speedWithinTolerance());
-    Logger.recordOutput("Shooter/SpeedDipThresholdRpm", telemetry.dipThresholdRpm());
-    Logger.recordOutput("Shooter/SpeedDeficitRpm", telemetry.speedDeficitRpm());
-    Logger.recordOutput("Shooter/SpeedDipCounterLoops", speedDipCounterLoops);
-    Logger.recordOutput("Shooter/SpeedDipSample", telemetry.dipSample());
-    Logger.recordOutput("Shooter/SpeedDipActive", speedDipActive);
-    Logger.recordOutput("Shooter/SpeedDipRisingEdge", telemetry.speedDipRisingEdge());
-    Logger.recordOutput("Shooter/SpeedDipLastTimestampSec", lastSpeedDipTimestampSec);
-    Logger.recordOutput("Shooter/SpeedDipLastMagnitudeRpm", lastSpeedDipMagnitudeRpm);
-  }
-
   private void updateDashboard(ShooterTelemetry telemetry) {
     SmartDashboard.putNumber(measuredVelocityRpmKey, telemetry.velocityRpm());
     SmartDashboard.putNumber(currentTargetVelocityRpmKey, telemetry.targetVelocityRpm());
@@ -261,6 +245,76 @@ public class ShooterFlywheel extends SubsystemBase {
 
   private boolean isAbsoluteVelocityWithinTolerance(double targetRpm, double velocityRpm) {
     return velocityRpm >= targetRpm - ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
+  }
+
+  @AutoLogOutput(key = "Shooter/VelocityRpm")
+  public double getLoggedVelocityRpm() {
+    return currentTelemetry.velocityRpm();
+  }
+
+  @AutoLogOutput(key = "Shooter/TargetVelocityRpm")
+  public double getLoggedTargetVelocityRpm() {
+    return currentTelemetry.targetVelocityRpm();
+  }
+
+  @AutoLogOutput(key = "Shooter/RpmError")
+  public double getLoggedRpmError() {
+    return currentTelemetry.rpmError();
+  }
+
+  @AutoLogOutput(key = "Shooter/CorrectDirection")
+  public boolean isCorrectDirection() {
+    return currentTelemetry.correctDirection();
+  }
+
+  @AutoLogOutput(key = "Shooter/RpmReadyForFeed")
+  public boolean isRpmReadyForFeed() {
+    return currentTelemetry.rpmReadyForFeed();
+  }
+
+  @AutoLogOutput(key = "Shooter/RpmWithinTolerance")
+  public boolean isRpmWithinTolerance() {
+    return currentTelemetry.speedWithinTolerance();
+  }
+
+  @AutoLogOutput(key = "Shooter/SpeedDipThresholdRpm")
+  public double getLoggedSpeedDipThresholdRpm() {
+    return currentTelemetry.dipThresholdRpm();
+  }
+
+  @AutoLogOutput(key = "Shooter/SpeedDeficitRpm")
+  public double getLoggedSpeedDeficitRpm() {
+    return currentTelemetry.speedDeficitRpm();
+  }
+
+  @AutoLogOutput(key = "Shooter/SpeedDipCounterLoops")
+  public int getSpeedDipCounterLoops() {
+    return speedDipCounterLoops;
+  }
+
+  @AutoLogOutput(key = "Shooter/SpeedDipSample")
+  public boolean isSpeedDipSample() {
+    return currentTelemetry.dipSample();
+  }
+
+  @AutoLogOutput(key = "Shooter/SpeedDipActive")
+  public boolean isSpeedDipActive() {
+    return speedDipActive;
+  }
+
+  @AutoLogOutput(key = "Shooter/SpeedDipRisingEdge")
+  public boolean isSpeedDipRisingEdge() {
+    return currentTelemetry.speedDipRisingEdge();
+  }
+
+  @AutoLogOutput(key = "Shooter/SpeedDipLastTimestampSec")
+  public double getLoggedSpeedDipLastTimestampSec() {
+    return lastSpeedDipTimestampSec;
+  }
+
+  @AutoLogOutput(key = "Shooter/SpeedDipLastMagnitudeRpm")
+  public double getLoggedSpeedDipLastMagnitudeRpm() {
+    return lastSpeedDipMagnitudeRpm;
   }
 
   public Command wheelSysIdQuasistatic(SysIdRoutine.Direction direction) {

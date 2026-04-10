@@ -166,7 +166,6 @@ public class Drive extends SubsystemBase {
     stopModulesIfDisabled(isDisabled);
     logDisabledSetpointsIfDisabled(isDisabled);
     updateOdometry();
-    logDriveState();
   }
 
   private void updateDriveInputs() {
@@ -196,15 +195,6 @@ public class Drive extends SubsystemBase {
 
     Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
     Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
-  }
-
-  private void logDriveState() {
-    Logger.recordOutput("Drive/Odometry/GyroConnected", gyroInputs.connected);
-    Logger.recordOutput("Drive/Odometry/GyroYawDeg", gyroInputs.yawPosition.getDegrees());
-    Logger.recordOutput("Drive/Odometry/PoseRotationDeg", getRotation().getDegrees());
-    Logger.recordOutput("Drive/Odometry/PoseX", getPose().getX());
-    Logger.recordOutput("Drive/Odometry/PoseY", getPose().getY());
-    logCurrentZone();
   }
 
   /** Updates the field relative position of the robot. */
@@ -448,22 +438,67 @@ public class Drive extends SubsystemBase {
     speedIndex = kslowModeConstant;
   }
 
-  // TODO: Migrate Pose Access to RobotContainer
-  private void logCurrentZone() {
-    Pose2d pose = getPose();
-    RebuiltZone zone = RebuiltZoneUtil.getZone(pose);
-    double[] zoneBoundaries = RebuiltZoneUtil.getZoneBoundariesMeters();
-
-    Logger.recordOutput("Drive/Zone/Name", zone.name());
-    Logger.recordOutput("Drive/Zone/Id", zone.getId());
-    Logger.recordOutput("Drive/Zone/BlueEndXMax", zoneBoundaries[0]);
-    Logger.recordOutput("Drive/Zone/CenterXMax", zoneBoundaries[1]);
-    Logger.recordOutput("Drive/Zone/RedEndXMin", zoneBoundaries[2]);
-    Logger.recordOutput("Drive/Zone/LowerLaneYMax", zoneBoundaries[3]);
-    Logger.recordOutput("Drive/Zone/UpperLaneYMin", zoneBoundaries[4]);
-  }
-
   public void resetSpeedIndex() {
     speedIndex = 1;
+  }
+
+  @AutoLogOutput(key = "Drive/Odometry/GyroConnected")
+  public boolean isGyroConnected() {
+    return gyroInputs.connected;
+  }
+
+  @AutoLogOutput(key = "Drive/Odometry/GyroYawDeg")
+  public double getGyroYawDeg() {
+    return gyroInputs.yawPosition.getDegrees();
+  }
+
+  @AutoLogOutput(key = "Drive/Odometry/PoseRotationDeg")
+  public double getPoseRotationDeg() {
+    return getRotation().getDegrees();
+  }
+
+  @AutoLogOutput(key = "Drive/Odometry/PoseX")
+  public double getPoseX() {
+    return getPose().getX();
+  }
+
+  @AutoLogOutput(key = "Drive/Odometry/PoseY")
+  public double getPoseY() {
+    return getPose().getY();
+  }
+
+  @AutoLogOutput(key = "Drive/Zone/Name")
+  public String getLoggedZoneName() {
+    return getCurrentZone().name();
+  }
+
+  @AutoLogOutput(key = "Drive/Zone/Id")
+  public int getLoggedZoneId() {
+    return getCurrentZone().getId();
+  }
+
+  @AutoLogOutput(key = "Drive/Zone/BlueEndXMax")
+  public double getZoneBlueEndXMax() {
+    return RebuiltZoneUtil.getZoneBoundariesMeters()[0];
+  }
+
+  @AutoLogOutput(key = "Drive/Zone/CenterXMax")
+  public double getZoneCenterXMax() {
+    return RebuiltZoneUtil.getZoneBoundariesMeters()[1];
+  }
+
+  @AutoLogOutput(key = "Drive/Zone/RedEndXMin")
+  public double getZoneRedEndXMin() {
+    return RebuiltZoneUtil.getZoneBoundariesMeters()[2];
+  }
+
+  @AutoLogOutput(key = "Drive/Zone/LowerLaneYMax")
+  public double getZoneLowerLaneYMax() {
+    return RebuiltZoneUtil.getZoneBoundariesMeters()[3];
+  }
+
+  @AutoLogOutput(key = "Drive/Zone/UpperLaneYMin")
+  public double getZoneUpperLaneYMin() {
+    return RebuiltZoneUtil.getZoneBoundariesMeters()[4];
   }
 }

@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeFlywheel extends SubsystemBase {
@@ -104,9 +105,21 @@ public class IntakeFlywheel extends SubsystemBase {
   public void periodic() {
     intake.updateInputs(inputs);
     Logger.processInputs("Intake/Flywheel", inputs);
-    Logger.recordOutput("Intake/Flywheel/CommandedSpeed", commandedSpeed);
-    Logger.recordOutput("Intake/Flywheel/BoostActive", boostActive);
-    Logger.recordOutput("Intake/Flywheel/State", intakeState.toString());
+  }
+
+  @AutoLogOutput(key = "Intake/Flywheel/CommandedSpeed")
+  public double getLoggedCommandedSpeed() {
+    return commandedSpeed;
+  }
+
+  @AutoLogOutput(key = "Intake/Flywheel/BoostActive")
+  public boolean isBoostActive() {
+    return boostActive;
+  }
+
+  @AutoLogOutput(key = "Intake/Flywheel/State")
+  public String getLoggedState() {
+    return intakeState.toString();
   }
 
   private void updateStateFromSpeed(double speed) {

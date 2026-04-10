@@ -6,8 +6,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.subsystems.feeder.FeederConstants;
-import frc.robot.subsystems.intake.IntakePivot.IntakePivotConstants;
 import frc.robot.subsystems.intake.IntakeFlywheel.IntakeFlywheelConstants;
+import frc.robot.subsystems.intake.IntakePivot.IntakePivotConstants;
 import frc.robot.subsystems.shooter.ShooterFlywheel.ShooterFlywheelConstants;
 import frc.robot.subsystems.shooter.ShooterPivot.ShooterPivotConstants;
 
