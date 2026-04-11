@@ -6,12 +6,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.util.LoggedTunableNumber;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterPivot extends SubsystemBase {
   private final ShooterPivotIO shooter;
   private final ShooterPivotIOInputsAutoLogged inputs = new ShooterPivotIOInputsAutoLogged();
+  private static final LoggedTunableNumber tuning_angle =
+      new LoggedTunableNumber("Shooter/Pivot/tuning_angle", 0.0);
   private final SysIdRoutine pivotSysId;
 
   public ShooterPivot(ShooterPivotIO shooterPivotIO) {
@@ -31,6 +35,14 @@ public class ShooterPivot extends SubsystemBase {
 
   public Command setPivotPositionCom(double position) {
     return runOnce(() -> shooter.setPivotPosition(position));
+  }
+
+  public Command setPivotPositionCom(DoubleSupplier position) {
+    return runOnce(() -> shooter.setPivotPosition(position.getAsDouble()));
+  }
+
+  public Command runPivotTuning() {
+    return setPivotPositionCom(() -> tuning_angle.get());
   }
 
   public void setPivotPositionVoid(double position) {

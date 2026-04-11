@@ -331,6 +331,7 @@ public class RobotContainer {
 
   private void configureDefaultCommands() {
     drive.setDefaultCommand(createDriverDriveCommand());
+    feeder.setDefaultCommand(feeder.stopCommand());
   }
 
   private void configureDriverBindings() {
@@ -372,10 +373,19 @@ public class RobotContainer {
         .whileTrue(new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder));
 
     Trigger autoAimShotTrigger = operator.rightTrigger();
-    autoAimShotTrigger.whileTrue(createAutoAimAndFeedCommand());
+    // autoAimShotTrigger.whileTrue(createAutoAimAndFeedCommand());
+    autoAimShotTrigger.whileTrue(createDashboardShootTuneCommand());
+
+    // autoAimShotTrigger.whileTrue(feeder.feedFuel());
+
+    Trigger autoAimTriggerTEMP = operator.y();
+    autoAimTriggerTEMP.whileTrue(createAutoAimAndFeedCommand());
+
+    operator.x().whileTrue(shooterFlywheel.runStatic());
 
     operator.povUp().whileTrue(intakePivot.turntoUp());
     operator.povDown().whileTrue(intakePivot.turntoDown());
+    operator.povLeft().whileTrue(feeder.feedFuelReverse());
   }
 
   private Command createDriverDriveCommand() {
@@ -386,6 +396,13 @@ public class RobotContainer {
   private Command createAutoAimAndFeedCommand() {
     return Commands.parallel(
         new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder),
+        Commands.waitUntil(shooterFlywheel::atRPM).andThen(feeder.feedFuel()));
+  }
+
+  private Command createDashboardShootTuneCommand() {
+    return Commands.parallel(
+        shooterFlywheel.dashboardShootTune(),
+        shooterPivot.runPivotTuning(),
         Commands.waitUntil(shooterFlywheel::atRPM).andThen(feeder.feedFuel()));
   }
 

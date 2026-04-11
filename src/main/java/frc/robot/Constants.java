@@ -29,4 +29,7 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public static final boolean tuningMode = true;
+  public static final boolean disableHAL = false;
 }

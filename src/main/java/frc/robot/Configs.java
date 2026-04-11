@@ -73,12 +73,12 @@ public class Configs {
           .velocityConversionFactor(1.0 / ShooterFlywheelConstants.Top.kGearRatio);
 
       // 24 & 8
-      topMotorConfig.encoder.uvwMeasurementPeriod(25).uvwAverageDepth(8);
+      topMotorConfig.encoder.uvwMeasurementPeriod(34).uvwAverageDepth(8);
 
       // bottomMotorConfig.encoder.uvwMeasurementPeriod(10).uvwAverageDepth(2);
-      bottomMotorConfig
-          .apply(topMotorConfig)
-          .follow(ShooterFlywheelConstants.Top.kTopMotorID, true);
+      bottomMotorConfig.apply(topMotorConfig);
+      bottomMotorConfig.inverted(true);
+      bottomMotorConfig.closedLoop.p(ShooterFlywheelConstants.Bottom.kP);
 
       pivotMotorConfig
           .idleMode(IdleMode.kBrake)
@@ -104,7 +104,7 @@ public class Configs {
       motorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(60)
+          .smartCurrentLimit(80)
           .inverted(false);
 
       motorConfig

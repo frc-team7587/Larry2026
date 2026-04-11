@@ -61,4 +61,9 @@ public class FeederIOSpark implements FeederIO {
   public double getFeederVelocityRpm() {
     return feederEncoder.getVelocity();
   }
+
+  @Override
+  public void stop() {
+    feederMotor.stopMotor();
+  }
 }

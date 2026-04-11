@@ -31,4 +31,6 @@ public interface FeederIO {
   default double getFeederVelocityRpm() {
     return 0.0;
   }
+
+  default void stop() {}
 }

@@ -13,7 +13,7 @@ public class FeederConstants {
   public static final double kI = 0.0;
   public static final double kD = 0.0;
 
-  public static final double kS = 0.7175;
+  public static final double kS = 0.9175;
   public static final double kV = 0.00995;
 
   public static final double kMinOutput = -1.0;

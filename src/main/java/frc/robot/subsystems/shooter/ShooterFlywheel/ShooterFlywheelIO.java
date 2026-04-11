@@ -12,6 +12,8 @@ public interface ShooterFlywheelIO {
     public double bottomAppliedVolts = 0.0;
     public double topCurrentAmps = 0.0;
     public double bottomCurrentAmps = 0.0;
+
+    public double bottomRpm = 0.0;
   }
 
   default void updateInputs(ShooterFlywheelIOInputs inputs) {}
@@ -25,6 +27,8 @@ public interface ShooterFlywheelIO {
 
   /** Sets shooter motors with direct voltage for characterization. */
   default void setShooterVoltage(double volts) {}
+
+  default void setDuelVoltage(double top_volts, double bot_volts) {}
 
   /**
    * Gets the shooter wheel velocity in rpm.

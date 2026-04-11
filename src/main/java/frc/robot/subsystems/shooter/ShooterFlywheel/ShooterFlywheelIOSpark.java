@@ -17,18 +17,25 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
   private final SparkMax bottomMotor;
 
   private final RelativeEncoder topEncoder;
-  private final SimpleMotorFeedforward feedforward;
+  private final RelativeEncoder botEncoder;
+
+  private final SimpleMotorFeedforward topFeedforward;
+  private final SimpleMotorFeedforward bottomFeedforward;
 
   public ShooterFlywheelIOSpark() {
 
     topMotor = new SparkMax(ShooterFlywheelConstants.Top.kTopMotorID, MotorType.kBrushless);
     bottomMotor =
         new SparkMax(ShooterFlywheelConstants.Bottom.kBottomMotorID, MotorType.kBrushless);
-    feedforward =
+    topFeedforward =
         new SimpleMotorFeedforward(
-            ShooterFlywheelConstants.Top.ff_kS, ShooterFlywheelConstants.Top.ff_kV);
+            ShooterFlywheelConstants.Top.ff_kS_top, ShooterFlywheelConstants.Top.ff_kV_top);
+    bottomFeedforward =
+        new SimpleMotorFeedforward(
+            ShooterFlywheelConstants.Top.ff_kS_bot, ShooterFlywheelConstants.Top.ff_kV_bot);
 
     topEncoder = topMotor.getEncoder();
+    botEncoder = bottomMotor.getEncoder();
 
     topMotor.configure(
         ShooterConfig.topMotorConfig,
@@ -49,16 +56,24 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
     inputs.bottomAppliedVolts = bottomMotor.getAppliedOutput() * bottomMotor.getBusVoltage();
     inputs.topCurrentAmps = topMotor.getOutputCurrent();
     inputs.bottomCurrentAmps = bottomMotor.getOutputCurrent();
+
+    inputs.bottomRpm = botEncoder.getVelocity();
   }
 
   @Override
   public void setShooterSpeed(double speed) {
     topMotor.set(speed);
+    bottomMotor.set(speed);
   }
 
   @Override
   public void setShooterVoltage(double volts) {
     topMotor.setVoltage(volts);
+  }
+
+  public void setDuelVoltage(double top_volts, double bot_volts) {
+    topMotor.setVoltage(top_volts);
+    bottomMotor.setVoltage(bot_volts);
   }
 
   @Override
@@ -68,14 +83,25 @@ public class ShooterFlywheelIOSpark implements ShooterFlywheelIO {
 
   @Override
   public void setVelocity(double rpm) {
-    double feedforwardVolts = feedforward.calculate(rpm);
+    double bottomFeedforwardVolts = bottomFeedforward.calculate(rpm);
+    double topFeedforwardVolts = topFeedforward.calculate(rpm);
+
     topMotor
         .getClosedLoopController()
         .setSetpoint(
             rpm,
             ControlType.kVelocity,
             ClosedLoopSlot.kSlot0,
-            feedforwardVolts,
+            topFeedforwardVolts,
+            ArbFFUnits.kVoltage);
+
+    bottomMotor
+        .getClosedLoopController()
+        .setSetpoint(
+            rpm,
+            ControlType.kVelocity,
+            ClosedLoopSlot.kSlot0,
+            bottomFeedforwardVolts,
             ArbFFUnits.kVoltage);
   }
 }

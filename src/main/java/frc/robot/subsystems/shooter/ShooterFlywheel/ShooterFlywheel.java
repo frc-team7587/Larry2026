@@ -20,7 +20,10 @@ public class ShooterFlywheel extends SubsystemBase {
   private static final String speedDipActiveKey = "Shooter/SpeedDipActive";
   private static final String speedDipLastTimestampSecKey = "Shooter/SpeedDipLastTimestampSec";
   private static final String speedDipLastMagnitudeRpmKey = "Shooter/SpeedDipLastMagnitudeRpm";
-  private final LoggedNetworkNumber Ks = new LoggedNetworkNumber("ks", 0);
+  private final LoggedNetworkNumber KS_TOP = new LoggedNetworkNumber("Flywheel/KS_TOP", 0);
+  private final LoggedNetworkNumber KS_BOT = new LoggedNetworkNumber("Flywheel/KS_BOT", 0);
+  private final LoggedNetworkNumber tuning_speed =
+      new LoggedNetworkNumber("Flywheel/tuningSpeed", 0);
 
   private final ShooterFlywheelIO io;
   private final ShooterFlywheelIOInputsAutoLogged inputs = new ShooterFlywheelIOInputsAutoLogged();
@@ -82,7 +85,7 @@ public class ShooterFlywheel extends SubsystemBase {
   }
 
   public Command setVelocityCommand(double rpm) {
-    return startEnd(() -> setVelocityRpm(rpm), this::stopShooter);
+    return runEnd(() -> setVelocityRpm(rpm), this::stopShooter);
   }
 
   private double getDashboardTargetRpm() {
@@ -98,8 +101,12 @@ public class ShooterFlywheel extends SubsystemBase {
         "Shooter/DashboardRequestedTargetRpmRadPerSec", requestedRpm * 2 * Math.PI / 60.0);
   }
 
+  public Command runTuning() {
+    return setVelocityCommand(tuning_speed.get());
+  }
+
   public Command runStatic() {
-    return runEnd(() -> io.setShooterVoltage(Ks.get()), this::stopShooter);
+    return runEnd(() -> io.setDuelVoltage(KS_TOP.get(), KS_BOT.get()), this::stopShooter);
   }
 
   public Command dashboardShootTune() {

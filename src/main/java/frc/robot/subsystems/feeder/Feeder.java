@@ -49,7 +49,12 @@ public class Feeder extends SubsystemBase {
   }
 
   public void stop() {
-    setVelocityRpm(0.0);
+    targetVelocityRpm = 0.0;
+    feeder.stop();
+  }
+
+  public Command stopCommand() {
+    return run(this::stopCommand);
   }
 
   @Override
