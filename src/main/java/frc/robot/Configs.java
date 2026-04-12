@@ -58,7 +58,7 @@ public class Configs {
       topMotorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(60)
+          .smartCurrentLimit(80)
           .inverted(false);
       topMotorConfig
           .closedLoop

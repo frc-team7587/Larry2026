@@ -17,7 +17,7 @@ public class ShooterFlywheelConstants {
 
   public class Top {
     public static final int kTopMotorID = 16;
-    public static final double kGearRatio = 1.0;
+    public static final double kGearRatio = 3.0;
 
     public static final double kOutSpeed = 0.95;
     public static final double kInSpeed = -0.95;
@@ -49,11 +49,13 @@ public class ShooterFlywheelConstants {
     public static final double kI = 0.0;
     public static final double kD = 0.0;
 
-    public static final double ff_kS_top = 0.6;
-    public static final double ff_kV_top = 0.00197;
+    //4/12 ks aned kv for 3:1
 
-    public static final double ff_kS_bot = 0.55;
-    public static final double ff_kV_bot = 0.00208;
+    public static final double ff_kS_top = 0.367;
+    public static final double ff_kV_top = 0.0062;
+
+    public static final double ff_kS_bot = 0.335;
+    public static final double ff_kV_bot = 0.00615;
   }
 
   public class Bottom {
