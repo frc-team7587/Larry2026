@@ -236,4 +236,3 @@ These assets are deployed to the roboRIO by the Gradle deploy task.
 - **BuildConstants**: generated build/git metadata.
 - **FieldConstants**: field geometry and AprilTag references.
 - **Constants**: runtime mode and global feature flags.
-

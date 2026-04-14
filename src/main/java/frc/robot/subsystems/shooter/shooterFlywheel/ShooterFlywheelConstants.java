@@ -80,14 +80,23 @@ public class ShooterFlywheelConstants {
     // // };
 
     // 3:1 Gear Ratio Values (w/ conversion factors)
+    // public static final double[] kDistanceMeters = {
+    //   1.67, 1.78, 2.22, 2.4, 2.59, 2.85, 3.05, 3.39, 3.5
+    // };
+    // public static final double[] kPivotPosition = {
+    //   2.19, 2.52, 2.904, 3.328, 3.40, 3.5, 3.51, 3.515, 3.58
+    // };
+    // public static final double[] kShooterTargetRpm = {
+    //   2850, 3150, 3250, 3250, 3250, 3500, 3750, 4075, 4200
+    // };
     public static final double[] kDistanceMeters = {
-      1.67, 1.78, 2.22, 2.4, 2.59, 2.85, 3.05, 3.39, 3.5
+      1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4
     };
     public static final double[] kPivotPosition = {
-      2.19, 1.52, 2.904, 3.328, 3.40, 3.5, 3.51, 3.515, 3.58
+      2.52, 2.85, 3.328, 3.40, 3.5, 3.51, 3.515, 3.58, 3.4, 3.43
     };
     public static final double[] kShooterTargetRpm = {
-      2950, 3150, 3250, 3250, 3250, 3500, 3750, 4075, 4200
+      2700, 2850, 2975, 3050, 3250, 3625, 4500, 4800, 5400, 5700
     };
   }
 }
