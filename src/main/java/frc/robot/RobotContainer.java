@@ -503,7 +503,8 @@ public class RobotContainer {
     // turns rpm to radians per second then sends to setVelocityRobot
     // autoAimShotTrigger.whileTrue(
     //     Commands.parallel(
-    //         shooter.dashboardShootTune(), Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+    //         shooterFlywheel.dashboardShootTune(),
+    //         Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     autoAimShotTrigger.whileTrue(
         Commands.parallel(

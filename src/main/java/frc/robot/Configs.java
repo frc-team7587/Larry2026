@@ -5,6 +5,7 @@ import com.revrobotics.spark.config.SoftLimitConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.subsystems.climber.ClimberConstants;
+import frc.robot.subsystems.feeder.FeederConstants;
 import frc.robot.subsystems.intake.IntakePivot.IntakePivotConstants;
 import frc.robot.subsystems.intake.intakeFlywheel.IntakeFlywheelConstants;
 import frc.robot.subsystems.shooter.shooterFlywheel.ShooterFlywheelConstants;
@@ -39,7 +40,7 @@ public class Configs {
       intakeMotorLeaderConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(60)
+          .smartCurrentLimit(50)
           .inverted(false);
       intakeMotorFollowerConfig
           .apply(intakeMotorLeaderConfig)
@@ -103,8 +104,18 @@ public class Configs {
       motorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(60)
+          .smartCurrentLimit(55)
           .inverted(false);
+
+      motorConfig
+          .encoder
+          .positionConversionFactor(1.0 / FeederConstants.kGearRatio)
+          .velocityConversionFactor(1.0 / FeederConstants.kGearRatio);
+      motorConfig
+          .closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          .pid(FeederConstants.kP, FeederConstants.kI, FeederConstants.kD)
+          .outputRange(FeederConstants.kMinOutput, FeederConstants.kMaxOutput);
     }
   }
 
