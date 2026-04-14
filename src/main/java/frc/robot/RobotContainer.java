@@ -202,6 +202,7 @@ public class RobotContainer {
   private static final String shooterDashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
   private static final String shooterDashboardOutputKey = "Shooter/DashboardMappedOutput";
   private static final double driverSlowModeScale = 0.35;
+  private static final double driverTurnScale = 0.7;
 
   private static final PathConstraints hubPathfindConstraints =
       new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
@@ -434,7 +435,7 @@ public class RobotContainer {
             () ->
                 -MathUtil.applyDeadband(
                     (1 - 0.75 * driver.getRightTriggerAxis()) * driver.getLeftX(), 0.05),
-            () -> -MathUtil.applyDeadband(0.5 * driver.getRightX(), 0.05)));
+            () -> -MathUtil.applyDeadband(driverTurnScale * driver.getRightX(), 0.05)));
 
     /*
      * Climber is now uninstalled.

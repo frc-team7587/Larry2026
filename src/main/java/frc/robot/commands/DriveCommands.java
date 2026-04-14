@@ -196,10 +196,15 @@ public class DriveCommands {
               Translation2d hubCenter =
                   AllianceFlipUtil.apply(FieldConstants.Hub.blueCenter).getTranslation();
               Translation2d awayFromHub = robotPose.getTranslation().minus(hubCenter);
+              double targetHeadingDegrees =
+                  DriveConstants.hubAlignFacingOffsetDegrees
+                      + DriveConstants.hubAlignAprilTagCorrectionDegrees;
               if (awayFromHub.getNorm() < 1e-6) {
-                return Rotation2d.fromDegrees(drive.getRotation().getDegrees() - 80);
+                return Rotation2d.fromDegrees(
+                    drive.getRotation().getDegrees() + targetHeadingDegrees);
               }
-              return Rotation2d.fromDegrees(awayFromHub.getAngle().getDegrees() - 80);
+              return Rotation2d.fromDegrees(
+                  awayFromHub.getAngle().getDegrees() + targetHeadingDegrees);
             })
         .withName("JoystickDriveAlignToHub");
   }

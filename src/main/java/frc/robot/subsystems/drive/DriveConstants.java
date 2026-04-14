@@ -24,9 +24,11 @@ public class DriveConstants {
   public static final double kInitChassisSpeed = 1;
 
   public static final double alignMaxSpeed = 3;
-  public static final double alignMaxAngularSpeed = 2.5 * Math.PI;
+  public static final double alignMaxAngularSpeed = 3.0 * Math.PI;
   public static final double alignRotationTolerance = Units.degreesToRadians(3); // radians
   public static final double alignPositionTolerance = 0.03; // meters
+  public static final double hubAlignFacingOffsetDegrees = -83.25;
+  public static final double hubAlignAprilTagCorrectionDegrees = -2.0;
 
   public static final double maxSpeedMetersPerSec = 4.8;
   public static final double odometryFrequency = 100.0; // Hz
@@ -41,7 +43,7 @@ public class DriveConstants {
         new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
       };
 
-  // Zeroed rotation values for each module, see setup instructions
+  // Zeroed roation values for each module, see setup instructions
   public static final Rotation2d frontLeftZeroRotation = new Rotation2d(-Math.PI / 2);
   public static final Rotation2d frontRightZeroRotation = new Rotation2d(0);
   public static final Rotation2d backLeftZeroRotation = new Rotation2d(Math.PI);
