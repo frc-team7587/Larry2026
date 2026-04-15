@@ -83,7 +83,7 @@ public class Configs {
       pivotMotorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(40)
+          .smartCurrentLimit(35)
           .inverted(false);
       pivotMotorConfig
           .closedLoop

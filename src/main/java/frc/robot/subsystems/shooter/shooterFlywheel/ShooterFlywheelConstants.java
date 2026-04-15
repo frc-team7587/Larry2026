@@ -6,6 +6,8 @@ public class ShooterFlywheelConstants {
     public static final double kNoTargetRpm = 0.0;
     public static final double kNoStableTimestamp = -1.0;
     public static final double kTargetEpsilonRpm = 1e-6;
+    public static final boolean kEnableIdleAfterFirstSpinup = true;
+    public static final double kIdleTargetRpm = 800.0;
     // formerly 3500 default target rpm on dash
     public static final double kDashboardDefaultTargetRpm = 3500.0;
     public static final double kDashboardMaxTargetRpm = 5500.0;

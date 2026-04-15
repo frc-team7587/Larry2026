@@ -7,7 +7,7 @@ public class IntakeFlywheelConstants {
 
     // public static final double kIntakeOutSpeed = -0.31;
     // public static final double kIntakeInSpeed = 0.31;
-    public static final double kIntakeOutSpeed = -0.31;
+    public static final double kIntakeOutSpeed = -0.40;
     public static final double kIntakeInSpeed = 0.31;
 
     public static final double kMinOutput = -1.0;

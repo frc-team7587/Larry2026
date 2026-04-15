@@ -15,8 +15,12 @@ public class ShooterFlywheel extends SubsystemBase {
 
   private final ShooterFlywheelIO shooter;
   private final SysIdRoutine wheelSysId;
-  private double targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+  private double activeTargetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+  private double appliedShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
   private double rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+  private boolean idleEnabled = ShooterFlywheelConstants.Control.kEnableIdleAfterFirstSpinup;
+  private boolean idleArmed = false;
+  private boolean idleActive = false;
 
   public ShooterFlywheel(ShooterFlywheelIO shooter) {
     this.shooter = shooter;
@@ -36,20 +40,26 @@ public class ShooterFlywheel extends SubsystemBase {
   }
 
   public void setShooterSpeedWithTargetRpm(double speed, double targetRpm) {
-    setTargetShooterVelocityRpm(targetRpm);
+    setActiveTargetShooterVelocityRpm(targetRpm);
+    appliedShooterVelocityRpm = targetRpm;
+    armIdleIfSpunUp(targetRpm);
+    idleActive = false;
     shooter.setShooterSpeed(speed);
   }
 
-  private void setTargetShooterVelocityRpm(double targetRpm) {
-    if (Math.abs(targetShooterVelocityRpm - targetRpm)
+  private void setActiveTargetShooterVelocityRpm(double targetRpm) {
+    if (Math.abs(activeTargetShooterVelocityRpm - targetRpm)
         > ShooterFlywheelConstants.Control.kTargetEpsilonRpm) {
       rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
     }
-    targetShooterVelocityRpm = targetRpm;
+    activeTargetShooterVelocityRpm = targetRpm;
   }
 
   public void setVelocityRpm(double rpm) {
-    setTargetShooterVelocityRpm(rpm);
+    setActiveTargetShooterVelocityRpm(rpm);
+    appliedShooterVelocityRpm = rpm;
+    armIdleIfSpunUp(rpm);
+    idleActive = false;
     shooter.setVelocity(rpm);
   }
 
@@ -73,10 +83,35 @@ public class ShooterFlywheel extends SubsystemBase {
   }
 
   public void stopShooter() {
-    shooter.setShooterSpeed(ShooterFlywheelConstants.Control.kStoppedSpeed);
-    targetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+    activeTargetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
     rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
     SmartDashboard.putNumber(dashboardOutputKey, 0.0);
+
+    if (shouldRunIdle()) {
+      appliedShooterVelocityRpm = ShooterFlywheelConstants.Control.kIdleTargetRpm;
+      idleActive = true;
+      shooter.setVelocity(appliedShooterVelocityRpm);
+      return;
+    }
+
+    appliedShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+    idleActive = false;
+    shooter.setShooterSpeed(ShooterFlywheelConstants.Control.kStoppedSpeed);
+  }
+
+  public void toggleIdleEnabled() {
+    setIdleEnabled(!idleEnabled);
+  }
+
+  public void setIdleEnabled(boolean enabled) {
+    idleEnabled = enabled;
+    Logger.recordOutput("Shooter/IdleEnabled", idleEnabled);
+
+    if (!idleEnabled && idleActive) {
+      appliedShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+      idleActive = false;
+      shooter.setShooterSpeed(ShooterFlywheelConstants.Control.kStoppedSpeed);
+    }
   }
 
   public Command shootFuel() {
@@ -106,7 +141,8 @@ public class ShooterFlywheel extends SubsystemBase {
   }
 
   public boolean atRPM() {
-    if (Math.abs(targetShooterVelocityRpm) <= ShooterFlywheelConstants.Control.kTargetEpsilonRpm
+    if (Math.abs(activeTargetShooterVelocityRpm)
+            <= ShooterFlywheelConstants.Control.kTargetEpsilonRpm
         || rpmReadyStartTime <= ShooterFlywheelConstants.Control.kNoStableTimestamp) {
       return false;
     }
@@ -121,13 +157,15 @@ public class ShooterFlywheel extends SubsystemBase {
   @Override
   public void periodic() {
     double velocityRpm = shooter.getShooterVelocityRpm();
-    double rpmError = targetShooterVelocityRpm - velocityRpm;
-    boolean correctDirection = targetShooterVelocityRpm * velocityRpm > 0.0;
+    double rpmError = activeTargetShooterVelocityRpm - velocityRpm;
+    boolean correctDirection = activeTargetShooterVelocityRpm * velocityRpm > 0.0;
     boolean rpmReadyForFeed =
         Math.abs(velocityRpm)
-            >= Math.abs(targetShooterVelocityRpm) - ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
+            >= Math.abs(activeTargetShooterVelocityRpm)
+                - ShooterFlywheelConstants.Top.kSpeedToleranceRpm;
     boolean speedWithinTolerance = correctDirection && rpmReadyForFeed;
-    if (Math.abs(targetShooterVelocityRpm) > ShooterFlywheelConstants.Control.kTargetEpsilonRpm
+    if (Math.abs(activeTargetShooterVelocityRpm)
+            > ShooterFlywheelConstants.Control.kTargetEpsilonRpm
         && speedWithinTolerance) {
       if (rpmReadyStartTime <= ShooterFlywheelConstants.Control.kNoStableTimestamp) {
         rpmReadyStartTime = Timer.getFPGATimestamp();
@@ -138,14 +176,28 @@ public class ShooterFlywheel extends SubsystemBase {
 
     boolean atRpm = atRPM();
     Logger.recordOutput("Shooter/VelocityRpm", velocityRpm);
-    Logger.recordOutput("Shooter/TargetVelocityRpm", targetShooterVelocityRpm);
+    Logger.recordOutput("Shooter/TargetVelocityRpm", appliedShooterVelocityRpm);
+    Logger.recordOutput("Shooter/ActiveTargetVelocityRpm", activeTargetShooterVelocityRpm);
     Logger.recordOutput("Shooter/RpmError", rpmError);
     Logger.recordOutput("Shooter/CorrectDirection", correctDirection);
     Logger.recordOutput("Shooter/RpmReadyForFeed", rpmReadyForFeed);
     Logger.recordOutput("Shooter/RpmWithinTolerance", speedWithinTolerance);
     Logger.recordOutput("Shooter/AtRPM", atRpm);
+    Logger.recordOutput("Shooter/IdleEnabled", idleEnabled);
+    Logger.recordOutput("Shooter/IdleArmed", idleArmed);
+    Logger.recordOutput("Shooter/IdleActive", idleActive);
     SmartDashboard.putNumber("Shooter/MeasuredVelocityRpm", velocityRpm);
-    SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", targetShooterVelocityRpm);
+    SmartDashboard.putNumber("Shooter/CurrentTargetVelocityRpm", appliedShooterVelocityRpm);
+  }
+
+  private boolean shouldRunIdle() {
+    return idleEnabled && idleArmed;
+  }
+
+  private void armIdleIfSpunUp(double rpm) {
+    if (Math.abs(rpm) > ShooterFlywheelConstants.Control.kTargetEpsilonRpm) {
+      idleArmed = true;
+    }
   }
 
   public Command wheelSysIdQuasistatic(SysIdRoutine.Direction direction) {
