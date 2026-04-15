@@ -8,10 +8,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ShooterFlywheel extends SubsystemBase {
   private static final String dashboardTargetRpmKey = "Shooter/DashboardTargetRpm";
   private static final String dashboardOutputKey = "Shooter/DashboardMappedOutput";
+  private static final String staticVoltageKey = "Flywheel/KS";
+  private static final String tuningSpeedKey = "Flywheel/tuningSpeed";
 
   private final ShooterFlywheelIO shooter;
   private final SysIdRoutine wheelSysId;
@@ -21,6 +24,9 @@ public class ShooterFlywheel extends SubsystemBase {
   private boolean idleEnabled = ShooterFlywheelConstants.Control.kEnableIdleAfterFirstSpinup;
   private boolean idleArmed = false;
   private boolean idleActive = false;
+
+  private final LoggedNetworkNumber ksTuning = new LoggedNetworkNumber(staticVoltageKey, 0);
+  private final LoggedNetworkNumber tuningSpeed = new LoggedNetworkNumber(tuningSpeedKey, 0);
 
   public ShooterFlywheel(ShooterFlywheelIO shooter) {
     this.shooter = shooter;
@@ -37,6 +43,8 @@ public class ShooterFlywheel extends SubsystemBase {
     SmartDashboard.putNumber(
         dashboardTargetRpmKey, ShooterFlywheelConstants.Control.kDashboardDefaultTargetRpm);
     SmartDashboard.putNumber(dashboardOutputKey, 0.0);
+    SmartDashboard.putNumber(staticVoltageKey, 0.0);
+    SmartDashboard.putNumber(tuningSpeedKey, 0.0);
   }
 
   public void setShooterSpeedWithTargetRpm(double speed, double targetRpm) {
@@ -78,6 +86,26 @@ public class ShooterFlywheel extends SubsystemBase {
         "Shooter/DashboardRequestedTargetRpmRadPerSec", requestedRpm * 2 * Math.PI / 60.0);
   }
 
+  public Command runTuning() {
+    return runEnd(
+        () -> {
+          double requestedRpm = SmartDashboard.getNumber(tuningSpeedKey, tuningSpeed.get());
+          setVelocityRpm(requestedRpm);
+          Logger.recordOutput("Shooter/TuningRequestedRpm", requestedRpm);
+        },
+        this::stopShooter);
+  }
+
+  public Command runStatic() {
+    return runEnd(
+        () -> {
+          double requestedVolts = SmartDashboard.getNumber(staticVoltageKey, ksTuning.get());
+          setOpenLoopVoltage(requestedVolts);
+          Logger.recordOutput("Shooter/TuningRequestedVolts", requestedVolts);
+        },
+        this::stopShooter);
+  }
+
   public Command dashboardShootTune() {
     return runEnd(this::runShooterAtDashboardRpm, this::stopShooter);
   }
@@ -97,6 +125,14 @@ public class ShooterFlywheel extends SubsystemBase {
     appliedShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
     idleActive = false;
     shooter.setShooterSpeed(ShooterFlywheelConstants.Control.kStoppedSpeed);
+  }
+
+  private void setOpenLoopVoltage(double volts) {
+    activeTargetShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+    appliedShooterVelocityRpm = ShooterFlywheelConstants.Control.kNoTargetRpm;
+    rpmReadyStartTime = ShooterFlywheelConstants.Control.kNoStableTimestamp;
+    idleActive = false;
+    shooter.setShooterVoltage(volts);
   }
 
   public void toggleIdleEnabled() {
