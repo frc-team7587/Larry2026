@@ -40,7 +40,7 @@ public class Configs {
       intakeMotorLeaderConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(50)
+          .smartCurrentLimit(42)
           .inverted(false);
       intakeMotorFollowerConfig
           .apply(intakeMotorLeaderConfig)
@@ -104,7 +104,7 @@ public class Configs {
       motorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(55)
+          .smartCurrentLimit(52)
           .inverted(false);
 
       motorConfig
@@ -126,7 +126,7 @@ public class Configs {
       conveyorMotorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(30)
+          .smartCurrentLimit(23)
           .inverted(false);
     }
   }
@@ -138,7 +138,7 @@ public class Configs {
       motorConfig
           .idleMode(IdleMode.kBrake)
           .voltageCompensation(12.0)
-          .smartCurrentLimit(60)
+          .smartCurrentLimit(5)
           .inverted(false);
       motorConfig
           .encoder

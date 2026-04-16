@@ -448,6 +448,7 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDriveAlignToHub(
                 drive, this::getDriverScaledLeftY, this::getDriverScaledLeftX));
+    driver.rightBumper().onTrue(shooterPivot.setPivotPositionCom(0));
 
     // driver
     //     .rightTrigger()
@@ -494,18 +495,25 @@ public class RobotContainer {
                     () -> operator.setRumble(RumbleType.kRightRumble, 1.0),
                     () -> operator.setRumble(RumbleType.kRightRumble, 0.0))));
 
-    operator
-        .y()
-        .whileTrue(new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder));
+    // operator
+    //     .y()
+    //     .whileTrue(new AutoAimShooter(drive, vision, shooterFlywheel, shooterPivot, feeder));
+    operator.y().onTrue(shooterPivot.setPivotPositionCom(0));
 
-    operator.x().onTrue(Commands.runOnce(shooterFlywheel::toggleIdleEnabled, shooterFlywheel));
+    // operator.x().onTrue(Commands.runOnce(shooterFlywheel::toggleIdleEnabled, shooterFlywheel));
 
-    Trigger autoAimShotTrigger = operator.rightTrigger();
+    Trigger manualHubShotTrigger = operator.x().and(operator.rightTrigger());
+    Trigger autoAimShotTrigger = operator.rightTrigger().and(operator.x().negate());
     // turns rpm to radians per second then sends to setVelocityRobot
     // autoAimShotTrigger.whileTrue(
     //     Commands.parallel(
     //         shooterFlywheel.dashboardShootTune(),
     //         Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
+
+    manualHubShotTrigger.whileTrue(
+        Commands.parallel(
+            shooterFlywheel.dashboardShootTune(),
+            Commands.waitSeconds(0.8).andThen(feeder.feedFuel())));
 
     autoAimShotTrigger.whileTrue(
         Commands.parallel(

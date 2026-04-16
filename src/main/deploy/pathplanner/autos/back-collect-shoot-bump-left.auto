@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "back off start pos"
+            "pathName": "back off start pos left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intake down"
           }
         },
         {
@@ -17,13 +23,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "back to center"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake down"
+                  "pathName": "bump left back to center"
                 }
               },
               {
@@ -38,7 +38,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "center to right"
+            "pathName": "center to left"
           }
         },
         {

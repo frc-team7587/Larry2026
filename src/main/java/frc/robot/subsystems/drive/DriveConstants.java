@@ -27,7 +27,7 @@ public class DriveConstants {
   public static final double alignMaxAngularSpeed = 3.0 * Math.PI;
   public static final double alignRotationTolerance = Units.degreesToRadians(3); // radians
   public static final double alignPositionTolerance = 0.03; // meters
-  public static final double hubAlignFacingOffsetDegrees = -83.25;
+  public static final double hubAlignFacingOffsetDegrees = -78;
   public static final double hubAlignAprilTagCorrectionDegrees = -2.0;
 
   public static final double maxSpeedMetersPerSec = 4.8;
