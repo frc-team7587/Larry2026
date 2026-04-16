@@ -39,6 +39,10 @@ public class ShooterPivot extends SubsystemBase {
     shooter.setPivotPosition(shooter.getPivotPosition());
   }
 
+  public Command zeroEncoderToCurrentPosition() {
+    return runOnce(() -> shooter.setPivotEncoderPosition(0.0));
+  }
+
   public double getPivotPosition() {
     return shooter.getPivotPosition();
   }

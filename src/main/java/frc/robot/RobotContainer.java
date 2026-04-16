@@ -450,6 +450,8 @@ public class RobotContainer {
                 drive, this::getDriverScaledLeftY, this::getDriverScaledLeftX));
     driver.rightBumper().onTrue(shooterPivot.setPivotPositionCom(0));
 
+    driver.start().onTrue(shooterPivot.zeroEncoderToCurrentPosition());
+
     // driver
     //     .rightTrigger()
     //     .whileTrue(
